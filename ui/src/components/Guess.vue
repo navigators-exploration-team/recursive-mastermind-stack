@@ -8,13 +8,16 @@
         <div class="clue__container d-flex flex-wrap gap-2">
             <RoundedColor v-for="el in clue" :bgColor="el.color" width="16px" height="16px" />
         </div>
-        <el-button size="small">Check</el-button>
+        <el-button size="small" @click="handleSubmitGuess">Check</el-button>
     </div>
 </template>
 <script setup lang="ts">
 import RoundedColor from '@/components/RoundedColor.vue';
 import { ref } from 'vue';
 import { AvailableColor } from '../types';
+import { useZkAppStore } from "@/store/zkAppModule"
+
+const { createGuessTransaction } = useZkAppStore()
 
 
 const clue = ref([
@@ -45,7 +48,10 @@ const props = defineProps({
         required: true
     }
 })
-
+const handleSubmitGuess = async () => {
+    const code = props.guess.map((e: AvailableColor) => e.value)
+    await createGuessTransaction(code)
+}
 
 
 </script>

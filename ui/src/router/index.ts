@@ -3,12 +3,15 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
-    name: "gameplay",
-    meta: {
-      requiresAuth: false,
-    },
+    name: "home",
     component: () =>
-      import(/* webpackChunkName: "Gameplay" */ "@/views/Gameplay.vue"),
+      import(/* webpackChunkName: "home" */ "@/views/Gameplay.vue"),
+  },
+  {
+    path: "/:id",
+    name: "created-gameplay",
+    component: () =>
+      import(/* webpackChunkName: "created-gameplay" */ "@/views/Gameplay.vue"),
   },
 ];
 
