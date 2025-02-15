@@ -3,3 +3,13 @@ export interface AvailableColor {
   value: number;
 }
 
+export interface ZkAppStates {
+  maxAttempts: number;
+  turnCount: number;
+  isSolved: boolean;
+  codemasterId: string;
+  codebreakerId: string;
+  solutionHash: string;
+  packedGuessHistory: string;
+  packedClueHistory: string;
+}

@@ -36,7 +36,9 @@ export default class ZkappWorkerClient {
     const result = await this._call("getTransactionJSON", {});
     return result;
   }
-
+  async initZkappInstance(publicKeyBase58: string) {
+    return await this._call("initZkappInstance", { publicKeyBase58 });
+  }
   async createInitGameTransaction(
     feePayer: string,
     rounds: number
@@ -74,6 +76,9 @@ export default class ZkappWorkerClient {
       secretCombination,
       randomSalt,
     });
+  }
+  async getZkappStates() {
+    return this._call("getZkappStates", {});
   }
 
   // worker initialization

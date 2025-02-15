@@ -6,9 +6,17 @@ import {
   AccountUpdate,
   PrivateKey,
   UInt8,
-  CircuitString,
 } from "o1js";
-import { MastermindZkApp } from "mina-mastermind";
+import {
+  deserializeClueHistory,
+  deserializeCombinationHistory,
+  MastermindZkApp,
+} from "mina-mastermind";
+import {
+  createCluesMatrix,
+  createGuessesMatrix,
+  transformBinaryArray,
+} from "./utils";
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 interface VerificationKeyData {
@@ -111,6 +119,12 @@ const functions = {
     });
     state.transaction!.send();
   },
+  initZkappInstance: async (args: { publicKeyBase58: string }) => {
+    const publicKey = PublicKey.fromBase58(args.publicKeyBase58);
+    await fetchAccount({ publicKey });
+    state.zkappInstance = new state.MastermindContract!(publicKey);
+    state.zkAppAddress = args.publicKeyBase58;
+  },
   createGiveClueTransaction: async (args: {
     feePayer: string;
     secretCombination: number[];
@@ -132,6 +146,42 @@ const functions = {
     });
     state.transaction = transaction;
     state.transaction!.send();
+  },
+  getZkappStates: async (args: {}) => {
+    const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
+    await fetchAccount({ publicKey });
+
+    const [
+      maxAttempts,
+      turnCount,
+      isSolved,
+      solutionHash,
+      serializedGuessHistory,
+      packedClueHistory,
+    ] = await Promise.all([
+      state.zkappInstance!.maxAttempts.get(),
+      state.zkappInstance!.turnCount.get(),
+      state.zkappInstance!.isSolved.get(),
+      state.zkappInstance!.solutionHash.get(),
+      state.zkappInstance!.packedGuessHistory.get(),
+      state.zkappInstance!.packedClueHistory.get(),
+    ]);
+
+    const guessHistory = JSON.stringify(
+      deserializeCombinationHistory(serializedGuessHistory)
+    );
+    const clueHistory = JSON.stringify(
+      deserializeClueHistory(packedClueHistory)
+    );
+    const clues = transformBinaryArray(JSON.parse(clueHistory));
+    return {
+      maxAttempts: maxAttempts.toNumber(),
+      turnCount: turnCount.toNumber(),
+      isSolved: isSolved.toString(),
+      solutionHash,
+      guessesHistory: createGuessesMatrix(guessHistory),
+      cluesHistory: createCluesMatrix(clues, turnCount.toNumber()),
+    };
   },
 };
 

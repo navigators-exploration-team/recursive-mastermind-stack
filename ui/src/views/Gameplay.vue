@@ -1,39 +1,63 @@
 <template>
-  <div class="gameplay__container d-flex flex-column align-items-center w-100 h-100">
-    <div class="board__container d-flex">
-      <div class="color-picker__container d-flex flex-column gap-3 p-2">
-        <RoundedColor height="40px" width="40px" v-for="el in availableColors" :bg-color="el.color"
-          @click="handlePickColor(el)" />
-      </div>
-      <div>
-        <div class=" d-flex flex-start p-3">Game</div>
-        <div v-for="(guess, row) in guesses">
-          <Guess :attemptNo="row" @setColor="handleSetColor($event, row)" :guess="guess" />
-        </div>
-      </div>
+  <!--   <el-button size="large" @click="refreshStates">Refresh States</el-button>-->
+  <div class="d-flex gap-3">
+    <div v-for="el in cluesColors" :key="el.color" class="d-flex align-items-center gap-2 ">
+      <RoundedColor :bgColor="el.color" :value="el.value" width="18px" height="18px" />
+      <span>{{ el.title }}</span>
     </div>
+
   </div>
+  <div v-if="zkAppStates">
+    <div class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center" v-if="isCodeMasterTurn">Code
+      Master Turn
+      <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#0000ff" height="18px" />
+    </div>
+    <div class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2 " v-else>Code Breaker Turn
+      <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#ffde21" height="18px" />
+    </div>
+    <GameBoard />
+
+  </div>
+
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import Guess from '@/components/Guess.vue';
-import RoundedColor from '@/components/RoundedColor.vue';
-import { availableColors } from '../constants/colors';
-import { AvailableColor } from '../types';
+import { computed, onMounted, watch } from 'vue';
+import { useZkAppStore } from "@/store/zkAppModule"
+import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
+import GameBoard from '../components/GameBoard.vue';
+import RoundedColor from '../components/RoundedColor.vue';
+import { cluesColors } from '../constants/colors';
+const route = useRoute()
+const { compiled, zkAppStates } = storeToRefs(useZkAppStore())
+const { initZkappInstance, getZkappStates } = useZkAppStore()
 
-const guesses = ref<Array<AvailableColor[]>>(
-  Array.from({ length: 10 }, () =>
-    Array.from({ length: 4 }, () => ({ color: "#222", value: 0 }))
-  )
-);
-const selectedColor = ref<AvailableColor>({ color: "#222", value: 0 })
-const handlePickColor = (pickedColor: AvailableColor) => {
-  selectedColor.value = pickedColor
+const gameId = route?.params?.id
+const refreshStates = async () => {
+  await getZkappStates()
 }
-const handleSetColor = (index: number, row: number) => {
-  guesses.value[row][index] = { ...selectedColor.value }
-}
+const isCodeMasterTurn = computed(() => {
+  return zkAppStates.value?.turnCount % 2 === 0;
+});
+onMounted(async () => {
+  if (compiled.value) {
+    await initZkappInstance(gameId)
+    setInterval(async () => {
+      await getZkappStates()
+    }, 3000)
+
+
+  }
+})
+watch(() => compiled.value, async () => {
+  if (compiled.value) {
+    await initZkappInstance(gameId)
+    setInterval(async () => {
+      await getZkappStates()
+    }, 3000)
+  }
+})
 
 </script>
 <style lang="css">

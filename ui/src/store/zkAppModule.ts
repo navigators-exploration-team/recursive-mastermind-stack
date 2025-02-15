@@ -218,5 +218,12 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         return this.zkAppAddress;
       }
     },
+    async initZkappInstance(zkAppAddress: string) {
+      await this.zkappWorkerClient!.initZkappInstance(zkAppAddress);
+      this.zkAppAddress = zkAppAddress;
+    },
+    async getZkappStates() {
+      this.zkAppStates = await this.zkappWorkerClient!.getZkappStates();
+    },
   },
 });
