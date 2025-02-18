@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import Guess from '@/components/Guess.vue';
 import RoundedColor from '@/components/RoundedColor.vue';
 import { availableColors } from '@/constants/colors';
@@ -64,7 +64,10 @@ const handleSetColor = (index: number, row: number) => {
     guesses.value[row][index] = { ...selectedColor.value }
 }
 
-
+watch(() => zkAppStates.value?.turnCount, () => {
+    guesses.value =
+        zkAppStates.value.guessesHistory.slice(0, zkAppStates.value.maxAttempts)
+})
 
 </script>
 <style lang="css">
