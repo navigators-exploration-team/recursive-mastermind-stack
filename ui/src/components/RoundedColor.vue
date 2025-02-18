@@ -1,7 +1,10 @@
 <template>
-    <div class="rounded__color d-flex align-items-center justify-content-center fs-9"
-        :class="{ blinkColor: blinkColor }" @click="handleColorClick">
-        <span class="rounded__value" v-if="bgColor !== '#222'">{{ value }}</span>
+    <div class="d-flex align-items-center gap-2">
+        <div class="rounded__color d-flex align-items-center justify-content-center fs-9"
+            :class="{ blinkColor: blinkColor }" @click="handleColorClick">
+            <span class="rounded__value" v-if="bgColor !== '#222'">{{ value }}</span>
+        </div>
+        <span v-if="title" class="ms-2">{{ title }}</span>
     </div>
 </template>
 <script setup lang="ts">
@@ -24,6 +27,10 @@ const props = defineProps({
         required: true
     },
     blinkColor: {
+        type: String,
+        required: false
+    },
+    title: {
         type: String,
         required: false
     }

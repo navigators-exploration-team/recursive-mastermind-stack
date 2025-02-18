@@ -1,9 +1,8 @@
 <template>
   <!--   <el-button size="large" @click="refreshStates">Refresh States</el-button>-->
   <div class="d-flex gap-3">
-    <div v-for="el in cluesColors" :key="el.color" class="d-flex align-items-center gap-2 ">
-      <RoundedColor :bgColor="el.color" :value="el.value" width="18px" height="18px" />
-      <span>{{ el.title }}</span>
+    <div v-for="el in cluesColors" :key="el.color">
+      <RoundedColor :bgColor="el.color" :value="el.value" :title="el.title" width="18px" height="18px" />
     </div>
 
   </div>

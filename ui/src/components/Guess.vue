@@ -47,7 +47,7 @@ const isCurrentRound = computed(() => {
 });
 const emit = defineEmits(["setColor"]);
 const handleSetColor = (index: number) => {
-    if (isCurrentRound.value) {
+    if (isCurrentRound.value && !isCodeMasterTurn.value) {
         emit("setColor", index);
     }
 };
