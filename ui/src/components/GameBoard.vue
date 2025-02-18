@@ -1,11 +1,23 @@
 <template>
     <div class="gameplay__container d-flex flex-column align-items-center w-100 h-100">
-        <div v-if="zkAppStates.isSolved === 'true'">
-            the code breaker has won
+        <div class="w-100 d-flex justify-content-start">
+            <div v-if="zkAppStates.isSolved === 'true'" class="m-4">
+                the code breaker has won
+            </div>
+            <div v-else-if="zkAppStates.turnCount > zkAppStates.maxAttempts * 2" class="m-4">
+                the code master has won
+            </div>
         </div>
-        <div v-else-if="zkAppStates.turnCount > zkAppStates.maxAttempts * 2">
-            the code master has won
-        </div>
+        <template v-if="!(zkAppStates.isSolved === 'true' || zkAppStates.turnCount > zkAppStates.maxAttempts * 2)">
+            <div class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center" v-if="isCodeMasterTurn">
+                Code
+                Master Turn
+                <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#0000ff" height="18px" />
+            </div>
+            <div class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2 " v-else>Code Breaker Turn
+                <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#ffde21" height="18px" />
+            </div>
+        </template>
         <div class="board__container d-flex">
 
             <div class="color-picker__container d-flex flex-column gap-3 p-2">
@@ -36,7 +48,9 @@ import { formatAddress } from '@/utils'
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 
 const { zkAppAddress, zkAppStates } = storeToRefs(useZkAppStore())
-
+const isCodeMasterTurn = computed(() => {
+    return zkAppStates.value?.turnCount % 2 === 0;
+});
 const guesses = ref<Array<AvailableColor[]>>(
     zkAppStates.value.guessesHistory.slice(0, zkAppStates.value.maxAttempts)
 );
