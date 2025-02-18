@@ -18,28 +18,8 @@
             <el-button size="small" @click="handleSubmitGuess" v-else>Check</el-button>
         </div>
         <el-dialog v-model="isVerifyGuessModalOpen" modal-class="dialog-class" custom-class="dialog-class"
-            style="padding: 0px!important;">
-            <div class="d-flex flex-column align-items-start">
-                <label class="mb-2">Secret Code</label>
-                <div class="board__container w-100">
-                    <div class="d-flex gap-2 p-2 justify-content-center w-100">
-                        <RoundedColor height="40px" width="40px" v-for="(secret, index) in secretCode"
-                            :bg-color="secret.color" @click="handleSetSecretCode(index)" :value="secret.value" />
-                    </div>
-                    <div class="color-picker__container d-flex justify-content-center gap-3 p-2">
-                        <RoundedColor height="40px" width="40px" v-for="el in availableColors" :bg-color="el.color"
-                            :value="el.value" @click="handlePickColor(el)" />
-                    </div>
-                </div>
-            </div>
-            <el-form-item class="mt-4">
-                <label>Salt</label>
-                <div class="d-flex w-100 gap-2 align-items-center">
-                    <el-input type="text" size="large" v-model="randomSalt"></el-input>
-                    <CopyToClipBoard :text="randomSalt || ''" />
-                </div>
-            </el-form-item>
-            <el-button size="large" type="primary" @click="handleGiveClue" class="my-5 w-100">Give clue</el-button>
+            style="padding: 0px!important;" destroy-on-close>
+            <CodePickerForm @submit="handleGiveClue" btnText="Give clue" :isRandomSalt="false" />
         </el-dialog>
     </div>
 </template>
@@ -48,20 +28,14 @@ import RoundedColor from "@/components/RoundedColor.vue";
 import { computed, ref } from "vue";
 import { AvailableColor } from "../types";
 import { useZkAppStore } from "@/store/zkAppModule";
-import { availableColors } from "../constants/colors";
 import { storeToRefs } from "pinia";
-import CopyToClipBoard from "@/components/CopyToClipBoard.vue";
+import CodePickerForm, { CodePicker } from "./forms/CodePickerForm.vue";
 const { createGuessTransaction, createGiveClueTransaction, getZkappStates } = useZkAppStore();
 const { zkAppStates } = storeToRefs(useZkAppStore());
 
-const selectedColor = ref<AvailableColor>({ color: "#222", value: 0 });
-const handlePickColor = (pickedColor: AvailableColor) => {
-    selectedColor.value = pickedColor;
-};
-const handleGiveClue = async () => {
-    const code = secretCode.value.map((e: AvailableColor) => e.value);
+const handleGiveClue = async (formData: CodePicker) => {
     isVerifyGuessModalOpen.value = false
-    await createGiveClueTransaction(code, randomSalt.value);
+    await createGiveClueTransaction(formData.code, formData.randomSalt);
     await getZkappStates()
 };
 const isVerifyGuessModalOpen = ref(false);
@@ -100,15 +74,8 @@ const handleSubmitGuess = async () => {
 const handleVerifyGuess = () => {
     isVerifyGuessModalOpen.value = true;
 };
-const randomSalt = ref();
 
-const secretCode = ref<Array<AvailableColor>>(
-    Array.from({ length: 4 }, () => ({ color: "#222", value: 0 }))
-);
 
-const handleSetSecretCode = (index: number) => {
-    secretCode.value[index] = { ...selectedColor.value };
-};
 </script>
 <style>
 .dialog-class {

@@ -27,7 +27,6 @@ const props = defineProps({
         type: String,
         required: false
     }
-
 })
 const emit = defineEmits(["click"])
 const handleColorClick = () => {
@@ -45,17 +44,24 @@ const handleColorClick = () => {
     height: v-bind(height);
     cursor: pointer;
 }
+
 .rounded__value {
     font-size: 12px;
     color: #444444;
 }
+
 .blinkColor {
     background-color: v-bind(blinkColor);
     animation: blink 1s infinite alternate;
 }
 
 @keyframes blink {
-    0% { opacity: 1; }
-    100% { opacity: 0.2; }
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
 }
 </style>
