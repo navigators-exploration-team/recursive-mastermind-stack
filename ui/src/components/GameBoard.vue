@@ -18,18 +18,31 @@
                 <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#ffde21" height="18px" />
             </div>
         </template>
-        <div class="board__container d-flex">
-
-            <div class="color-picker__container d-flex flex-column gap-3 p-2">
-                <RoundedColor height="40px" width="40px" v-for="el in availableColors" :bg-color="el.color"
-                    :value="el.value" @click="handlePickColor(el)" />
-            </div>
-            <div>
-                <div class=" d-flex flex-start gap-2 p-3">Game: {{ formatAddress(zkAppAddress) }}
-                    <CopyToClipBoard :text="zkAppAddress" />
+        <div class="d-flex">
+            <div class="board__container d-flex">
+                <div class="color-picker__container d-flex flex-column gap-3 p-2">
+                    <RoundedColor height="40px" width="40px" v-for="el in availableColors" :bg-color="el.color"
+                        :value="el.value" @click="handlePickColor(el)" />
                 </div>
-                <div v-for="(guess, row) in guesses">
-                    <Guess :attemptNo="row" @setColor="handleSetColor($event, row)" :guess="guess" :clue="clues[row]" />
+                <div>
+                    <div class=" d-flex flex-start gap-2 p-3">Game: {{ formatAddress(zkAppAddress) }}
+                        <CopyToClipBoard :text="zkAppAddress" />
+                    </div>
+                    <div v-for="(guess, row) in guesses">
+                        <Guess :attemptNo="row" @setColor="handleSetColor($event, row)" :guess="guess"
+                            :clue="clues[row]" />
+                    </div>
+                </div>
+            </div>
+            <div class="logs__container">
+                <div class="d-flex justify-content-center p-3 logs-title">
+                    <span>Logs</span>
+                </div>
+                <div class="d-flex flex-column align-items-start px-3">
+                    <div v-for="(value, key) in logState" :key="key" class="p-2">
+                        {{ key }} : {{ value }}
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -63,7 +76,23 @@ const handlePickColor = (pickedColor: AvailableColor) => {
 const handleSetColor = (index: number, row: number) => {
     guesses.value[row][index] = { ...selectedColor.value }
 }
+const logState = computed(() => {
+    return {
+        turnCount: zkAppStates.value.turnCount,
+        packedGuessHistory: zkAppStates.value.packedGuessHistory,
+        packedClueHistory: zkAppStates.value.packedClueHistory,
+        codemasterId: zkAppStates.value.codemasterId.length > 10 ? formatAddress(zkAppStates.value.codemasterId) :
+            zkAppStates.value.codemasterId,
+        codebreakerId: zkAppStates.value.codebreakerId.length > 10 ? formatAddress(zkAppStates.value.codebreakerId)
+            :
+            zkAppStates.value.codebreakerId,
+        solutionHash: zkAppStates.value.solutionHash.length > 10 ? formatAddress(zkAppStates.value.solutionHash)
+            : zkAppStates.value.solutionHash,
+        maxAttempts: zkAppStates.value.maxAttempts,
+        isSolved: zkAppStates.value.isSolved
+    }
 
+})
 watch(() => zkAppStates.value?.turnCount, () => {
     guesses.value =
         zkAppStates.value.guessesHistory.slice(0, zkAppStates.value.maxAttempts)
@@ -75,7 +104,16 @@ watch(() => zkAppStates.value?.turnCount, () => {
     border: 1px solid #222;
 }
 
+.logs__container {
+    border: 1px solid #222;
+    border-left: none;
+}
+
 .color-picker__container {
     border: 1px solid #222;
+}
+
+.logs-title {
+    border-bottom: 1px solid #222;
 }
 </style>

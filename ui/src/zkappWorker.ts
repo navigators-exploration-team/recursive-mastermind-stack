@@ -149,7 +149,6 @@ const functions = {
   getZkappStates: async (args: {}) => {
     const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
     await fetchAccount({ publicKey });
-
     const [
       maxAttempts,
       turnCount,
@@ -157,6 +156,8 @@ const functions = {
       solutionHash,
       serializedGuessHistory,
       packedClueHistory,
+      codebreakerId,
+      codemasterId,
     ] = await Promise.all([
       state.zkappInstance!.maxAttempts.get(),
       state.zkappInstance!.turnCount.get(),
@@ -164,8 +165,9 @@ const functions = {
       state.zkappInstance!.solutionHash.get(),
       state.zkappInstance!.packedGuessHistory.get(),
       state.zkappInstance!.packedClueHistory.get(),
+      state.zkappInstance!.codebreakerId.get(),
+      state.zkappInstance!.codemasterId.get(),
     ]);
-
     const guessHistory = JSON.stringify(
       deserializeCombinationHistory(serializedGuessHistory)
     );
@@ -177,9 +179,13 @@ const functions = {
       maxAttempts: maxAttempts.toNumber(),
       turnCount: turnCount.toNumber(),
       isSolved: isSolved.toString(),
-      solutionHash,
+      solutionHash: solutionHash.toString(),
+      packedGuessHistory: serializedGuessHistory.toString(),
+      packedClueHistory: packedClueHistory.toString(),
       guessesHistory: createGuessesMatrix(guessHistory),
       cluesHistory: createCluesMatrix(clues, turnCount.toNumber()),
+      codebreakerId: codebreakerId.toString(),
+      codemasterId: codemasterId.toString(),
     };
   },
 };
@@ -210,7 +216,10 @@ addEventListener("message", async (event: MessageEvent<ZkappWorkerRequest>) => {
     postMessage({
       id: event.data.id,
       data: null,
-      error: error instanceof Error ? error.message.substring(0,error.message.indexOf('!')) : "Unknown error",
+      error:
+        error instanceof Error
+          ? error.message.substring(0, error.message.indexOf("!"))
+          : "Unknown error",
     });
   }
 });
