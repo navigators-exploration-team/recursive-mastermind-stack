@@ -1,12 +1,12 @@
 import { defineStore } from "pinia";
 import ZkappWorkerClient from "../zkappWorkerClient";
-import { Field } from "o1js";
 
 interface MinaWallet {
   requestAccounts: () => Promise<string[]>;
   signMessage: (args: {
     message: string;
   }) => Promise<{ publicKey: string; signature: string }>;
+  on: (event:string,handler:Function) => void
 }
 
 declare global {
@@ -51,16 +51,23 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             this.publicKeyBase58
           );
           this.accountExists = res.error === null;
-
           await this.zkappWorkerClient.loadContract();
-
           this.stepDisplay = "Compiling zkApp...";
           await this.zkappWorkerClient.compileContract();
           this.stepDisplay = "";
           this.compiled = true;
           this.hasBeenSetup = true;
           this.hasWallet = true;
+          window.mina?.on("accountsChanged",async (accounts: string[]) => {
+            if(accounts.length) {
+              this.publicKeyBase58 = accounts[0];
+            }else{
+              const newAccounts = await window.mina?.requestAccounts();
+              this.publicKeyBase58 = newAccounts?.[0];
+            }
+          });
           console.log("setup completed...");
+          this.error = null
         } catch (error: any) {
           return { message: error.message };
         }
@@ -89,13 +96,12 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       } catch (error: any) {
         this.stepDisplay = `Error checking account: ${error.message}`;
       }
-
       this.accountExists = true;
+      this.error = null
     },
     async createInitGameTransaction(rounds: number) {
       try {
         this.loading = true;
-
         this.stepDisplay = "Creating a transaction...";
         this.zkAppAddress =
           await this.zkappWorkerClient!.createInitGameTransaction(
@@ -119,7 +125,9 @@ export const useZkAppStore = defineStore("useZkAppModule", {
           },
         });
         this.stepDisplay = "";
-      } catch (err) {
+        this.error = null
+      } catch (err:any) {
+        this.error = err?.message || err
         console.log("error ", err);
       } finally {
         this.loading = false;
@@ -150,7 +158,10 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         });
 
         this.stepDisplay = "";
-      } catch (err) {
+        this.error = null
+
+      } catch (err:any) {
+        this.error = err?.message || err
         console.log("error ", err);
       } finally {
         this.loading = false;
@@ -180,7 +191,10 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         });
 
         this.stepDisplay = "";
-      } catch (err) {
+        this.error = null
+
+      } catch (err:any) {
+        this.error = err?.message || err
         console.log("error ", err);
       } finally {
         this.loading = false;
@@ -211,7 +225,10 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         });
 
         this.stepDisplay = "";
-      } catch (err) {
+        this.error = null
+
+      } catch (err:any) {
+        this.error = err?.message || err
         console.log("error ", err);
       } finally {
         this.loading = false;

@@ -2,6 +2,7 @@
     <div class="d-flex gap-4 align-items-center">
         <el-form :model="game" :rules="rules" ref="ruleFormRef" class="w-100">
             <el-form-item prop="gameAddress" class="w-100">
+                <label>ZkApp Address</label>
                 <el-input placeholder="Insert ZkApp Address" size="large" v-model="game.gameAddress"></el-input>
             </el-form-item>
             <el-button class="w-100 mt-2" size="large" type="primary" @click="handleJoinGame"> Play </el-button>

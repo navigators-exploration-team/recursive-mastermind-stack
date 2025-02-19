@@ -31,12 +31,17 @@ import { useZkAppStore } from "@/store/zkAppModule";
 import { storeToRefs } from "pinia";
 import CodePickerForm, { CodePicker } from "./forms/CodePickerForm.vue";
 import { validateColorCombination } from "../utils";
+import { ElMessage } from "element-plus";
 const { createGuessTransaction, createGiveClueTransaction } = useZkAppStore();
-const { zkAppStates } = storeToRefs(useZkAppStore());
+const { zkAppStates , error } = storeToRefs(useZkAppStore());
 
 const handleGiveClue = async (formData: CodePicker) => {
     isVerifyGuessModalOpen.value = false
     await createGiveClueTransaction(formData.code, formData.randomSalt);
+    if(error.value) {
+        ElMessage.error({message:error.value,duration:6000});
+    }
+
 };
 const isVerifyGuessModalOpen = ref(false);
 const isCodeMasterTurn = computed(() => {
@@ -73,6 +78,9 @@ const props = defineProps({
 const handleSubmitGuess = async () => {
     const code = props.guess.map((e: AvailableColor) => e.value);
     await createGuessTransaction(code);
+    if(error.value) {
+        ElMessage.error({message:error.value,duration:6000});
+    }
 };
 
 const handleVerifyGuess = () => {

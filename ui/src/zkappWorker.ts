@@ -137,7 +137,6 @@ const functions = {
       0
     );
     const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
-
     const transaction = await Mina.transaction(feePayerPublickKey, async () => {
       await state.zkappInstance!.giveClue(
         Field(combination),
@@ -201,11 +200,17 @@ export type ZkappWorkerReponse = {
 };
 
 addEventListener("message", async (event: MessageEvent<ZkappWorkerRequest>) => {
-  const returnData = await functions[event.data.fn](event.data.args);
-
-  const message: ZkappWorkerReponse = {
-    id: event.data.id,
-    data: returnData,
-  };
-  postMessage(message);
+  try {
+    const returnData = await functions[event.data.fn](event.data.args);
+    postMessage({
+      id: event.data.id,
+      data: returnData,
+    });
+  } catch (error) {
+    postMessage({
+      id: event.data.id,
+      data: null,
+      error: error instanceof Error ? error.message.substring(0,error.message.indexOf('!')) : "Unknown error",
+    });
+  }
 });

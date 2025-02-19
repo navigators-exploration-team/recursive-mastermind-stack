@@ -5,10 +5,12 @@
                 <el-form-item>
                     <label>Number of Attempts</label>
                     <el-input type="number" v-model.number="game.rounds" size="large"
-                        placeholder="Select a number between 5 and 15" :max="15" :min="5" @blur="setAttempts"></el-input>
+                        placeholder="Select a number between 5 and 15" :max="15" :min="5"
+                        @blur="setAttempts"></el-input>
                 </el-form-item>
             </el-form>
-            <el-button type="primary" size="large" @click="handleInitCode" class="mt-2 w-100">Init Game</el-button>
+            <el-button type="primary" size="large" @click="handleInitCode" class="mt-2 w-100" :loading="!compiled"
+                :disabled="!compiled">Init Game</el-button>
         </div>
         <div v-if="formStep === 'CREATE_GAME'">
             <CodePickerForm @submit="handleCreateGame" btnText="Submit Code" isRandomSalt />
@@ -22,8 +24,8 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import CodePickerForm from '@/components/forms/CodePickerForm.vue';
 import { CodePicker } from './CodePickerForm.vue';
-import { ElForm } from 'element-plus';
-const { zkAppAddress } = storeToRefs(useZkAppStore())
+import { ElForm, ElMessage } from 'element-plus';
+const { zkAppAddress, compiled, error } = storeToRefs(useZkAppStore())
 const router = useRouter()
 const { createInitGameTransaction, createNewGameTransaction } = useZkAppStore()
 const formStep = ref("INIT_GAME")
@@ -50,24 +52,32 @@ const rules = ref({
     ]
 });
 const setAttempts = () => {
-    if(game.value.rounds > 15){
+    if (game.value.rounds > 15) {
         game.value.rounds = 15
-    }else if(game.value.rounds < 5) {
+    } else if (game.value.rounds < 5) {
         game.value.rounds = 5
     }
 }
 const handleInitCode = async () => {
     await createInitGameTransaction(game.value.rounds)
-    formStep.value = 'CREATE_GAME'
+    if (error.value) {
+        ElMessage.error({ message: error.value, duration: 6000 });
+    } else {
+        formStep.value = 'CREATE_GAME'
+    }
 }
 
 const handleCreateGame = async (formData: CodePicker) => {
     await createNewGameTransaction(formData.code, formData.randomSalt)
-    router.push({
-        name: "gameplay", params: {
-            id: zkAppAddress.value
-        }
-    })
+    if (error.value) {
+        ElMessage.error({ message: error.value, duration: 6000 });
+    } else {
+        router.push({
+            name: "gameplay", params: {
+                id: zkAppAddress.value
+            }
+        })
+    }
 }
 
 
