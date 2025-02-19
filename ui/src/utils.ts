@@ -1,5 +1,7 @@
+import { validateCombination } from "mina-mastermind";
 import { availableColors, cluesColors } from "./constants/colors";
 import { AvailableColor } from "./types";
+import { Field } from "o1js";
 
 export function formatAddress(address: string) {
   return `${address.slice(0, 5)}...${address.slice(-5)}`;
@@ -53,4 +55,24 @@ export function transformBinaryArray(arr: string[]): string[] {
       .reverse()
       .join("");
   });
+}
+
+export function validateColorCombination(combination: AvailableColor[]) {
+  const combinationDigits = combination.map(({value}) => Field(value))
+  let isValid = true
+  try {
+    validateCombination(combinationDigits)
+    return {
+      isValid,
+      message:""
+    }
+  }
+  catch(err:any) {
+    isValid = false 
+    return {
+      isValid,
+      message:"You should choose four distinct colors."
+    }
+  }
+  
 }

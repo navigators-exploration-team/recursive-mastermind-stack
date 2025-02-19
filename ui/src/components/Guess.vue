@@ -12,10 +12,10 @@
             </div>
 
         </div>
-
-        <div v-show="isCurrentRound">
+        <div v-if="isCurrentRound">
             <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn">Verify</el-button>
-            <el-button size="small" @click="handleSubmitGuess" v-else>Check</el-button>
+            <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
+                :title="combinationValidation.message" v-else>Check</el-button>
         </div>
         <el-dialog v-model="isVerifyGuessModalOpen" modal-class="dialog-class" custom-class="dialog-class"
             style="padding: 0px!important;" destroy-on-close>
@@ -30,13 +30,13 @@ import { AvailableColor } from "../types";
 import { useZkAppStore } from "@/store/zkAppModule";
 import { storeToRefs } from "pinia";
 import CodePickerForm, { CodePicker } from "./forms/CodePickerForm.vue";
-const { createGuessTransaction, createGiveClueTransaction, getZkappStates } = useZkAppStore();
+import { validateColorCombination } from "../utils";
+const { createGuessTransaction, createGiveClueTransaction } = useZkAppStore();
 const { zkAppStates } = storeToRefs(useZkAppStore());
 
 const handleGiveClue = async (formData: CodePicker) => {
     isVerifyGuessModalOpen.value = false
     await createGiveClueTransaction(formData.code, formData.randomSalt);
-    await getZkappStates()
 };
 const isVerifyGuessModalOpen = ref(false);
 const isCodeMasterTurn = computed(() => {
@@ -45,6 +45,11 @@ const isCodeMasterTurn = computed(() => {
 const isCurrentRound = computed(() => {
     return Math.ceil(zkAppStates.value.turnCount / 2) === props.attemptNo + 1;
 });
+
+const combinationValidation = computed(() => {
+    return validateColorCombination(props.guess)
+})
+
 const emit = defineEmits(["setColor"]);
 const handleSetColor = (index: number) => {
     if (isCurrentRound.value && !isCodeMasterTurn.value) {
@@ -68,7 +73,6 @@ const props = defineProps({
 const handleSubmitGuess = async () => {
     const code = props.guess.map((e: AvailableColor) => e.value);
     await createGuessTransaction(code);
-    await getZkappStates()
 };
 
 const handleVerifyGuess = () => {

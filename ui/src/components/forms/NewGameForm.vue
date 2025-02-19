@@ -1,16 +1,19 @@
 <template>
-    <el-form>
+    <div>
         <div v-if="formStep === 'INIT_GAME'">
-            <el-form-item>
-                <label>Number of Attempts</label>
-                <el-input type="number" v-model.number="rounds" size="large" :max="15" :min="5"></el-input>
-            </el-form-item>
+            <el-form :model="game" :rules="rules" ref="ruleFormRef">
+                <el-form-item>
+                    <label>Number of Attempts</label>
+                    <el-input type="number" v-model.number="game.rounds" size="large"
+                        placeholder="Select a number between 5 and 15" :max="15" :min="5" @blur="setAttempts"></el-input>
+                </el-form-item>
+            </el-form>
             <el-button type="primary" size="large" @click="handleInitCode" class="mt-2 w-100">Init Game</el-button>
         </div>
         <div v-if="formStep === 'CREATE_GAME'">
             <CodePickerForm @submit="handleCreateGame" btnText="Submit Code" isRandomSalt />
         </div>
-    </el-form>
+    </div>
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue';
@@ -19,14 +22,42 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import CodePickerForm from '@/components/forms/CodePickerForm.vue';
 import { CodePicker } from './CodePickerForm.vue';
+import { ElForm } from 'element-plus';
 const { zkAppAddress } = storeToRefs(useZkAppStore())
 const router = useRouter()
 const { createInitGameTransaction, createNewGameTransaction } = useZkAppStore()
-const rounds = ref()
 const formStep = ref("INIT_GAME")
-
+const game = ref({
+    rounds: 8
+})
+const ruleFormRef = ref<InstanceType<typeof ElForm>>();
+const rules = ref({
+    rounds: [
+        {
+            required: true,
+            message: `The number of attempts is required !`,
+            trigger: "change",
+        },
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                if (value >= 5 && value <= 15) {
+                    callback();
+                } else {
+                    callback(new Error(`The number of attempts should be between 5 and 15`));
+                }
+            },
+        }
+    ]
+});
+const setAttempts = () => {
+    if(game.value.rounds > 15){
+        game.value.rounds = 15
+    }else if(game.value.rounds < 5) {
+        game.value.rounds = 5
+    }
+}
 const handleInitCode = async () => {
-    await createInitGameTransaction(rounds.value)
+    await createInitGameTransaction(game.value.rounds)
     formStep.value = 'CREATE_GAME'
 }
 

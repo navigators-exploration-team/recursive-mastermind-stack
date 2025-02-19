@@ -1,16 +1,46 @@
 <template>
     <div class="d-flex gap-4 align-items-center">
-        <el-input placeholder="Insert ZkApp Address" size="large" v-model="newGameAddress"></el-input>
-        <el-button size="large" type="primary" @click="handleJoinGame"> Play </el-button>
-
+        <el-form :model="game" :rules="rules" ref="ruleFormRef" class="w-100">
+            <el-form-item prop="gameAddress" class="w-100">
+                <el-input placeholder="Insert ZkApp Address" size="large" v-model="game.gameAddress"></el-input>
+            </el-form-item>
+            <el-button class="w-100 mt-2" size="large" type="primary" @click="handleJoinGame"> Play </el-button>
+        </el-form>
     </div>
 </template>
 <script lang="ts" setup>
+import { ElForm } from 'element-plus';
+import { PublicKey } from 'o1js';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter()
-const newGameAddress = ref("")
+const ruleFormRef = ref<InstanceType<typeof ElForm>>();
+const rules = ref({
+    gameAddress: [
+        {
+            required: true,
+            message: `The zkApp address is required !`,
+            trigger: "change",
+        },
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                try {
+                    PublicKey.fromBase58(value)
+                    callback();
+                } catch {
+                    callback(new Error(`This is not a valid address !`));
+                }
+            },
+        }
+    ]
+});
+const game = ref({ gameAddress: '' })
 const handleJoinGame = () => {
-    router.push({ name: "gameplay", params: { id: newGameAddress.value } })
+    if (!ruleFormRef.value) return;
+    ruleFormRef.value.validate(async (valid) => {
+        if (valid) {
+            router.push({ name: "gameplay", params: { id: game.value.gameAddress } })
+        }
+    })
 }
 </script>

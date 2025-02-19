@@ -4,6 +4,7 @@ import {
   deserializeCombinationHistory,
   getElementAtIndex,
   separateCombinationDigits,
+  validateCombination
 } from './utils.js';
 
 export {
@@ -12,4 +13,5 @@ export {
   getElementAtIndex,
   separateCombinationDigits,
   deserializeClueHistory,
+  validateCombination
 };
