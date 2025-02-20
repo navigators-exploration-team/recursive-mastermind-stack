@@ -240,7 +240,12 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       this.zkAppAddress = zkAppAddress;
     },
     async getZkappStates() {
-      this.zkAppStates = await this.zkappWorkerClient!.getZkappStates();
+      try{
+        this.zkAppStates = await this.zkappWorkerClient!.getZkappStates();
+        this.error = null
+      }catch(err:any){
+        this.error = err.message
+      }
     },
   },
 });

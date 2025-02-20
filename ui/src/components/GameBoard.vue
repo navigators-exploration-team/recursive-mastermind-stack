@@ -262,7 +262,7 @@ const logState = computed(() => {
         <li>
             Note: The Code Breaker is expected to fetch this state off-chain, unpack the clues, retrieve and deserialize
             the
-            latest clue, and interpret the result to accurately understand the outcome of their previous guess and
+            latest clue<br> and interpret the result to accurately understand the outcome of their previous guess and
             adjust
             their strategy accordingly.
         </li>

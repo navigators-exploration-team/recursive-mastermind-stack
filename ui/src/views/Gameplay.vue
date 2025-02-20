@@ -1,13 +1,21 @@
 <template>
-  <div class="d-flex gap-3">
-    <div v-for="el in cluesColors" :key="el.color">
-      <RoundedColor :bgColor="el.color" :value="el.value" :title="el.title" width="18px" height="18px" />
-    </div>
+  <div class="d-flex flex-column align-items-center">
+    <div class="d-flex gap-3">
+      <div v-for="el in cluesColors" :key="el.color">
+        <RoundedColor :bgColor="el.color" :value="el.value" :title="el.title" width="18px" height="18px" />
+      </div>
 
+    </div>
+    <div v-if="zkAppStates">
+      <GameBoard />
+    </div>
+    <div v-else-if="error">
+      <div class="fs-1 mt-5 ">
+        404 Game Not found !
+      </div>
+    </div>
   </div>
-  <div v-if="zkAppStates">
-    <GameBoard />
-  </div>
+
 
 </template>
 
@@ -20,9 +28,8 @@ import GameBoard from '../components/GameBoard.vue';
 import RoundedColor from '../components/RoundedColor.vue';
 import { cluesColors } from '../constants/colors';
 const route = useRoute()
-const { compiled, zkAppStates } = storeToRefs(useZkAppStore())
+const { compiled, zkAppStates, error } = storeToRefs(useZkAppStore())
 const { initZkappInstance, getZkappStates } = useZkAppStore()
-
 const gameId = route?.params?.id
 onMounted(async () => {
   if (compiled.value) {
