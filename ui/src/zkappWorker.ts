@@ -168,21 +168,27 @@ const functions = {
       state.zkappInstance!.codebreakerId.get(),
       state.zkappInstance!.codemasterId.get(),
     ]);
-    const guessHistory = JSON.stringify(
-      deserializeCombinationHistory(serializedGuessHistory)
-    );
-    const clueHistory = JSON.stringify(
-      deserializeClueHistory(packedClueHistory)
-    );
-    const clues = transformBinaryArray(JSON.parse(clueHistory));
+    const guessHistory = deserializeCombinationHistory(serializedGuessHistory);
+    const guessBits = guessHistory.map((c) => c.toBits(14));
+    const clueHistory = deserializeClueHistory(packedClueHistory);
+    const clueBits = clueHistory.map((c) => c.toBits(8));
+    const clues = transformBinaryArray(JSON.parse(JSON.stringify(clueHistory)));
     return {
       maxAttempts: maxAttempts.toNumber(),
       turnCount: turnCount.toNumber(),
       isSolved: isSolved.toString(),
       solutionHash: solutionHash.toString(),
       packedGuessHistory: serializedGuessHistory.toString(),
+      unpackedGuessHistory: JSON.stringify(guessHistory),
+      unpackedBinaryGuessHistory: JSON.stringify(guessBits)
+        .replace(new RegExp("false", "g"), "0")
+        .replace(new RegExp("true", "g"), "1"),
+      unpackedClueHistory: JSON.stringify(clueHistory),
+      unpackedBinaryClueHistory: JSON.stringify(clueBits)
+        .replace(new RegExp("false", "g"), "0")
+        .replace(new RegExp("true", "g"), "1"),
       packedClueHistory: packedClueHistory.toString(),
-      guessesHistory: createGuessesMatrix(guessHistory),
+      guessesHistory: createGuessesMatrix(JSON.stringify(guessHistory)),
       cluesHistory: createCluesMatrix(clues, turnCount.toNumber()),
       codebreakerId: codebreakerId.toString(),
       codemasterId: codemasterId.toString(),
