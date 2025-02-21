@@ -36,22 +36,30 @@
             </div>
             <div class="logs__container">
                 <div class="d-flex justify-content-center p-3 logs-title">
-                    <span>Logs</span>
+                    <span>Mastermind States</span>
                 </div>
-                <div class="d-flex flex-column align-items-start px-3">
-                    <div v-for="(state, key) in logState" :key="key" class="p-2 d-flex align-items-center gap-2">
-                        <span>{{ key }} : {{ state.value }}</span>
-                        <el-tooltip placement="top-start" class="w-50">
-                            <template #content>
-                                <div v-html="state.information"></div>
-                            </template>
-                            <el-icon :size="18" class="cursor-pointer">
-                                <InfoFilled />
-                            </el-icon>
-                        </el-tooltip>
-
+                <div class="d-flex justify-content-between h-75">
+                    <div class="px-3">
+                        <div v-for="(state, key) in logState" :key="key" class="p-2">
+                            <div style="width: 180px;" class="d-flex ">{{ key }} </div>
+                        </div>
                     </div>
-
+                    <div class="separator h-100 "></div>
+                    <div class="px-3">
+                        <div v-for="(state, key) in logState" :key="key" class="p-2">
+                            <div class="d-flex gap-4 align-items-center justify-content-between ">
+                                <span> {{ state.value }}</span>
+                                <el-tooltip placement="top-start" class="w-50">
+                                    <template #content>
+                                        <div v-html="state.information"></div>
+                                    </template>
+                                    <el-icon :size="18" class="cursor-pointer">
+                                        <InfoFilled />
+                                    </el-icon>
+                                </el-tooltip>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -257,7 +265,7 @@ const logState = computed(() => {
         <li>
             Unlike packedGuessHistory, this state is not directly used within the zkApp but serves as an untampered
             record
-            of clues, showing the results of all the Code Breaker's guesses.
+            of clues,<br> showing the results of all the Code Breaker's guesses.
         </li>
         <li>
             Note: The Code Breaker is expected to fetch this state off-chain, unpack the clues, retrieve and deserialize
@@ -278,7 +286,7 @@ const logState = computed(() => {
         <li>
             Each clue consists of four digits, where each digit can be 0, 1, or 2, meaning the clue digits fall within
             the
-            range of a 2-bit number. These digits are combined and encoded as an 8-bit Field in decimal format.
+            range of a 2-bit number.<br> These digits are combined and encoded as an 8-bit Field in decimal format.
             <ul>
                 <li>
                     For example, if the clue is 1 1 1 1, it would be stored as a field of value 15.
@@ -287,7 +295,7 @@ const logState = computed(() => {
         </li>
         <li>
             The packedClueHistory state demonstrates an efficient packing technique that stores multiple small Field
-            elements (binary-encoded) into a single compact value.
+            elements (binary-encoded)<br> into a single compact value.
         </li>
         <li>
             Currently, the value of this state is ${zkAppStates.value.packedClueHistory}, and we can break down how this value was derived step by step.<br>
@@ -298,7 +306,7 @@ const logState = computed(() => {
             Each clue is converted into its 8-bit binary equivalent:<br>
             ${zkAppStates.value.unpackedBinaryClueHistory.replace(/\[0,0,0,0,0,0,0,0\],/g, '').replace('[0,0,0,0,0,0,0,0]', '[0,0,0,0,0,0,0,0],.....,[0,0,0,0,0,0,0,0]')}<br>
             <strong>Flattening and Conversion to Field</strong><br>
-            Finally, we treat this sequence as a little-endian binary number, meaning the least significant bits come first. When converting this back into a Field value, we get:
+            Finally, we treat this sequence as a little-endian binary number, meaning the least significant bits come first. <br>When converting this back into a Field value, we get:
                     ${zkAppStates.value.packedClueHistory}
         </li>
 
@@ -334,5 +342,10 @@ watch(() => zkAppStates.value?.turnCount, () => {
 
 :deep(.el-popper) {
     width: 70% !important;
+}
+
+.separator {
+    border: 1px solid #222;
+    width: 2px;
 }
 </style>

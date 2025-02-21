@@ -5,17 +5,24 @@
                 <label>ZkApp Address</label>
                 <el-input placeholder="Insert ZkApp Address" size="large" v-model="game.gameAddress"></el-input>
             </el-form-item>
-            <el-button class="w-100 mt-2" size="large" type="primary" @click="handleJoinGame"> Play </el-button>
+            <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
+                <el-button class="w-100 mt-2" size="large" type="primary" @click="handleJoinGame" :visible="compiled" :loading="!compiled"
+                    :disabled="!compiled"> Play </el-button>
+            </el-tooltip>
+
         </el-form>
     </div>
 </template>
 <script lang="ts" setup>
 import { ElForm } from 'element-plus';
 import { PublicKey } from 'o1js';
+import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useZkAppStore } from '@/store/zkAppModule';
 const router = useRouter()
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
+const { compiled } = storeToRefs(useZkAppStore())
 const rules = ref({
     gameAddress: [
         {

@@ -9,8 +9,10 @@
                         @blur="setAttempts"></el-input>
                 </el-form-item>
             </el-form>
-            <el-button type="primary" size="large" @click="handleInitCode" class="mt-2 w-100" :loading="!compiled"
-                :disabled="!compiled">Init Game</el-button>
+            <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
+                <el-button type="primary" size="large" @click="handleInitCode" class="mt-2 w-100" :loading="!compiled"
+                    :disabled="!compiled">Init Game</el-button>
+            </el-tooltip>
         </div>
         <div v-if="formStep === 'CREATE_GAME'">
             <CodePickerForm @submit="handleCreateGame" btnText="Submit Code" isRandomSalt />

@@ -50,6 +50,11 @@ const handleColorClick = () => {
     width: v-bind(width);
     height: v-bind(height);
     cursor: pointer;
+    border: 1px solid #6b6969;
+}
+
+.rounded__color:hover {
+    opacity: 0.8;
 }
 
 .rounded__value {
