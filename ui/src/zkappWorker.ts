@@ -6,6 +6,7 @@ import {
   AccountUpdate,
   PrivateKey,
   UInt8,
+  Cache
 } from "o1js";
 import {
   deserializeClueHistory,
@@ -15,6 +16,8 @@ import {
 import {
   createCluesMatrix,
   createGuessesMatrix,
+  fetchFiles,
+  MinaFileSystem,
   transformBinaryArray,
 } from "./utils";
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
@@ -47,7 +50,13 @@ const functions = {
     state.MastermindContract = MastermindZkApp;
   },
   compileContract: async (args: {}) => {
-    const { verificationKey } = await state.MastermindContract!.compile();
+    console.time("compiling")
+    const cacheFiles = await fetchFiles();
+    const cache = MinaFileSystem(cacheFiles) as Cache; 
+    const { verificationKey } = await state.MastermindContract!.compile({
+      cache
+    });
+    console.timeEnd("compiling")
     state.verificationKey = verificationKey;
   },
   fetchAccount: async (args: { publicKey58: string }) => {

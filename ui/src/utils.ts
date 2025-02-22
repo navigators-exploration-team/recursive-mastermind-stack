@@ -1,7 +1,7 @@
 import { validateCombination } from "mina-mastermind";
 import { availableColors, cluesColors } from "./constants/colors";
 import { AvailableColor } from "./types";
-import { Field } from "o1js";
+import { Field , Cache} from "o1js";
 
 export function formatAddress(address: string) {
   return `${address.slice(0, 5)}...${address.slice(-5)}`;
@@ -75,4 +75,63 @@ export function validateColorCombination(combination: AvailableColor[]) {
     }
   }
   
+}
+
+export const MinaFileSystem = (files: any) : Cache => ({
+  read({ persistentId, uniqueId, dataType }: any) {
+    // read current uniqueId, return data if it matches
+    if (!files[persistentId]) {
+     // console.log('read');
+     // console.log({ persistentId, uniqueId, dataType });
+
+      return undefined;
+    }
+    
+    const currentId = files[persistentId].header;
+
+    if (currentId !== uniqueId) {
+      // console.log('current id did not match persistent id');
+
+      return undefined;
+    }
+
+    if (dataType === 'string') {
+      // console.log('found in cache', { persistentId, uniqueId, dataType });
+
+      return new TextEncoder().encode(files[persistentId].data);
+    }
+
+    return undefined;
+  },
+  write({ persistentId, uniqueId, dataType }: any, data: any) {
+    //console.log('write');
+   // console.log({ persistentId, uniqueId, dataType });
+  },
+  canWrite: true,
+});
+
+export function fetchFiles() {
+  const files = [
+    { name:'srs-fp-65536', type: 'string' },
+    { name:'srs-fq-32768', type: 'string' },
+    { name:'step-vk-mastermindzkapp-creategame', type: 'string' },
+    { name:'step-vk-mastermindzkapp-giveclue', type: 'string' },
+    { name:'step-vk-mastermindzkapp-initgame', type: 'string' },
+    { name:'step-vk-mastermindzkapp-makeguess', type: 'string' },
+    { name:'wrap-vk-mastermindzkapp', type: 'string' },
+    { name:'lagrange-basis-fp-1024', type: 'string' },
+    { name:'lagrange-basis-fp-8192', type: 'string' },
+  
+  ]
+  return Promise.all(files.map((file) => {
+    return Promise.all([
+      fetch(`/zkAppCache/${file.name}.header`).then(res => res.text()),
+      fetch(`/zkAppCache/${file.name}`).then(res => res.text())
+    ]).then(([header, data]) => ({ file, header, data }));
+  }))
+  .then((cacheList) => cacheList.reduce((acc: any, { file, header, data }) => {
+    acc[file.name] = { file, header, data };
+
+    return acc;
+  }, {}));
 }
