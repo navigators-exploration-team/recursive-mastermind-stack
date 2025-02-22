@@ -17,5 +17,7 @@ const iframeSrc = ref<string>("/guideflow/rules.gif");
   position: relative;
   width: 80%;
   height: 100%;
+  clip-path: inset(40px 0 40px 0);  
+
 }
 </style>

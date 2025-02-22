@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex guess__container p-2 align-items-center gap-2">
-        <span>{{ attemptNo + 1 }}</span>
+        <span v-if="attemptNo !== -1">{{ attemptNo + 1 }}</span>
         <div class="d-flex flex-1 gap-5">
             <div class="d-flex gap-3  guesses">
                 <RoundedColor v-for="(el, index) in guess" :bgColor="el.color" :value="el.value" width="40px"
@@ -33,22 +33,22 @@ import CodePickerForm, { CodePicker } from "./forms/CodePickerForm.vue";
 import { validateColorCombination } from "../utils";
 import { ElMessage } from "element-plus";
 const { createGuessTransaction, createGiveClueTransaction } = useZkAppStore();
-const { zkAppStates , error } = storeToRefs(useZkAppStore());
+const { zkAppStates, error } = storeToRefs(useZkAppStore());
 
 const handleGiveClue = async (formData: CodePicker) => {
     isVerifyGuessModalOpen.value = false
     await createGiveClueTransaction(formData.code, formData.randomSalt);
-    if(error.value) {
-        ElMessage.error({message:error.value,duration:6000});
+    if (error.value) {
+        ElMessage.error({ message: error.value, duration: 6000 });
     }
 
 };
 const isVerifyGuessModalOpen = ref(false);
 const isCodeMasterTurn = computed(() => {
-    return zkAppStates.value.turnCount % 2 === 0;
+    return zkAppStates.value?.turnCount % 2 === 0;
 });
 const isCurrentRound = computed(() => {
-    return Math.ceil(zkAppStates.value.turnCount / 2) === props.attemptNo + 1;
+    return Math.ceil(zkAppStates.value?.turnCount / 2) === props.attemptNo + 1;
 });
 
 const combinationValidation = computed(() => {
@@ -64,7 +64,8 @@ const handleSetColor = (index: number) => {
 const props = defineProps({
     attemptNo: {
         type: Number,
-        required: true,
+        required: false,
+        default: -1
     },
     guess: {
         type: Array<AvailableColor>,
@@ -78,8 +79,8 @@ const props = defineProps({
 const handleSubmitGuess = async () => {
     const code = props.guess.map((e: AvailableColor) => e.value);
     await createGuessTransaction(code);
-    if(error.value) {
-        ElMessage.error({message:error.value,duration:6000});
+    if (error.value) {
+        ElMessage.error({ message: error.value, duration: 6000 });
     }
 };
 
