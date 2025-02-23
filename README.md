@@ -460,6 +460,131 @@ npm run testw # watch mode
 npm run coverage
 ```
 
+
+# Running with Lightnet
+
+This guide provides step-by-step instructions to set up and run the zkApp, including the UI and the Lightnet blockchain network.
+
+## 1. Prerequisites
+
+Before starting, ensure you have the following installed:
+
+- **Node.js** 
+- **Yarn**
+- **Docker** 
+
+### Install Docker
+
+If you **don't have Docker installed**, you can download and install it using the links below:
+
+- **Windows:** [Install Docker for Windows](https://docs.docker.com/desktop/setup/install/windows-install/)  
+- **Mac:** [Install Docker for Mac](https://docs.docker.com/desktop/setup/install/mac-install/)  
+- **Linux:** [Install Docker for Linux](https://docs.docker.com/desktop/setup/install/linux/ubuntu/)  
+
+## 2. Running Lightnet
+
+Once Docker is installed and running, start the Lightnet blockchain network using the following command:
+
+```sh
+zk lightnet start --no-archive
+```
+
+### Note:
+By default, starting the Lightnet blockchain network also launches archive data tools such as:
+- The Mina archive process
+- PostgreSQL RDBMS
+- Archive-Node-API application
+
+If your testing does **not** require archive data tools and you want to use fewer system resources, you can disable them using the `--no-archive` option, as shown above.
+
+## 3. Setting Up the Contract
+
+Navigate to the contract directory and link the package:
+
+```sh
+cd contract
+yarn link
+```
+
+## 4. Linking the Contract in the UI
+
+Go to the `ui` directory and link the contract package:
+
+```sh
+cd ../ui
+yarn link mina-mastermind
+```
+
+## 5. Running the UI
+
+To start the frontend, run the following commands inside the `ui` directory:
+
+```sh
+yarn install
+npm run dev
+```
+
+This will launch the UI, allowing you to interact with the zkApp.
+
+## Working with Lightnet Test Accounts
+
+To get a set of testing accounts for Lightnet, you can use the following API:
+
+### HTTP GET:
+```
+http://localhost:8181/acquire-account
+```
+
+### Supported Query Parameters:
+- **isRegularAccount**=`<boolean>` (default: `true`)
+  - Useful if you need to get a non-zkApp account.
+- **unlockAccount**=`<boolean>` (default: `false`)
+  - Useful if you need to get an unlocked account.
+
+### Example Request:
+```
+http://localhost:8181/acquire-account?isRegularAccount=true&unlockAccount=true
+```
+
+### Example Response:
+```json
+{
+  "used": true,
+  "pk": "B62qkAenR6pceWB8TGTZ5XxLMa1DTmnndwyxnhxPr4Y5dT4ZtRPLmqA",
+  "sk": "EKEoXY2iT3GFwnzJQW3HHCCA9gBZSpq3GPomxW4m6SP5H6aFJsWJ"
+}
+```
+
+By doing this, you will get an account that contains **1550 tMINA** on the Lightnet network.
+
+
+## Adding the Lightnet Network to Auro Wallet
+
+To integrate the Lightnet network into the Auro Wallet, follow these steps:
+
+1. Open **Settings** in the Auro Wallet.
+2. Click **Network**.
+3. Click **Add Network**.
+4. Set the **Node Name** to `lightnet`.
+5. Set the **Node URL** to:
+   ```
+   http://localhost:8080/graphql
+   ```
+6. Click **Confirm**.
+
+![Adding the Lightnet Network to Auro Wallet](./images/add-network.gif)
+
+## Adding the Test Account to Auro Wallet
+
+1. Ensure that you are in the **Account Management Menu**.
+2. Click **Add Account**.
+3. Choose **Private Key**.
+4. Enter the **Account Name** and click **Next**.
+5. Enter the **previously extracted private key**.
+6. Click **Confirm** to complete the process.
+
+![Adding the Test Account to Auro Wallet](./images/add-account.gif)
+
 # License
 
 [Apache-2.0](LICENSE)
