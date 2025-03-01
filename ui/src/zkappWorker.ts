@@ -1,25 +1,28 @@
 import {
   Mina,
-  PublicKey,
   fetchAccount,
   Field,
   AccountUpdate,
-  PrivateKey,
   UInt8,
-  Cache
+  PublicKey,
+  PrivateKey,
+  Signature,
+  Cache,
 } from "o1js";
 import {
-  deserializeClueHistory,
-  deserializeCombinationHistory,
+  deserializeClue,
   MastermindZkApp,
+  StepProgram,
+  StepProgramProof,
 } from "mina-mastermind";
 import {
-  createCluesMatrix,
-  createGuessesMatrix,
-  fetchFiles,
+  createColoredClue,
+  createColoredGuess,
+  fetchZkAppCacheFiles,
+  fetchZkProgramCacheFiles,
   MinaFileSystem,
-  transformBinaryArray,
 } from "./utils";
+import { SignedData } from "./store/zkAppModule";
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 interface VerificationKeyData {
@@ -34,6 +37,7 @@ const state = {
   verificationKey: null as null | VerificationKeyData | any,
   proofsEnabled: false,
   zkAppAddress: null as null | string,
+  lastProof: StepProgramProof,
 };
 
 const functions = {
@@ -50,14 +54,22 @@ const functions = {
     state.MastermindContract = MastermindZkApp;
   },
   compileContract: async (args: {}) => {
-    console.time("compiling")
-    const cacheFiles = await fetchFiles();
-    const cache = MinaFileSystem(cacheFiles) as Cache; 
-    const { verificationKey } = await state.MastermindContract!.compile({
-      cache
-    });
-    console.timeEnd("compiling")
-    state.verificationKey = verificationKey;
+    try {
+      const zkAppCacheFiles = await fetchZkAppCacheFiles();
+      const zkProgramCacheFiles = await fetchZkProgramCacheFiles();
+      const zkAppCache = MinaFileSystem(zkAppCacheFiles) as Cache;
+      const zkProgramCache = MinaFileSystem(zkProgramCacheFiles) as Cache;
+
+      console.time("compiling");
+      await StepProgram.compile();
+      const { verificationKey } = await state.MastermindContract!.compile({
+       // cache: zkAppCache,
+      });
+      console.timeEnd("compiling");
+      state.verificationKey = verificationKey;
+    } catch (e) {
+      console.log("e ", e);
+    }
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
@@ -111,6 +123,26 @@ const functions = {
     state.transaction = transaction;
     state.transaction!.send();
   },
+  sendNewGameProof: async (args: {
+    signedData: SignedData;
+    secretCombination: number;
+    randomSalt: string;
+    rounds: number;
+  }) => {
+    const codeMasterPubKey = PublicKey.fromBase58(args.signedData.publicKey);
+
+    const stepProof = await StepProgram.createGame(
+      {
+        authPubKey: codeMasterPubKey,
+        authSignature: Signature.fromJSON(args.signedData.signature),
+      },
+      UInt8.from(args.rounds),
+      Field(args.secretCombination),
+      Field(args.randomSalt)
+    );
+
+    state.lastProof = stepProof.proof;
+  },
   createGuessTransaction: async (args: {
     feePayer: string;
     secretCombination: number[];
@@ -163,8 +195,8 @@ const functions = {
       turnCount,
       isSolved,
       solutionHash,
-      serializedGuessHistory,
-      packedClueHistory,
+      unseparatedGuess,
+      serializedClue,
       codebreakerId,
       codemasterId,
     ] = await Promise.all([
@@ -172,33 +204,20 @@ const functions = {
       state.zkappInstance!.turnCount.get(),
       state.zkappInstance!.isSolved.get(),
       state.zkappInstance!.solutionHash.get(),
-      state.zkappInstance!.packedGuessHistory.get(),
-      state.zkappInstance!.packedClueHistory.get(),
+      state.zkappInstance!.unseparatedGuess.get(),
+      state.zkappInstance!.serializedClue.get(),
       state.zkappInstance!.codebreakerId.get(),
       state.zkappInstance!.codemasterId.get(),
     ]);
-    const guessHistory = deserializeCombinationHistory(serializedGuessHistory);
-    const guessBits = guessHistory.map((c) => c.toBits(14));
-    const clueHistory = deserializeClueHistory(packedClueHistory);
-    const clueBits = clueHistory.map((c) => c.toBits(8));
-    const clues = transformBinaryArray(JSON.parse(JSON.stringify(clueHistory)));
+
+    const deserializedClue = deserializeClue(serializedClue);
     return {
       maxAttempts: maxAttempts.toNumber(),
       turnCount: turnCount.toNumber(),
       isSolved: isSolved.toString(),
       solutionHash: solutionHash.toString(),
-      packedGuessHistory: serializedGuessHistory.toString(),
-      unpackedGuessHistory: JSON.stringify(guessHistory),
-      unpackedBinaryGuessHistory: JSON.stringify(guessBits)
-        .replace(new RegExp("false", "g"), "0")
-        .replace(new RegExp("true", "g"), "1"),
-      unpackedClueHistory: JSON.stringify(clueHistory),
-      unpackedBinaryClueHistory: JSON.stringify(clueBits)
-        .replace(new RegExp("false", "g"), "0")
-        .replace(new RegExp("true", "g"), "1"),
-      packedClueHistory: packedClueHistory.toString(),
-      guessesHistory: createGuessesMatrix(JSON.stringify(guessHistory)),
-      cluesHistory: createCluesMatrix(clues, turnCount.toNumber()),
+      guessesHistory: [createColoredGuess(JSON.stringify(unseparatedGuess))],
+      cluesHistory: [createColoredClue(JSON.stringify(deserializedClue))],
       codebreakerId: codebreakerId.toString(),
       codemasterId: codemasterId.toString(),
     };

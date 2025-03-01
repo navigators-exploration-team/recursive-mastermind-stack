@@ -1,12 +1,26 @@
 import { defineStore } from "pinia";
 import ZkappWorkerClient from "../zkappWorkerClient";
 
+export interface SignedData {
+  publicKey: string;
+  data: string;
+  signature: {
+      field: string;
+      scalar: string;
+  };
+}
+
+interface ProviderError extends Error {
+  message: string;
+  code: number;
+  data?: unknown;
+}
 interface MinaWallet {
   requestAccounts: () => Promise<string[]>;
-  signMessage: (args: {
-    message: string;
-  }) => Promise<{ publicKey: string; signature: string }>;
-  on: (event:string,handler:Function) => void
+  signJsonMessage: (args: {
+    message: Object;
+  }) => Promise<SignedData | ProviderError >;
+  on: (event: string, handler: Function) => void;
 }
 
 declare global {
@@ -40,7 +54,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
           this.requestedConnexion = true;
           this.stepDisplay = "Loading web worker...";
           this.zkappWorkerClient = new ZkappWorkerClient();
-          await new Promise((resolve) => setTimeout(resolve, 5000));
+          await new Promise((resolve) => setTimeout(resolve, 500));
           this.stepDisplay = "Setting Mina instance...";
           await this.zkappWorkerClient.setActiveInstanceToLightnet();
 
@@ -58,16 +72,16 @@ export const useZkAppStore = defineStore("useZkAppModule", {
           this.compiled = true;
           this.hasBeenSetup = true;
           this.hasWallet = true;
-          window.mina?.on("accountsChanged",async (accounts: string[]) => {
-            if(accounts.length) {
+          window.mina?.on("accountsChanged", async (accounts: string[]) => {
+            if (accounts.length) {
               this.publicKeyBase58 = accounts[0];
-            }else{
+            } else {
               const newAccounts = await window.mina?.requestAccounts();
               this.publicKeyBase58 = newAccounts?.[0];
             }
           });
           console.log("setup completed...");
-          this.error = null
+          this.error = null;
         } catch (error: any) {
           return { message: error.message };
         }
@@ -97,7 +111,23 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         this.stepDisplay = `Error checking account: ${error.message}`;
       }
       this.accountExists = true;
-      this.error = null
+      this.error = null;
+    },
+    async signJsonMessage(content:object) {
+      try {
+        this.loading = true;
+        this.stepDisplay = "Signing a message...";
+        console.log("Signing a message ")
+        const res = await (window as any).mina.signJsonMessage({
+          message: content
+        });
+        console.log(res)
+        this.stepDisplay = "";
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
+        console.log("error ", err);
+      } 
     },
     async createInitGameTransaction(rounds: number) {
       try {
@@ -125,9 +155,9 @@ export const useZkAppStore = defineStore("useZkAppModule", {
           },
         });
         this.stepDisplay = "";
-        this.error = null
-      } catch (err:any) {
-        this.error = err?.message || err
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
         console.log("error ", err);
       } finally {
         this.loading = false;
@@ -137,6 +167,14 @@ export const useZkAppStore = defineStore("useZkAppModule", {
     async createNewGameTransaction(code: number[], randomSalt: string) {
       try {
         this.loading = true;
+        const combination = code.reduce(
+          (acc: number, curr: number) => {
+            return acc * 10 + curr;
+          },
+          0
+        );
+        await this.signJsonMessage([combination,randomSalt])
+        
         this.stepDisplay = "Creating a transaction...";
         await this.zkappWorkerClient!.createNewGameTransaction(
           this.publicKeyBase58,
@@ -147,7 +185,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         await this.zkappWorkerClient!.proveTransaction();
         this.stepDisplay = "Getting transaction JSON...";
         const transactionJSON =
-          await this.zkappWorkerClient!.getTransactionJSON();
+        await this.zkappWorkerClient!.getTransactionJSON();
         this.stepDisplay = "Requesting send transaction...";
         const { hash } = await (window as any).mina.sendTransaction({
           transaction: transactionJSON,
@@ -156,12 +194,10 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             memo: "",
           },
         });
-
         this.stepDisplay = "";
-        this.error = null
-
-      } catch (err:any) {
-        this.error = err?.message || err
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
         console.log("error ", err);
       } finally {
         this.loading = false;
@@ -191,10 +227,9 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         });
 
         this.stepDisplay = "";
-        this.error = null
-
-      } catch (err:any) {
-        this.error = err?.message || err
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
         console.log("error ", err);
       } finally {
         this.loading = false;
@@ -225,10 +260,9 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         });
 
         this.stepDisplay = "";
-        this.error = null
-
-      } catch (err:any) {
-        this.error = err?.message || err
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
         console.log("error ", err);
       } finally {
         this.loading = false;
@@ -240,11 +274,11 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       this.zkAppAddress = zkAppAddress;
     },
     async getZkappStates() {
-      try{
+      try {
         this.zkAppStates = await this.zkappWorkerClient!.getZkappStates();
-        this.error = null
-      }catch(err:any){
-        this.error = err.message
+        this.error = null;
+      } catch (err: any) {
+        this.error = err.message;
       }
     },
   },

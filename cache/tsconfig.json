@@ -9,10 +9,6 @@
     "skipLibCheck": true,
     "moduleResolution": "nodenext"
   },
-  "ts-node": {
-        "esm": true,
-        "experimentalSpecifierResolution": "node"
-  },
   "exclude": [
     "node_modules"
   ],

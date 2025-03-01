@@ -1,10 +1,11 @@
-import { fetchAccount, Field, Nullifier } from "o1js";
+import { fetchAccount } from "o1js";
 
 import type {
   ZkappWorkerRequest,
   ZkappWorkerReponse,
   WorkerFunctions,
 } from "./zkappWorker";
+import { SignedData } from "./store/zkAppModule";
 
 export default class ZkappWorkerClient {
   // worker functions
@@ -59,6 +60,19 @@ export default class ZkappWorkerClient {
       secretCombination,
       randomSalt,
     });
+  }
+  async sendNewGameProof(
+    signedData: SignedData,
+    secretCombination: number[],
+    randomSalt: string,
+    rounds: number
+  ) {
+    return this._call("sendNewGameProof", {
+      signedData,
+      secretCombination,
+      randomSalt,
+      rounds
+        });
   }
   async createGuessTransaction(feePayer: string, secretCombination: number[]) {
     return this._call("createGuessTransaction", {

@@ -1,6 +1,6 @@
 import { Cache } from "o1js";
 import fs from "fs";
-import { MastermindZkApp } from "mina-mastermind";
+import { MastermindZkApp,StepProgram } from "mina-mastermind";
 
 function isEmptyDirectory(directoryPath: string): boolean {
   fs.readdir(directoryPath, (err, files) => {
@@ -21,6 +21,11 @@ function isEmptyDirectory(directoryPath: string): boolean {
 
 const cacheZkApp = async () => {
   const zkAppCache: Cache = Cache.FileSystem("./zkAppCache");
+  const zkProgramCache: Cache = Cache.FileSystem("./zkProgramCache");
+  if (isEmptyDirectory("./zkProgramCache")) {
+    await StepProgram.compile({ cache: zkProgramCache });
+  }
+
   if (isEmptyDirectory("./zkAppCache")) {
     await MastermindZkApp.compile({ cache: zkAppCache });
   }

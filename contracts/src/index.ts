@@ -1,17 +1,17 @@
 import { MastermindZkApp } from './Mastermind.js';
-import {
-  deserializeClueHistory,
-  deserializeCombinationHistory,
-  getElementAtIndex,
-  separateCombinationDigits,
-  validateCombination
-} from './utils.js';
+import { StepProgram, StepProgramProof } from './stepProgram.js';
 
-export {
-  MastermindZkApp,
-  deserializeCombinationHistory,
-  getElementAtIndex,
-  separateCombinationDigits,
-  deserializeClueHistory,
-  validateCombination
-};
+import {
+    separateCombinationDigits,
+    validateCombination,
+    deserializeClue
+  } from './utils.js';
+  
+  export {
+    MastermindZkApp,
+    separateCombinationDigits,
+    validateCombination,
+    deserializeClue,
+    StepProgram,
+    StepProgramProof
+  };
