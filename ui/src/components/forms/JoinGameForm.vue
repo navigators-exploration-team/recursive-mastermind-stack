@@ -6,8 +6,8 @@
                 <el-input placeholder="Insert ZkApp Address" size="large" v-model="game.gameAddress"></el-input>
             </el-form-item>
             <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
-                <el-button class="w-100 mt-2" size="large" type="primary" @click="handleJoinGame" :visible="compiled" :loading="!compiled"
-                    :disabled="!compiled"> Play </el-button>
+                <el-button class="w-100 mt-2" size="large" type="primary" @click="handleJoinGame" :visible="compiled"
+                    :loading="!compiled" :disabled="!compiled"> Play </el-button>
             </el-tooltip>
 
         </el-form>
@@ -23,6 +23,8 @@ import { useZkAppStore } from '@/store/zkAppModule';
 const router = useRouter()
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const { compiled } = storeToRefs(useZkAppStore())
+const { joinGame } = useZkAppStore()
+
 const rules = ref({
     gameAddress: [
         {
@@ -48,6 +50,7 @@ const handleJoinGame = () => {
     ruleFormRef.value.validate(async (valid) => {
         if (valid) {
             router.push({ name: "gameplay", params: { id: game.value.gameAddress } })
+            joinGame(game.value.gameAddress)
         }
     })
 }

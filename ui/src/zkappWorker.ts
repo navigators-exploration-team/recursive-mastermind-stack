@@ -37,7 +37,7 @@ const state = {
   verificationKey: null as null | VerificationKeyData | any,
   proofsEnabled: false,
   zkAppAddress: null as null | string,
-  lastProof: StepProgramProof,
+  lastProof: null as null | StepProgramProof,
 };
 
 const functions = {
@@ -59,21 +59,20 @@ const functions = {
       const zkProgramCacheFiles = await fetchZkProgramCacheFiles();
       const zkAppCache = MinaFileSystem(zkAppCacheFiles) as Cache;
       const zkProgramCache = MinaFileSystem(zkProgramCacheFiles) as Cache;
-
       console.time("compiling");
-      await StepProgram.compile();
+      await StepProgram.compile({ cache: zkProgramCache });
       const { verificationKey } = await state.MastermindContract!.compile({
-       // cache: zkAppCache,
+        cache: zkAppCache,
       });
       console.timeEnd("compiling");
       state.verificationKey = verificationKey;
     } catch (e) {
-      console.log("e ", e);
+      console.log("error: ", e);
     }
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
-    return await fetchAccount({ publicKey }, "http://localhost:8080/graphql");
+    return await fetchAccount({ publicKey });
   },
   proveTransaction: async () => {
     await state.transaction!.prove();
@@ -103,20 +102,13 @@ const functions = {
   },
   createNewGameTransaction: async (args: {
     feePayer: string;
-    secretCombination: number[];
+    secretCombination: number;
     randomSalt: string;
   }) => {
-    const combination = args.secretCombination.reduce(
-      (acc: number, curr: number) => {
-        return acc * 10 + curr;
-      },
-      0
-    );
     const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
-
     const transaction = await Mina.transaction(feePayerPublickKey, async () => {
       await state.zkappInstance!.createGame(
-        Field(combination),
+        Field(args.secretCombination),
         Field(args.randomSalt)
       );
     });
@@ -129,36 +121,40 @@ const functions = {
     randomSalt: string;
     rounds: number;
   }) => {
-    const codeMasterPubKey = PublicKey.fromBase58(args.signedData.publicKey);
-
-    const stepProof = await StepProgram.createGame(
-      {
-        authPubKey: codeMasterPubKey,
-        authSignature: Signature.fromJSON(args.signedData.signature),
-      },
-      UInt8.from(args.rounds),
-      Field(args.secretCombination),
-      Field(args.randomSalt)
-    );
-
-    state.lastProof = stepProof.proof;
+    try {
+      const signature = Signature.fromBase58(args.signedData.signature);
+      const codeMasterPubKey = PublicKey.fromBase58(args.signedData.publicKey);
+      const stepProof = await StepProgram.createGame(
+        {
+          authPubKey: codeMasterPubKey,
+          authSignature: signature,
+        },
+        UInt8.from(args.rounds),
+        Field(args.secretCombination),
+        Field(args.randomSalt)
+      );
+      state.lastProof = stepProof.proof;
+      return stepProof.proof.toJSON();
+    } catch (e) {
+      console.log(e);
+    }
   },
-  createGuessTransaction: async (args: {
-    feePayer: string;
-    secretCombination: number[];
+  createGuessProof: async (args: {
+    signedData: SignedData;
+    unseparatedGuess: number;
   }) => {
-    const combination = args.secretCombination.reduce(
-      (acc: number, curr: number) => {
-        return acc * 10 + curr;
+    const signature = Signature.fromBase58(args.signedData.signature);
+    const codeBreakerPubKey = PublicKey.fromBase58(args.signedData.publicKey);
+    const stepProof = await StepProgram.makeGuess(
+      {
+        authPubKey: codeBreakerPubKey,
+        authSignature: signature,
       },
-      0
+      state.lastProof as StepProgramProof,
+      Field(args.unseparatedGuess)
     );
-    const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
-
-    state.transaction = await Mina.transaction(feePayerPublickKey, async () => {
-      await state.zkappInstance!.makeGuess(Field(combination));
-    });
-    state.transaction!.send();
+    state.lastProof = stepProof.proof;
+    return stepProof.proof.toJSON();
   },
   initZkappInstance: async (args: { publicKeyBase58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKeyBase58);
@@ -166,61 +162,62 @@ const functions = {
     state.zkappInstance = new state.MastermindContract!(publicKey);
     state.zkAppAddress = args.publicKeyBase58;
   },
-  createGiveClueTransaction: async (args: {
-    feePayer: string;
-    secretCombination: number[];
+  createGiveClueProof: async (args: {
+    signedData: SignedData;
+    secretCombination: number;
     randomSalt: string;
   }) => {
-    const combination = args.secretCombination.reduce(
-      (acc: number, curr: number) => {
-        return acc * 10 + curr;
+    const signature = Signature.fromBase58(args.signedData.signature);
+    const codeMasterPubKey = PublicKey.fromBase58(args.signedData.publicKey);
+    const stepProof = await StepProgram.giveClue(
+      {
+        authPubKey: codeMasterPubKey,
+        authSignature: signature,
       },
-      0
+      state.lastProof as StepProgramProof,
+      Field(args.secretCombination),
+      Field(args.randomSalt)
     );
-    const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
-    const transaction = await Mina.transaction(feePayerPublickKey, async () => {
-      await state.zkappInstance!.giveClue(
-        Field(combination),
-        Field(args.randomSalt)
+    state.lastProof = stepProof.proof;
+    return stepProof.proof.toJSON();
+  },
+  getZkappStates: async (args: {}) => {
+    if (state.lastProof) {
+      const {
+        maxAttempts,
+        turnCount,
+        isSolved,
+        solutionHash,
+        lastGuess,
+        serializedClue,
+        codeBreakerId,
+        codeMasterId,
+      } = state.lastProof.publicOutput;
+      const deserializedClue = deserializeClue(serializedClue);
+      return {
+        maxAttempts: maxAttempts.toNumber(),
+        turnCount: turnCount.toNumber(),
+        isSolved: isSolved.toString(),
+        solutionHash: solutionHash.toString(),
+        guessesHistory: createColoredGuess(JSON.stringify(lastGuess)),
+        cluesHistory: createColoredClue(JSON.stringify(deserializedClue)),
+        codebreakerId: codeBreakerId.toString(),
+        codemasterId: codeMasterId.toString(),
+      };
+    }
+    return null;
+  },
+  setLastProof: async (args: { zkProof: any }) => {
+    state.lastProof = await StepProgramProof.fromJSON(JSON.parse(args.zkProof));
+  },
+  submitGameProof: async (args: {}) => {
+    const transaction = await Mina.transaction(async () => {
+      await state.zkappInstance!.submitGameProof(
+        state.lastProof as StepProgramProof
       );
     });
     state.transaction = transaction;
     state.transaction!.send();
-  },
-  getZkappStates: async (args: {}) => {
-    const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
-    await fetchAccount({ publicKey });
-    const [
-      maxAttempts,
-      turnCount,
-      isSolved,
-      solutionHash,
-      unseparatedGuess,
-      serializedClue,
-      codebreakerId,
-      codemasterId,
-    ] = await Promise.all([
-      state.zkappInstance!.maxAttempts.get(),
-      state.zkappInstance!.turnCount.get(),
-      state.zkappInstance!.isSolved.get(),
-      state.zkappInstance!.solutionHash.get(),
-      state.zkappInstance!.unseparatedGuess.get(),
-      state.zkappInstance!.serializedClue.get(),
-      state.zkappInstance!.codebreakerId.get(),
-      state.zkappInstance!.codemasterId.get(),
-    ]);
-
-    const deserializedClue = deserializeClue(serializedClue);
-    return {
-      maxAttempts: maxAttempts.toNumber(),
-      turnCount: turnCount.toNumber(),
-      isSolved: isSolved.toString(),
-      solutionHash: solutionHash.toString(),
-      guessesHistory: [createColoredGuess(JSON.stringify(unseparatedGuess))],
-      cluesHistory: [createColoredClue(JSON.stringify(deserializedClue))],
-      codebreakerId: codebreakerId.toString(),
-      codemasterId: codemasterId.toString(),
-    };
   },
 };
 

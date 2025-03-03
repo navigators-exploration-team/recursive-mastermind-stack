@@ -12,11 +12,9 @@
             </div>
 
         </div>
-        <div v-if="isCurrentRound">
-            <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn">Verify</el-button>
-            <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
-                :title="combinationValidation.message" v-else>Check</el-button>
-        </div>
+        <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn">Verify</el-button>
+        <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
+            :title="combinationValidation.message" v-else>Check</el-button>
         <el-dialog v-model="isVerifyGuessModalOpen" modal-class="dialog-class" custom-class="dialog-class"
             style="padding: 0px!important;" destroy-on-close>
             <CodePickerForm @submit="handleGiveClue" btnText="Give clue" :isRandomSalt="false" />
@@ -47,9 +45,6 @@ const isVerifyGuessModalOpen = ref(false);
 const isCodeMasterTurn = computed(() => {
     return zkAppStates.value?.turnCount % 2 === 0;
 });
-const isCurrentRound = computed(() => {
-    return Math.ceil(zkAppStates.value?.turnCount / 2) === props.attemptNo + 1;
-});
 
 const combinationValidation = computed(() => {
     return validateColorCombination(props.guess)
@@ -57,9 +52,7 @@ const combinationValidation = computed(() => {
 
 const emit = defineEmits(["setColor"]);
 const handleSetColor = (index: number) => {
-    if (isCurrentRound.value && !isCodeMasterTurn.value) {
-        emit("setColor", index);
-    }
+    emit("setColor", index);
 };
 const props = defineProps({
     attemptNo: {

@@ -70,7 +70,7 @@ const handleInitCode = async () => {
 }
 
 const handleCreateGame = async (formData: CodePicker) => {
-    await createNewGameTransaction(formData.code, formData.randomSalt)
+    await createNewGameTransaction(formData.code, formData.randomSalt, game.value.rounds)
     if (error.value) {
         ElMessage.error({ message: error.value, duration: 6000 });
     } else {

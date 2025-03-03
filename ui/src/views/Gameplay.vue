@@ -30,22 +30,17 @@ import RoundedColor from '@/components/RoundedColor.vue';
 import { cluesColors } from '@/constants/colors';
 const route = useRoute()
 const { compiled, zkAppStates, error } = storeToRefs(useZkAppStore())
-const { initZkappInstance, getZkappStates } = useZkAppStore()
+const { initZkappInstance, joinGame } = useZkAppStore()
 const gameId = route?.params?.id
 onMounted(async () => {
   if (compiled.value) {
     await initZkappInstance(gameId)
-    setInterval(async () => {
-      await getZkappStates()
-    }, 3000)
   }
 })
 watch(() => compiled.value, async () => {
   if (compiled.value) {
     await initZkappInstance(gameId)
-    setInterval(async () => {
-      await getZkappStates()
-    }, 3000)
+    await joinGame(gameId)
   }
 })
 </script>

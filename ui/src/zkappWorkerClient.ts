@@ -52,7 +52,7 @@ export default class ZkappWorkerClient {
   }
   async createNewGameTransaction(
     feePayer: string,
-    secretCombination: number[],
+    secretCombination: number,
     randomSalt: string
   ) {
     return this._call("createNewGameTransaction", {
@@ -63,7 +63,7 @@ export default class ZkappWorkerClient {
   }
   async sendNewGameProof(
     signedData: SignedData,
-    secretCombination: number[],
+    secretCombination: number,
     randomSalt: string,
     rounds: number
   ) {
@@ -71,28 +71,34 @@ export default class ZkappWorkerClient {
       signedData,
       secretCombination,
       randomSalt,
-      rounds
-        });
-  }
-  async createGuessTransaction(feePayer: string, secretCombination: number[]) {
-    return this._call("createGuessTransaction", {
-      feePayer,
-      secretCombination,
+      rounds,
     });
   }
-  async createGiveClueTransaction(
-    feePayer: string,
-    secretCombination: number[],
+  async createGuessProof(signedData: SignedData, unseparatedGuess: number) {
+    return this._call("createGuessProof", {
+      signedData,
+      unseparatedGuess,
+    });
+  }
+  async createGiveClueProof(
+    signedData: SignedData,
+    secretCombination: number,
     randomSalt: string
   ) {
-    return this._call("createGiveClueTransaction", {
-      feePayer,
+    return this._call("createGiveClueProof", {
+      signedData,
       secretCombination,
       randomSalt,
     });
   }
   async getZkappStates() {
     return this._call("getZkappStates", {});
+  }
+  async setLastProof(zkProof: any) {
+    return this._call("setLastProof", { zkProof });
+  }
+  async submitGameProof() {
+    return this._call("submitGameProof", {});
   }
 
   // worker initialization
@@ -115,7 +121,7 @@ export default class ZkappWorkerClient {
     this.worker.onmessage = (event: MessageEvent<ZkappWorkerReponse>) => {
       const { id, data, error } = event.data as any;
       if (error) {
-        this.promises[id].reject(new Error(error)); 
+        this.promises[id].reject(new Error(error));
       } else {
         this.promises[id].resolve(data);
       }
