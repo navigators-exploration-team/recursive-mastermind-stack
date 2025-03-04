@@ -16,7 +16,7 @@
         <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
             :title="combinationValidation.message" v-else>Check</el-button>
         <el-dialog v-model="isVerifyGuessModalOpen" modal-class="dialog-class" custom-class="dialog-class"
-            style="padding: 0px!important;" destroy-on-close>
+            style="padding: 0px!important;" destroy-on-close width="80%">
             <CodePickerForm @submit="handleGiveClue" btnText="Give clue" :isRandomSalt="false" />
         </el-dialog>
     </div>

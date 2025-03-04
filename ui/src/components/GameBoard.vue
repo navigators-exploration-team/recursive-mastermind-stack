@@ -14,11 +14,11 @@
                 </div>
             </template>
             <template v-else>
-                <div class="d-flex align-items-center justify-content-between">
-                    <div v-if="zkAppStates.isSolved === 'true'" class="m-4">
+                <div class="w-100 d-flex align-items-center justify-content-between">
+                    <div v-if="zkAppStates.isSolved === 'true'" class="my-4">
                         The code breaker has won!
                     </div>
-                    <div v-else-if="zkAppStates.turnCount > zkAppStates.maxAttempts * 2" class="m-4">
+                    <div v-else-if="zkAppStates.turnCount > zkAppStates.maxAttempts * 2" class="my-4">
                         The code master has won!
                     </div>
                     <el-button size="large" type="primary" @click="handleSubmitGameProof">Submit game proof</el-button>
