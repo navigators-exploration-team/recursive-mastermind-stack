@@ -1,4 +1,4 @@
-import { Field, Bool, Provable } from 'o1js';
+import { Field, Bool, Provable, UInt64, UInt32 } from 'o1js';
 
 export {
   separateCombinationDigits,
@@ -6,8 +6,18 @@ export {
   validateCombination,
   serializeClue,
   deserializeClue,
+  serializeClueHistory,
+  deserializeClueHistory,
   getClueFromGuess,
   checkIfSolved,
+  compressTurnCountMaxAttemptSolved,
+  separateTurnCountAndMaxAttemptSolved,
+  compressRewardAndFinalizeSlot,
+  separateRewardAndFinalizeSlot,
+  serializeCombinationHistory,
+  deserializeCombinationHistory,
+  updateElementAtIndex,
+  getElementAtIndex,
 };
 
 /**
@@ -163,4 +173,223 @@ function checkIfSolved(clue: Field[]) {
   }
 
   return isSolved;
+}
+
+/**
+ * Combines the turn count, max attempt, and solved flag into a single Field value.
+ *
+ * @param digits - An array of three Field elements representing the turn count, max attempt, and solved flag.
+ * @returns - The combined Field element representing the compressed turn count, max attempt, and solved flag.
+ */
+function compressTurnCountMaxAttemptSolved(digits: Field[]) {
+  digits[0].assertLessThan(100, 'Turn count must be less than 100!');
+  digits[1].assertLessThan(100, 'Max attempt must be less than 100!');
+  digits[2].assertLessThan(2, 'Solved flag must be less than 2!');
+
+  return digits[0].mul(10000).add(digits[1].mul(100).add(digits[2]));
+}
+
+/**
+ * Separates the turn count and max attempt from a single Field value.
+ *
+ * @param value - The Field value to be separated into turn count and max attempt.
+ * @returns - An array of two Field elements representing the separated turn count and max attempt.
+ */
+function separateTurnCountAndMaxAttemptSolved(value: Field) {
+  const digits = Provable.witness(Provable.Array(Field, 3), () => {
+    const num = value.toBigInt();
+
+    return [num / 10000n, (num / 100n) % 100n, num % 100n];
+  });
+
+  compressTurnCountMaxAttemptSolved(digits).assertEquals(value);
+
+  return digits;
+}
+
+/**
+ * Combines the reward amount and finalize slot into a single Field value.
+ * @param rewardAmount - The amount of reward in `UInt64`.
+ * @param finalizeSlot - The slot at which the game will finalize in `UInt32`.
+ * @returns - The combined Field element representing the compressed reward amount and finalize slot.
+ */
+function compressRewardAndFinalizeSlot(
+  rewardAmount: UInt64,
+  finalizeSlot: UInt32
+) {
+  return rewardAmount.value.mul(2 ** 32).add(finalizeSlot.value);
+}
+
+/**
+ * Separates the reward amount and finalize slot from a single Field value.
+ *
+ * @param value - The Field value to be separated into reward amount and finalize slot.
+ * @returns - An object containing the separated reward amount and finalize slot.
+ */
+function separateRewardAndFinalizeSlot(value: Field) {
+  const digits = Provable.witness(Provable.Array(UInt32, 3), () => {
+    const num = value.toBigInt();
+    return [
+      UInt32.from(num / 18446744073709551616n),
+      UInt32.from((num / 4294967296n) % 4294967296n),
+      UInt32.from(num % 4294967296n),
+    ];
+  });
+
+  let rewardAmount = UInt64.from(digits[0])
+    .mul(2 ** 32)
+    .add(UInt64.from(digits[1]));
+  let finalizeSlot = digits[2];
+
+  compressRewardAndFinalizeSlot(rewardAmount, finalizeSlot).assertEquals(value);
+
+  return { rewardAmount, finalizeSlot };
+}
+
+/**
+ * Serializes an array of clues into a single `Field` by converting each clue into an 8-bit representation.
+ *
+ * @param clues - An array of `Field` elements representing the clues.
+ * @returns - A serialized `Field` containing the bitwise representation of the clue history.
+ */
+function serializeClueHistory(clues: Field[]): Field {
+  return serialize(clues, 8);
+}
+
+/**
+ * Deserializes a `Field` back into an array of clues, where each clue is 8 bits long.
+ *
+ * @param serializedClueHistory - A `Field` containing the serialized clue history.
+ * @returns - The deserialized array of `Field` elements representing the clues.
+ */
+function deserializeClueHistory(serializedClueHistory: Field): Field[] {
+  // 120 bits total, each clue is 8 bits
+  return deserialize(serializedClueHistory, 120, 8);
+}
+
+/**
+ * Serializes an array of combinations into a single `Field` by converting each combination into 14 bits.
+ *
+ * @param combinations - The array of `Field` elements representing combinations.
+ * @returns - The serialized `Field` containing the combination history.
+ */
+function serializeCombinationHistory(combinations: Field[]): Field {
+  return serialize(combinations, 14);
+}
+
+/**
+ * Deserializes a `Field` back into an array of combinations, where each combination is 14 bits long.
+ *
+ * @param serializedCombinationHistory - A `Field` containing the serialized combination history.
+ * @returns - The deserialized array of `Field` elements representing the combinations.
+ */
+function deserializeCombinationHistory(
+  serializedCombinationHistory: Field
+): Field[] {
+  // 210 bits total, each combination is 14 bits
+  return deserialize(serializedCombinationHistory, 210, 14);
+}
+
+/**
+ * Retrieves the `Field` element at a specified index from an array of `Field` elements.
+ * Ensures that only one element matches the provided index and throws an error if none or multiple match.
+ *
+ * @param fieldArray - An array of `Field` elements.
+ * @param index - The index of the element to retrieve as a `Field`.
+ * @returns - The `Field` element at the specified index.
+ * @throws Will throw an error if the index is out of bounds or if multiple indices match.
+ */
+function getElementAtIndex(fieldArray: Field[], index: Field): Field {
+  const length = fieldArray.length;
+  let totalIndexMatch = Field(0);
+  let selectedValue = Field(0);
+
+  // Iterate through the array and match the element at the given index
+  for (let i = 0; i < length; i++) {
+    const isMatch = index.equals(Field(i)).toField(); // `1` if index matches, otherwise `0`
+    const matchingValue = isMatch.mul(fieldArray[i]); // Retain value only if index matches
+
+    selectedValue = selectedValue.add(matchingValue); // Accumulate the matching value
+    totalIndexMatch = totalIndexMatch.add(isMatch); // Track if exactly one index matched
+  }
+
+  // Ensure that exactly one index matched
+  const errorMessage =
+    'Invalid index: Index out of bounds or multiple indices match!';
+  totalIndexMatch.assertEquals(1, errorMessage);
+
+  return selectedValue; // Return the selected value
+}
+
+/**
+ * Updates an array of `Field` elements at a specified index with a new value.
+ * Ensures the index is within bounds and updates only the specified element, while retaining all others.
+ *
+ * @param newValue - The new `Field` value to insert at the specified index.
+ * @param fieldArray - The current array of `Field` elements.
+ * @param index - The index at which to update the array.
+ * @returns - The updated array of `Field` elements with the new value at the specified index.
+ * @throws Will throw an error if the index is out of bounds.
+ */
+function updateElementAtIndex(
+  newValue: Field,
+  fieldArray: Field[],
+  index: Field
+): Field[] {
+  // Ensure that the index is within bounds
+  const errorMessage = 'Invalid index: Index out of bounds!';
+  index.assertLessThan(fieldArray.length, errorMessage);
+
+  let updatedFieldArray: Field[] = [];
+
+  // Iterate through the array and update the element at the specified index
+  for (let i = 0; i < fieldArray.length; i++) {
+    updatedFieldArray[i] = Provable.if(
+      index.equals(i), // If current index matches the target index
+      newValue, // Update with the new value
+      fieldArray[i] // Otherwise, retain the original value
+    );
+  }
+
+  return updatedFieldArray;
+}
+
+/**
+ * Serializes an array of `Field` elements by converting each element into its bit representation
+ * and flattening the resulting bit arrays into a single `Field`.
+ *
+ * @param fields - The array of `Field` elements to serialize.
+ * @param range - The number of bits for each `Field` element.
+ * @returns - A single `Field` containing the serialized bit representation of the array.
+ */
+function serialize(fields: Field[], range: number): Field {
+  const bits = fields.map((c) => c.toBits(range));
+  return Field.fromBits(bits.flat());
+}
+
+/**
+ * Deserializes a `Field` into an array of `Field` elements by splitting its bit representation
+ * into chunks and converting them back into `Field` elements.
+ *
+ * @param serializedField - The serialized `Field` to deserialize.
+ * @param size - The total number of bits in the serialized `Field`.
+ * @param chunkSize - The bit size of each individual element in the array.
+ * @returns - An array of deserialized `Field` elements.
+ */
+function deserialize(
+  serializedField: Field,
+  size: number,
+  chunkSize: number
+): Field[] {
+  const packedBits = serializedField.toBits(size);
+  const unpackedBits: Bool[][] = [];
+
+  // Slice the bit representation into smaller arrays of length `chunkSize`
+  for (let i = 0; i < packedBits.length; i += chunkSize) {
+    const chunk = packedBits.slice(i, i + chunkSize);
+    unpackedBits.push(chunk);
+  }
+
+  const unpacked = unpackedBits.map((bits) => Field.fromBits(bits));
+  return unpacked;
 }

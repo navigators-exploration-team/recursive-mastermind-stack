@@ -15,10 +15,10 @@ This report summarizes the circuit analysis, compilation times, and per-step ben
 
 | Method     | Rows |
 | ---------- | ---- |
-| createGame | 455  |
-| giveClue   | 588  |
-| makeGuess  | 447  |
-| **Total**  | 1490 |
+| createGame | 452  |
+| giveClue   | 561  |
+| makeGuess  | 453  |
+| **Total**  | 1466 |
 
 ---
 
@@ -26,45 +26,48 @@ This report summarizes the circuit analysis, compilation times, and per-step ben
 
 | Method          | Rows |
 | --------------- | ---- |
-| initGame        | 332  |
-| createGame      | 771  |
-| submitGameProof | 420  |
-| **Total**       | 1523 |
+| initGame        | 1816 |
+| acceptGame      | 1679 |
+| submitGameProof | 567  |
+| claimReward     | 1079 |
+| forfeitWin      | 1037 |
+| makeGuess       | 857  |
+| giveClue        | 999  |
 
 ### Compilation Times
 
 | Name          | NodeJS Compilation Time | Browser Compilation Time |
 | ------------- | ----------------------- | ------------------------ |
-| stepProgram   | 4.69s                   | 33.36s                   |
-| MastermindApp | 1.89s                   | 7.71s                    |
+| stepProgram   | 13.46s                  | 52.35s                   |
+| MastermindApp | 8.60s                   | 20.67s                   |
 
 ## Step-wise Benchmark Results
 
 ### NodeJS Environment
 
-| Step Length | Solved | Create Game Avg | Make Guess Avg | Submit Game Proof | Total Time |
-| ----------- | ------ | --------------- | -------------- | ----------------- | ---------- |
-| 1           | Yes    | 9.435s          | 12.347s        | 12.353s           | 46.534s    |
-| 1           | No     | 8.844s          | 11.909s        | 11.734s           | 44.482s    |
-| 5           | Yes    | 8.785s          | 11.968s        | 11.759s           | 140.665s   |
-| 5           | No     | 8.703s          | 12.331s        | 12.127s           | 143.176s   |
-| 10          | Yes    | 8.876s          | 12.379s        | 12.265s           | 268.280s   |
-| 10          | No     | 9.070s          | 12.495s        | 12.316s           | 271.691s   |
-| 15          | Yes    | 9.367s          | 12.633s        | 12.249s           | 400.791s   |
-| 15          | No     | 9.516s          | 12.621s        | 12.484s           | 400.518s   |
+| Step Length | Solved | Deploy & Initialize Avg | Accept Game | Base Proof Avg | Make Guess Avg | Submit Game Proof | Total Time |
+| ----------- | ------ | ----------------------- | ----------- | -------------- | -------------- | ----------------- | ---------- |
+| 1           | Yes    | 11.402                  | 10.337      | 9.499          | 12.358         | 13.209            | 69.454     |
+| 1           | No     | 10.370                  | 10.057      | 8.801          | 11.943         | 12.634            | 65.731     |
+| 5           | Yes    | 10.340                  | 10.128      | 8.807          | 12.352         | 13.348            | 168.026    |
+| 5           | No     | 11.108                  | 10.304      | 8.897          | 12.173         | 13.270            | 166.189    |
+| 10          | Yes    | 10.519                  | 10.470      | 9.617          | 12.601         | 12.987            | 295.009    |
+| 10          | No     | 10.586                  | 10.502      | 9.149          | 12.598         | 13.675            | 295.294    |
+| 15          | Yes    | 10.811                  | 10.649      | 9.303          | 12.646         | 13.621            | 424.020    |
+| 15          | No     | 10.861                  | 10.875      | 9.570          | 12.737         | 13.529            | 428.026    |
 
 ### Browser Environment
 
-| Step Length | Solved | Create Game Avg | Make Guess Avg | Submit Game Proof | Total Time |
-| ----------- | ------ | --------------- | -------------- | ----------------- | ---------- |
-| 1           | Yes    | 9.970s          | 13.116s        | 12.917s           | 49.282s    |
-| 1           | No     | 9.926s          | 13.084s        | 12.518s           | 48.933s    |
-| 5           | Yes    | 9.703s          | 12.995s        | 12.736s           | 151.845s   |
-| 5           | No     | 9.443s          | 13.150s        | 12.586s           | 153.513s   |
-| 10          | Yes    | 9.798s          | 13.122s        | 12.671s           | 284.908s   |
-| 10          | No     | 9.390s          | 13.037s        | 12.686s           | 282.309s   |
-| 15          | Yes    | 9.804s          | 13.010s        | 12.599s           | 413.089s   |
-| 15          | No     | 9.780s          | 12.934s        | 12.812s           | 410.674s   |
+| Step Length | Solved | Deploy & Initialize Avg | Accept Game | Base Proof Avg | Make Guess Avg | Submit Game Proof | Total Time |
+| ----------- | ------ | ----------------------- | ----------- | -------------- | -------------- | ----------------- | ---------- |
+| 1           | Yes    | 16.305                  | 16.150      | 14.438         | 19.069         | 20.441            | 105.603    |
+| 1           | No     | 15.127                  | 16.124      | 14.212         | 18.696         | 19.615            | 102.495    |
+| 5           | Yes    | 15.392                  | 16.020      | 14.165         | 19.128         | 19.915            | 255.936    |
+| 5           | No     | 15.498                  | 15.469      | 14.328         | 18.731         | 19.829            | 251.549    |
+| 10          | Yes    | 16.176                  | 16.263      | 14.728         | 19.225         | 20.256            | 452.371    |
+| 10          | No     | 16.576                  | 16.150      | 14.511         | 19.380         | 21.340            | 455.191    |
+| 15          | Yes    | 16.126                  | 16.339      | 14.449         | 19.161         | 20.634            | 644.687    |
+| 15          | No     | 15.644                  | 16.475      | 14.312         | 19.634         | 20.800            | 655.678    |
 
 ## Overall Scores
 
@@ -72,32 +75,38 @@ This report summarizes the circuit analysis, compilation times, and per-step ben
 
 | Metric                        | Solved Games | Unsolved Games |
 | ----------------------------- | ------------ | -------------- |
-| Avg Time Each Game Step       | 27.6216s     | 27.7377s       |
-| Avg Time To Create Base Proof | 9.1156s      | 9.0332s        |
-| Avg Make Guess Time           | 12.4346s     | 12.5108s       |
-| Avg Give Clue Time            | 12.4422s     | 12.4916s       |
-| Avg Submit Game Proof Time    | 12.1566s     | 12.1653s       |
+| Avg Time Each Game Step       | 30.8551s     | 30.8142s       |
+| Avg Deploy & Initialize Time  | 10.7679s     | 10.7310s       |
+| Avg Accept Game Time          | 10.3959s     | 10.4348s       |
+| Avg Time To Create Base Proof | 9.3065s      | 9.1043s        |
+| Avg Make Guess Time           | 12.5747s     | 12.5758s       |
+| Avg Give Clue Time            | 12.6337s     | 12.6194s       |
+| Avg Submit Game Proof Time    | 13.2914s     | 13.2770s       |
 
 ### Browser Environment
 
 | Metric                        | Solved Games | Unsolved Games |
 | ----------------------------- | ------------ | -------------- |
-| Avg Time Each Game Step       | 29.004s      | 28.885s        |
-| Avg Time To Create Base Proof | 9.8188s      | 9.6350s        |
-| Avg Make Guess Time           | 13.0470s     | 13.0067s       |
-| Avg Give Clue Time            | 13.0474s     | 13.0026s       |
-| Avg Submit Game Proof Time    | 12.7308s     | 12.6505s       |
+| Avg Time Each Game Step       | 47.0515s     | 47.2552s       |
+| Avg Deploy & Initialize Time  | 15.9994s     | 15.7113s       |
+| Avg Accept Game Time          | 16.1931s     | 16.0547s       |
+| Avg Time To Create Base Proof | 14.4447s     | 14.3406s       |
+| Avg Make Guess Time           | 19.1733s     | 19.3762s       |
+| Avg Give Clue Time            | 19.2396s     | 19.2980s       |
+| Avg Submit Game Proof Time    | 20.3118s     | 20.3959s       |
 
 #### Metric Explanations
 
 - **Avg Time Each Game Step**: Total time taken to complete a game step on average.
-- **Avg Time To Create Base Proof**: Average time taken to create a game proof. Single base proof created on every game.
-- **Avg Make Guess Time**: Average time taken to make a guess in the game, based on measured from multiple games with different steps.
-- **Avg Give Clue Time**: Average time taken to give a clue in the game, based on measured from multiple games with different steps.
-- **Avg Submit Game Proof Time**: Average time taken to create transaction proof and submit it to the local network (Block creation time not included).
+- **Avg Deploy & Initialize Time**: Time taken to deploy and initialize the contract.
+- **Avg Accept Game Time**: Time taken to accept a game by code breaker.
+- **Avg Time To Create Base Proof**: Time taken to create the base proof for recursion.
+- **Avg Make Guess Time**: Time taken to make a guess by code breaker.
+- **Avg Give Clue Time**: Time taken to give a clue by code master.
+- **Avg Submit Game Proof Time**: Time taken to submit the recursive game proof to on-chain.
 
 # Conclusion
 
 Unlike the fully on-chain approach where the game state is stored and changed on-chain in every step, the recursive MastermindZkApp approach allows for both parties to interact with each other off-chain and only submit the final succint proof to the chain that includes all the game steps and the result. This approach significantly reduces the on-chain block time waiting and the cost of transactions.
 
-Mina's block time is around 3 minutes, and that means without recursion it would take at least 6 minutes to complete a game step (making guess and giving clue). With the recursive approach, the time is reduced to around 27 seconds on average. This improvement is reach significant levels when the game steps increase.
+Mina's block time is around 3 minutes, and that means without recursion it would take at least 6 minutes to complete a game step (making guess and giving clue). With the recursive approach, the time is reduced to around 47 seconds on average. This improvement is reach significant levels when the game steps increase.

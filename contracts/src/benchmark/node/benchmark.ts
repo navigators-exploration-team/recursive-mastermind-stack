@@ -1,52 +1,53 @@
 import { MastermindZkApp } from '../../Mastermind.js';
-import { Field, Mina, PrivateKey, AccountUpdate, UInt8, Signature } from 'o1js';
+import {
+  Field,
+  Mina,
+  PrivateKey,
+  AccountUpdate,
+  Signature,
+  UInt64,
+} from 'o1js';
 
 import { StepProgram, StepProgramProof } from '../../stepProgram.js';
 import { performance } from 'perf_hooks';
+import { checkIfSolved, deserializeClue } from '../../utils.js';
 
-async function localDeploy(
+async function deployAndInitializeGame(
   zkapp: MastermindZkApp,
-  deployerKey: PrivateKey,
-  zkappPrivateKey: PrivateKey
+  zkappPrivateKey: PrivateKey,
+  codeMasterKey: PrivateKey,
+  codeMasterSalt: Field,
+  unseparatedSecretCombination: Field,
+  refereeKey: PrivateKey,
+  maxAttempt: Field
 ) {
-  const deployerAccount = deployerKey.toPublicKey();
-  const tx = await Mina.transaction(deployerAccount, async () => {
-    AccountUpdate.fundNewAccount(deployerAccount);
-    zkapp.deploy();
-  });
-
-  await tx.prove();
-  await tx.sign([deployerKey, zkappPrivateKey]).send();
-}
-
-async function initializeGame(
-  zkapp: MastermindZkApp,
-  deployerKey: PrivateKey,
-  rounds: number
-) {
-  const deployerAccount = deployerKey.toPublicKey();
+  const deployerAccount = codeMasterKey.toPublicKey();
+  const refereeAccount = refereeKey.toPublicKey();
 
   const initTx = await Mina.transaction(deployerAccount, async () => {
-    await zkapp.initGame(UInt8.from(rounds));
+    AccountUpdate.fundNewAccount(deployerAccount);
+    zkapp.deploy();
+    await zkapp.initGame(
+      unseparatedSecretCombination,
+      codeMasterSalt,
+      maxAttempt,
+      refereeAccount,
+      UInt64.from(10000)
+    );
   });
 
   await initTx.prove();
-  await initTx.sign([deployerKey]).send();
+  await initTx.sign([codeMasterKey, zkappPrivateKey]).send();
 }
 
-async function createGame(
-  zkapp: MastermindZkApp,
-  codeMasterKey: PrivateKey,
-  codeMasterSalt: Field,
-  secret: number
-) {
-  const codeMasterPubKey = codeMasterKey.toPublicKey();
-  const tx = await Mina.transaction(codeMasterPubKey, async () => {
-    await zkapp.createGame(Field(secret), codeMasterSalt);
+async function acceptGame(zkapp: MastermindZkApp, codeBreakerKey: PrivateKey) {
+  const codeBreakerPubKey = codeBreakerKey.toPublicKey();
+  const tx = await Mina.transaction(codeBreakerPubKey, async () => {
+    await zkapp.acceptGame();
   });
 
   await tx.prove();
-  await tx.sign([codeMasterKey]).send();
+  await tx.sign([codeBreakerKey]).send();
 }
 
 function prettifyAnalyzers(
@@ -70,7 +71,7 @@ function prettifyAnalyzers(
 }
 
 function prettifyBenchmarks(result: BenchmarkResults) {
-  const avgCreateGame = result.createGameSeconds;
+  const avgCreateGame = result.baseGameSeconds;
   const avgMakeGuess = result.makeGuessSeconds.length
     ? result.makeGuessSeconds.reduce((a, b) => a + b, 0) /
       result.makeGuessSeconds.length
@@ -79,7 +80,13 @@ function prettifyBenchmarks(result: BenchmarkResults) {
   console.table([
     { Metric: 'Step Length', Value: result.stepLength },
     { Metric: 'Total Seconds', Value: result.totalSeconds.toFixed(3) },
-    { Metric: 'Create Game (Avg)', Value: avgCreateGame.toFixed(3) },
+    {
+      Metric: 'Deploy & Initialize (Avg)',
+      Value: result.deployAndInitializeSeconds.toFixed(3),
+    },
+
+    { Metric: 'Accept Game (Avg)', Value: result.acceptGameSeconds.toFixed(3) },
+    { Metric: 'Base Game Proof Create (Avg)', Value: avgCreateGame.toFixed(3) },
     { Metric: 'Make Guess (Avg)', Value: avgMakeGuess.toFixed(3) },
     { Metric: 'Solved', Value: result.isSolved },
     {
@@ -101,8 +108,16 @@ function overallScores(benchmarkResults: BenchmarkResults[]) {
     (sum, result) => sum + result.totalSeconds,
     0
   );
+  const totalDeploy = benchmarkResults.reduce(
+    (sum, result) => sum + result.deployAndInitializeSeconds,
+    0
+  );
+  const totalAcceptGame = benchmarkResults.reduce(
+    (sum, result) => sum + result.acceptGameSeconds,
+    0
+  );
   const totalCreateGame = benchmarkResults.reduce(
-    (sum, result) => sum + result.createGameSeconds,
+    (sum, result) => sum + result.baseGameSeconds,
     0
   );
   const totalMakeGuess = benchmarkResults.reduce(
@@ -123,6 +138,14 @@ function overallScores(benchmarkResults: BenchmarkResults[]) {
     {
       Metric: 'Avg Time Each Game Step',
       Value: totalTime / totalStepLength,
+    },
+    {
+      Metric: 'Avg Deploy & Initialize Time',
+      Value: totalDeploy / totalBenchmarkResults,
+    },
+    {
+      Metric: 'Avg Accept Game Time',
+      Value: totalAcceptGame / totalBenchmarkResults,
     },
     {
       Metric: 'Avg Time To Create Base Proof',
@@ -146,7 +169,9 @@ function overallScores(benchmarkResults: BenchmarkResults[]) {
 interface BenchmarkResults {
   stepLength: number;
   totalSeconds: number;
-  createGameSeconds: number;
+  deployAndInitializeSeconds: number;
+  acceptGameSeconds: number;
+  baseGameSeconds: number;
   makeGuessSeconds: number[];
   giveClueSeconds: number[];
   isSolved: boolean;
@@ -228,6 +253,8 @@ async function solveBenchmark(secret: number, steps: Field[]) {
   let codeBreakerKey = Local.testAccounts[1].key;
   let codeBreakerPubKey = codeBreakerKey.toPublicKey();
 
+  let refereeKey = Local.testAccounts[2].key;
+
   let zkappPrivateKey = PrivateKey.random();
   let zkappAddress = zkappPrivateKey.toPublicKey();
   let zkapp = new MastermindZkApp(zkappAddress);
@@ -237,18 +264,35 @@ async function solveBenchmark(secret: number, steps: Field[]) {
   let currentBenchmarkResults: BenchmarkResults = {
     stepLength: steps.length,
     totalSeconds: 0,
-    createGameSeconds: 0,
+    deployAndInitializeSeconds: 0,
+    acceptGameSeconds: 0,
+    baseGameSeconds: 0,
     makeGuessSeconds: [],
     giveClueSeconds: [],
     isSolved: false,
     submitGameProofSeconds: 0,
   };
 
-  await localDeploy(zkapp, codeMasterKey, zkappPrivateKey);
-  await initializeGame(zkapp, codeMasterKey, 15);
-  await createGame(zkapp, codeMasterKey, codeMasterSalt, secret);
-
   let start = performance.now();
+  await deployAndInitializeGame(
+    zkapp,
+    zkappPrivateKey,
+    codeMasterKey,
+    codeMasterSalt,
+    unseparatedSecretCombination,
+    refereeKey,
+    Field.from(15)
+  );
+  let end = performance.now();
+
+  currentBenchmarkResults.deployAndInitializeSeconds = (end - start) / 1000;
+
+  start = performance.now();
+  await acceptGame(zkapp, codeBreakerKey);
+  end = performance.now();
+  currentBenchmarkResults.acceptGameSeconds = (end - start) / 1000;
+
+  start = performance.now();
   lastProof = (
     await StepProgram.createGame(
       {
@@ -258,14 +302,13 @@ async function solveBenchmark(secret: number, steps: Field[]) {
           codeMasterSalt,
         ]),
       },
-      UInt8.from(15),
       unseparatedSecretCombination,
       codeMasterSalt
     )
   ).proof;
-  let end = performance.now();
+  end = performance.now();
 
-  currentBenchmarkResults.createGameSeconds = (end - start) / 1000;
+  currentBenchmarkResults.baseGameSeconds = (end - start) / 1000;
 
   for (let step of steps) {
     start = performance.now();
@@ -275,7 +318,7 @@ async function solveBenchmark(secret: number, steps: Field[]) {
           authPubKey: codeBreakerPubKey,
           authSignature: Signature.create(codeBreakerKey, [
             step,
-            Field.from(lastProof.publicOutput.turnCount.toNumber()),
+            lastProof.publicOutput.turnCount,
           ]),
         },
         lastProof,
@@ -293,7 +336,7 @@ async function solveBenchmark(secret: number, steps: Field[]) {
           authSignature: Signature.create(codeMasterKey, [
             unseparatedSecretCombination,
             codeMasterSalt,
-            Field.from(lastProof.publicOutput.turnCount.toNumber()),
+            lastProof.publicOutput.turnCount,
           ]),
         },
         lastProof,
@@ -317,13 +360,19 @@ async function solveBenchmark(secret: number, steps: Field[]) {
   await submitGameProofTx.sign([codeBreakerKey]).send();
   end = performance.now();
 
-  currentBenchmarkResults.isSolved =
-    lastProof.publicOutput.isSolved.toBoolean();
+  const deserializedClue = deserializeClue(
+    lastProof.publicOutput.serializedClue
+  );
+  let isSolved = checkIfSolved(deserializedClue);
+
+  currentBenchmarkResults.isSolved = isSolved.toBoolean();
 
   currentBenchmarkResults.submitGameProofSeconds = (end - start) / 1000;
 
   currentBenchmarkResults.totalSeconds =
-    currentBenchmarkResults.createGameSeconds +
+    currentBenchmarkResults.deployAndInitializeSeconds +
+    currentBenchmarkResults.acceptGameSeconds +
+    currentBenchmarkResults.baseGameSeconds +
     currentBenchmarkResults.makeGuessSeconds.reduce((a, b) => a + b, 0) +
     currentBenchmarkResults.giveClueSeconds.reduce((a, b) => a + b, 0) +
     currentBenchmarkResults.submitGameProofSeconds;
