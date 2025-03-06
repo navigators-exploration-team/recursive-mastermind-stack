@@ -21,11 +21,10 @@
                     <CopyToClipBoard :text="form.randomSalt || ''" />
                 </div>
             </el-form-item>
+            <el-button size="large" type="primary" :disabled="!combinationValidation.isValid"
+                :title="combinationValidation.message" @click="handleSubmitForm" class="my-5 w-100">{{ btnText
+                }}</el-button>
         </el-form>
-
-        <el-button size="large" type="primary" :disabled="!combinationValidation.isValid"
-            :title="combinationValidation.message" @click="handleSubmitForm" class="my-5 w-100">{{ btnText
-            }}</el-button>
     </div>
 </template>
 <script setup lang="ts">
@@ -38,10 +37,6 @@ import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 import { validateColorCombination } from '../../utils';
 import { ElForm } from 'element-plus';
 
-export interface CodePicker {
-    code: string;
-    randomSalt: string;
-}
 
 const props = defineProps({
     isRandomSalt: {

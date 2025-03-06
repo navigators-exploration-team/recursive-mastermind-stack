@@ -42,14 +42,23 @@ export default class ZkappWorkerClient {
   }
   async createInitGameTransaction(
     feePayer: string,
-    rounds: number
+    unseparatedSecretCombination: number,
+    salt: string,
+    maxAttempts: number,
+    refereePubKeyBase58: string,
+    rewardAmount: number
   ): Promise<string> {
     const result = this._call("createInitGameTransaction", {
       feePayer,
-      rounds,
+      unseparatedSecretCombination,
+      salt,
+      maxAttempts,
+      refereePubKeyBase58,
+      rewardAmount,
     });
     return result as Promise<string>;
   }
+
   async createNewGameTransaction(
     feePayer: string,
     secretCombination: number,

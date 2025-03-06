@@ -83,9 +83,13 @@ export const MinaFileSystem = (files: any): Cache => ({
 });
 export function fetchZkAppCacheFiles() {
   const files = [
-    { name: "lagrange-basis-fp-1024", type: "string" },
-    { name: "step-vk-mastermindzkapp-creategame", type: "string" },
+    { name: "lagrange-basis-fp-2048", type: "string" },
+    { name: "step-vk-mastermindzkapp-acceptgame", type: "string" },
+    { name: "step-vk-mastermindzkapp-claimreward", type: "string" },
+    { name: "step-vk-mastermindzkapp-forfeitwin", type: "string" },
+    { name: "step-vk-mastermindzkapp-giveclue", type: "string" },
     { name: "step-vk-mastermindzkapp-initgame", type: "string" },
+    { name: "step-vk-mastermindzkapp-makeguess", type: "string" },
     { name: "step-vk-mastermindzkapp-submitgameproof", type: "string" },
     { name: "wrap-vk-mastermindzkapp", type: "string" },
   ];

@@ -8,6 +8,7 @@ import {
   PrivateKey,
   Signature,
   Cache,
+  UInt64,
 } from "o1js";
 import {
   deserializeClue,
@@ -82,17 +83,27 @@ const functions = {
   },
   createInitGameTransaction: async (args: {
     feePayer: string;
-    rounds: number;
+    unseparatedSecretCombination: number;
+    salt: string;
+    maxAttempts: number;
+    refereePubKeyBase58: string;
+    rewardAmount: number;
   }) => {
     let zkAppPrivateKey = PrivateKey.random();
     let zkAppAddress = zkAppPrivateKey.toPublicKey();
-
     state.zkappInstance = new state.MastermindContract!(zkAppAddress);
     const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
+    const refereePubKey = PublicKey.fromBase58(args.refereePubKeyBase58);
     const transaction = await Mina.transaction(feePayerPublickKey, async () => {
       AccountUpdate.fundNewAccount(feePayerPublickKey);
       state.zkappInstance!.deploy();
-      await state.zkappInstance!.initGame(UInt8.from(args.rounds));
+      await state.zkappInstance!.initGame(
+        Field(args.unseparatedSecretCombination),
+        Field(args.salt),
+        Field(args.maxAttempts),
+        refereePubKey,
+        UInt64.from(args.rewardAmount)
+      );
     });
     transaction.sign([zkAppPrivateKey]);
     state.transaction = transaction;

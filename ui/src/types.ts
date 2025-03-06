@@ -13,3 +13,14 @@ export interface ZkAppStates {
   packedGuessHistory: string;
   packedClueHistory: string;
 }
+
+export interface CodePicker {
+  code: number[];
+  randomSalt: string;
+}
+
+export interface GameParams {
+  maxAttempts: number | null;
+  rewardAmount: number | null;
+  refereePubKeyBase58: string | null;
+}

@@ -24,10 +24,10 @@
 <script setup lang="ts">
 import RoundedColor from "@/components/RoundedColor.vue";
 import { computed, ref } from "vue";
-import { AvailableColor } from "../types";
+import { AvailableColor, CodePicker } from "@/types";
 import { useZkAppStore } from "@/store/zkAppModule";
 import { storeToRefs } from "pinia";
-import CodePickerForm, { CodePicker } from "./forms/CodePickerForm.vue";
+import CodePickerForm from "./forms/CodePickerForm.vue";
 import { validateColorCombination } from "../utils";
 import { ElMessage } from "element-plus";
 const { createGuessTransaction, createGiveClueTransaction } = useZkAppStore();
@@ -114,6 +114,6 @@ const handleVerifyGuess = () => {
 }
 
 .clue__container {
-    width: 50px;
+    width:50px;
 }
 </style>

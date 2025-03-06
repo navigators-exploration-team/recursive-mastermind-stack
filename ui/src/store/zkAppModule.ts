@@ -142,19 +142,28 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         return signedData;
       }
     },
-    async createInitGameTransaction(rounds: number) {
+    async createInitGameTransaction(
+      separatedSecretCombination: number[],
+      salt: string,
+      maxAttempts: number,
+      refereePubKeyBase58: string,
+      rewardAmount: number
+    ) {
       try {
         this.loading = true;
         this.stepDisplay = "Creating a transaction...";
+        const combination = serializeSecret(separatedSecretCombination);
         this.zkAppAddress =
           await this.zkappWorkerClient!.createInitGameTransaction(
             this.publicKeyBase58,
-            rounds
+            combination,
+            salt,
+            maxAttempts,
+            refereePubKeyBase58,
+            rewardAmount
           );
-
         this.stepDisplay = "Creating proof...";
         await this.zkappWorkerClient!.proveTransaction();
-
         this.stepDisplay = "Getting transaction JSON...";
         const transactionJSON =
           await this.zkappWorkerClient!.getTransactionJSON();

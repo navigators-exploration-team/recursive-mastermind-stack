@@ -1,21 +1,25 @@
 <template>
     <div>
-        <div v-if="formStep === 'INIT_GAME'">
+        <div>
             <el-form :model="game" :rules="rules" ref="ruleFormRef">
-                <el-form-item>
+                <el-form-item prop="maxAttempts">
                     <label>Number of Attempts</label>
-                    <el-input type="number" v-model.number="game.rounds" size="large"
-                        placeholder="Select a number between 5 and 15" :max="15" :min="5"
+                    <el-input type="number" v-model.number="game.maxAttempts" size="large"
+                        placeholder="Insert a number between 5 and 15" :max="15" :min="5"
                         @blur="setAttempts"></el-input>
                 </el-form-item>
+                <el-form-item prop="rewardAmount">
+                    <label>Reward Amount</label>
+                    <el-input type="number" placeholder="Insert reward amount" v-model.number="game.rewardAmount"
+                        size="large"></el-input>
+                </el-form-item>
+                <el-form-item prop="refereePubKeyBase58">
+                    <label>Refree Public Key</label>
+                    <el-input placeholder="Insert refree public key" v-model="game.refereePubKeyBase58"
+                        size="large"></el-input>
+                </el-form-item>
+                <CodePickerForm @submit="handleInitGame" btnText="Submit Code" isRandomSalt />
             </el-form>
-            <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
-                <el-button type="primary" size="large" @click="handleInitCode" class="mt-2 w-100" :loading="!compiled"
-                    :disabled="!compiled">Init Game</el-button>
-            </el-tooltip>
-        </div>
-        <div v-if="formStep === 'CREATE_GAME'">
-            <CodePickerForm @submit="handleCreateGame" btnText="Submit Code" isRandomSalt />
         </div>
     </div>
 </template>
@@ -25,18 +29,21 @@ import { useZkAppStore } from "@/store/zkAppModule"
 import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import CodePickerForm from '@/components/forms/CodePickerForm.vue';
-import { CodePicker } from './CodePickerForm.vue';
 import { ElForm, ElMessage } from 'element-plus';
+import { CodePicker } from '@/types';
+import { GameParams } from '../../types';
+import { PublicKey } from 'o1js';
 const { zkAppAddress, compiled, error } = storeToRefs(useZkAppStore())
 const router = useRouter()
-const { createInitGameTransaction, createNewGameTransaction } = useZkAppStore()
-const formStep = ref("INIT_GAME")
-const game = ref({
-    rounds: 8
+const { createInitGameTransaction } = useZkAppStore()
+const game = ref<GameParams>({
+    maxAttempts: null,
+    rewardAmount: null,
+    refereePubKeyBase58: ""
 })
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const rules = ref({
-    rounds: [
+    maxAttempts: [
         {
             required: true,
             message: `The number of attempts is required !`,
@@ -51,35 +58,62 @@ const rules = ref({
                 }
             },
         }
-    ]
+    ],
+    rewardAmount: [
+        {
+            required: true,
+            message: `The reward amount is required !`,
+            trigger: "change",
+        }
+    ],
+    refereePubKeyBase58: [
+        {
+            required: true,
+            message: `The refree public key is required!`,
+            trigger: "change",
+        },
+        {
+            validator: (rule: any, value: any, callback: any) => {
+                try {
+                    PublicKey.fromBase58(value)
+                    callback();
+                } catch {
+                    callback(new Error(`This is not a valid public key!`));
+                }
+            },
+        }
+    ],
 });
 const setAttempts = () => {
-    if (game.value.rounds > 15) {
-        game.value.rounds = 15
-    } else if (game.value.rounds < 5) {
-        game.value.rounds = 5
+    if (!game.value.maxAttempts) return;
+    if (game.value.maxAttempts > 15) {
+        game.value.maxAttempts = 15
+    } else if (game.value.maxAttempts < 5) {
+        game.value.maxAttempts = 5
     }
 }
-const handleInitCode = async () => {
-    await createInitGameTransaction(game.value.rounds)
-    if (error.value) {
-        ElMessage.error({ message: error.value, duration: 6000 });
-    } else {
-        formStep.value = 'CREATE_GAME'
-    }
-}
-
-const handleCreateGame = async (formData: CodePicker) => {
-    await createNewGameTransaction(formData.code, formData.randomSalt, game.value.rounds)
-    if (error.value) {
-        ElMessage.error({ message: error.value, duration: 6000 });
-    } else {
-        router.push({
-            name: "gameplay", params: {
-                id: zkAppAddress.value
+const handleInitGame = async (formData: CodePicker) => {
+    if (!ruleFormRef.value) return;
+    ruleFormRef.value.validate(async (valid) => {
+        if (valid) {
+            await createInitGameTransaction(
+                formData.code,
+                formData.randomSalt,
+                game.value.maxAttempts,
+                game.value.refereePubKeyBase58,
+                game.value.rewardAmount
+            )
+            if (error.value) {
+                ElMessage.error({ message: error.value, duration: 6000 });
+            } else {
+                router.push({
+                    name: "gameplay", params: {
+                        id: zkAppAddress.value
+                    }
+                })
             }
-        })
-    }
+        }
+    })
 }
 
 
