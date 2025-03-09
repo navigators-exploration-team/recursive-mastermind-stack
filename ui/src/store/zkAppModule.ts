@@ -287,7 +287,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
     },
     async getZkAppStates() {
       try {
-        console.log("zk proof")
+        console.log("fetching zkApp states ...")
         this.zkAppStates = await this.zkappWorkerClient!.getZkAppStates();
         this.error = null;
       } catch (err: any) {
@@ -326,6 +326,36 @@ export const useZkAppStore = defineStore("useZkAppModule", {
           },
         });
         await this.joinGame();
+        this.stepDisplay = "";
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
+        console.log("error ", err);
+      } finally {
+        this.loading = false;
+      }
+    },
+    async penalizePlayerTransaction(playerPubKeyBase58:string) {
+      try {
+        this.loading = true;
+        this.stepDisplay = "Creating a transaction...";
+        await this.zkappWorkerClient!.createPenalizePlayerTransaction(
+          this.publicKeyBase58,
+          playerPubKeyBase58
+        );
+        this.stepDisplay = "Creating proof...";
+        await this.zkappWorkerClient!.proveTransaction();
+        this.stepDisplay = "Getting transaction JSON...";
+        const transactionJSON =
+          await this.zkappWorkerClient!.getTransactionJSON();
+        this.stepDisplay = "Requesting send transaction...";
+        const { hash } = await (window as any).mina.sendTransaction({
+          transaction: transactionJSON,
+          feePayer: {
+            fee: TRANSACTION_FEE,
+            memo: "",
+          },
+        });
         this.stepDisplay = "";
         this.error = null;
       } catch (err: any) {

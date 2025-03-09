@@ -104,7 +104,15 @@ export default class ZkappWorkerClient {
   async submitGameProof() {
     return this._call("submitGameProof", {});
   }
-
+  async createPenalizePlayerTransaction(
+    feePayer: string,
+    penalizedPlayerPubKeyBase58: string
+  ) {
+    return this._call("createPenalizePlayerTransaction", {
+      feePayer,
+      penalizedPlayerPubKeyBase58,
+    });
+  }
   // worker initialization
 
   worker: Worker;

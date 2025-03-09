@@ -40,6 +40,7 @@
 import { availableColors } from '@/constants/colors';
 import GuessSkeleton from './GuessSkeleton.vue';
 
+
 </script>
 <style scoped>
 .board__container {

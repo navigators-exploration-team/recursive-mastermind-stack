@@ -243,6 +243,20 @@ const functions = {
     state.transaction = transaction;
     state.transaction!.send();
   },
+  createPenalizePlayerTransaction: async (args: {
+    feePayer: string;
+    penalizedPlayerPubKeyBase58: string;
+  }) => {
+    const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
+    const penalizedPlayerPubKey = PublicKey.fromBase58(args.penalizedPlayerPubKeyBase58);
+    const transaction = await Mina.transaction(feePayerPublickKey,async () => {
+      await state.zkappInstance!.forfeitWin(
+        penalizedPlayerPubKey
+      );
+    });
+    state.transaction = transaction;
+    state.transaction!.send();
+  },
 };
 
 // ---------------------------------------------------------------------------------------

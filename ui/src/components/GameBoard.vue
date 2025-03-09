@@ -9,16 +9,21 @@
             <div class="w-100 d-flex justify-content-start">
                 <template
                     v-if="!(zkAppStates.isSolved === 'true' || zkProofStates?.turnCount > zkAppStates?.maxAttempts * 2)">
-                    <div class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
-                        v-if="isCodeMasterTurn">
-                        Code
-                        Master Turn
-                        <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#0000ff" height="18px" />
-                    </div>
-                    <div class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2 " v-else>Code
-                        Breaker
-                        Turn
-                        <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#ffde21" height="18px" />
+                    <div class="d-flex align-items-center justify-content-between w-100">
+                        <div class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
+                            v-if="isCodeMasterTurn">
+                            Code
+                            Master Turn
+                            <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#0000ff" height="18px" />
+                        </div>
+                        <div class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2 " v-else>Code
+                            Breaker
+                            Turn
+                            <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#ffde21" height="18px" />
+                        </div>
+                        <el-button size="large" class="penalize-player-btn" @click="handleShowPenalizeDialog">
+                            Penalize Player
+                        </el-button>
                     </div>
                 </template>
                 <template v-else>
@@ -46,7 +51,7 @@
                         <div class=" d-flex flex-start gap-2 p-3"> Game: {{ formatAddress(zkAppAddress) }}
                             <CopyToClipBoard :text="zkAppAddress" />
                         </div>
-                        <div v-for="(guess, row) in guesses?.slice(0,zkAppStates.maxAttempts)">
+                        <div v-for="(guess, row) in guesses?.slice(0, zkAppStates.maxAttempts)">
                             <Guess :attemptNo="row" @setColor="handleSetColor($event, row)" :guess="guess"
                                 :clue="clues[row]" />
                         </div>
@@ -54,12 +59,15 @@
                 </div>
             </div>
         </div>
+        <el-dialog v-model="isPenalizeDialogVisible" style="padding: 0px!important;" destroy-on-close>
+            <PenalizePlayerForm @close="closePenalizePlayerDialog" />
+        </el-dialog>
     </div>
 
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import Guess from '@/components/Guess.vue';
 import RoundedColor from '@/components/RoundedColor.vue';
 import { availableColors } from '@/constants/colors';
@@ -69,8 +77,9 @@ import { storeToRefs } from 'pinia';
 import { formatAddress } from '@/utils'
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 import { cluesColors } from '@/constants/colors';
+import PenalizePlayerForm from './forms/PenalizePlayerForm.vue';
 
-const { submitGameProof, getZkProofStates } = useZkAppStore()
+const { submitGameProof } = useZkAppStore()
 const { zkAppAddress, zkProofStates, zkAppStates } = storeToRefs(useZkAppStore())
 const isCodeMasterTurn = computed(() => {
     return zkProofStates.value?.turnCount % 2 === 0;
@@ -89,9 +98,13 @@ const handleSetColor = (index: number, row: number) => {
 const handleSubmitGameProof = async () => {
     await submitGameProof()
 }
-onMounted(async () => {
-    //  await getZkProofStates()
-})
+const isPenalizeDialogVisible = ref(false)
+const handleShowPenalizeDialog = () => {
+    isPenalizeDialogVisible.value = true
+}
+const closePenalizePlayerDialog = () => {
+    isPenalizeDialogVisible.value = false
+}
 watch(() => zkProofStates.value?.turnCount, () => {
     guesses.value = zkProofStates.value.guessesHistory
 })
@@ -122,5 +135,10 @@ watch(() => zkProofStates.value?.turnCount, () => {
 .separator {
     border: 1px solid #222;
     width: 2px;
+}
+
+.penalize-player-btn {
+    background-color: #FF4D4D;
+    color: white;
 }
 </style>
