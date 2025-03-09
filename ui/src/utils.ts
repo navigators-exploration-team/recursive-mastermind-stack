@@ -79,6 +79,14 @@ export function validateColorCombination(combination: AvailableColor[]) {
     };
   }
 }
+export function generateRandomSalt(length = 20): string {
+  const chars = "123456789";
+  let randomSalt = "";
+  for (let i = 0; i < length; i++) {
+    randomSalt += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return randomSalt;
+}
 
 export const MinaFileSystem = (files: any): Cache => ({
   read({ persistentId, uniqueId, dataType }: any) {

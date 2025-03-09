@@ -34,7 +34,7 @@ import { availableColors } from '@/constants/colors';
 import { Field } from 'o1js';
 import RoundedColor from '@/components/RoundedColor.vue';
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
-import { validateColorCombination } from '../../utils';
+import { generateRandomSalt, validateColorCombination } from '../../utils';
 import { ElForm } from 'element-plus';
 
 
@@ -77,7 +77,13 @@ const rules = ref({
 });
 
 const selectedColor = ref<AvailableColor>({ color: "#222", value: 0 });
-const form = ref({ randomSalt: props.isRandomSalt ? JSON.stringify(Field.random()).replace(/"/g, '') : '' })
+const form = ref({
+    randomSalt: props.isRandomSalt ? generateRandomSalt(20)
+        : localStorage.getItem('randomSalt')
+            ? localStorage.getItem('randomSalt')
+            :
+            ''
+})
 
 const secretCode = ref<Array<AvailableColor>>(
     Array.from({ length: 4 }, () => ({ color: "#222", value: 0 }))
@@ -92,6 +98,7 @@ const handleSubmitForm = () => {
     if (!ruleFormRef.value) return;
     ruleFormRef.value.validate(async (valid) => {
         if (valid) {
+            localStorage.setItem('randomSalt', form.value.randomSalt as string);
             emit("submit", {
                 code: secretCode.value.map((e: AvailableColor) => e.value),
                 randomSalt: form.value.randomSalt
