@@ -6,15 +6,15 @@
                 <RoundedColor v-for="(el, index) in guess" :bgColor="el.color" :value="el.value" width="40px"
                     height="40px" @click="handleSetColor(index)" />
             </div>
-
             <div class="clue__container d-flex flex-wrap gap-2">
                 <RoundedColor v-for="el in clue" :bgColor="el.color" width="18px" :value="el.value" height="18px" />
             </div>
-
         </div>
-        <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn">Verify</el-button>
-        <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
-            :title="combinationValidation.message" v-else>Check</el-button>
+        <div v-if="isCurrentRound">
+            <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn">Verify</el-button>
+            <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
+                :title="combinationValidation.message" v-else>Check</el-button>
+        </div>
         <el-dialog v-model="isVerifyGuessModalOpen" modal-class="dialog-class" custom-class="dialog-class"
             style="padding: 0px!important;" destroy-on-close width="80%">
             <CodePickerForm @submit="handleGiveClue" btnText="Give clue" :isRandomSalt="false" />
@@ -30,12 +30,12 @@ import { storeToRefs } from "pinia";
 import CodePickerForm from "./forms/CodePickerForm.vue";
 import { validateColorCombination } from "../utils";
 import { ElMessage } from "element-plus";
-const { createGuessTransaction, createGiveClueTransaction } = useZkAppStore();
-const { zkAppStates, error } = storeToRefs(useZkAppStore());
+const { createGuessProof, createGiveClueProof } = useZkAppStore();
+const { zkAppStates, error, zkProofStates } = storeToRefs(useZkAppStore());
 
 const handleGiveClue = async (formData: CodePicker) => {
     isVerifyGuessModalOpen.value = false
-    await createGiveClueTransaction(formData.code, formData.randomSalt);
+    await createGiveClueProof(formData.code, formData.randomSalt);
     if (error.value) {
         ElMessage.error({ message: error.value, duration: 6000 });
     }
@@ -43,16 +43,20 @@ const handleGiveClue = async (formData: CodePicker) => {
 };
 const isVerifyGuessModalOpen = ref(false);
 const isCodeMasterTurn = computed(() => {
-    return zkAppStates.value?.turnCount % 2 === 0;
+    return zkProofStates.value?.turnCount % 2 === 0;
 });
-
+const isCurrentRound = computed(() => {
+    return Math.ceil(zkProofStates.value?.turnCount / 2) === props.attemptNo + 1;
+});
 const combinationValidation = computed(() => {
     return validateColorCombination(props.guess)
 })
 
 const emit = defineEmits(["setColor"]);
 const handleSetColor = (index: number) => {
-    emit("setColor", index);
+    if (isCurrentRound.value && !isCodeMasterTurn.value) {
+        emit("setColor", index);
+    }
 };
 const props = defineProps({
     attemptNo: {
@@ -71,7 +75,7 @@ const props = defineProps({
 });
 const handleSubmitGuess = async () => {
     const code = props.guess.map((e: AvailableColor) => e.value);
-    await createGuessTransaction(code);
+    await createGuessProof(code);
     if (error.value) {
         ElMessage.error({ message: error.value, duration: 6000 });
     }
@@ -113,7 +117,7 @@ const handleVerifyGuess = () => {
     border: 1px solid #222;
 }
 
-.clue__container {
+.clue__container{
     width:50px;
 }
 </style>

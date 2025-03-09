@@ -24,13 +24,12 @@ wss.on("connection", (ws) => {
     try {
       const data = JSON.parse(message.toString());
       const { gameId, action, zkProof } = data;
-      let lastProof = null;
 
+      let lastProof = zkProof;
       if (!gameId || !action) {
         ws.send(JSON.stringify({ error: "Bad request!" }));
         return;
       }
-
       if (action === "join") {
         if (!games.has(gameId)) {
           games.set(gameId, { players: new Set([ws]), lastProof });
@@ -39,7 +38,6 @@ wss.on("connection", (ws) => {
           lastProof = game.lastProof;
           game.players.add(ws);
         }
-
         if (lastProof) {
           ws.send(JSON.stringify({ zkProof: lastProof }));
         }
@@ -64,9 +62,8 @@ wss.on("connection", (ws) => {
           ws.send(JSON.stringify({ error: "Game not found!" }));
           return;
         }
-
         game.lastProof = zkProof;
-
+        games.set(gameId, game);
         game.players.forEach((player) => {
           if (player !== ws) {
             player.send(JSON.stringify({ zkProof }));

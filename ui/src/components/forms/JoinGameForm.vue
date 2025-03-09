@@ -50,7 +50,6 @@ const handleJoinGame = () => {
     ruleFormRef.value.validate(async (valid) => {
         if (valid) {
             router.push({ name: "gameplay", params: { id: game.value.gameAddress } })
-            joinGame(game.value.gameAddress)
         }
     })
 }

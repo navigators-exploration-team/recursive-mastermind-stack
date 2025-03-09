@@ -1,12 +1,8 @@
 <template>
   <div class="d-flex flex-column align-items-center">
-    <div class="d-flex gap-3">
-      <div v-for="el in cluesColors" :key="el.color">
-        <RoundedColor :bgColor="el.color" :value="el.value" :title="el.title" width="18px" height="18px" />
-      </div>
-    </div>
-    <div v-if="zkAppStates">
-      <GameBoard />
+    <div v-if="zkAppStates" class="w-100">
+      <GameDetail v-if="zkAppStates.codeBreakerId === '0'" />
+      <GameBoard v-else />
     </div>
     <div v-else-if="compiled && error && !zkAppStates">
       <div class="fs-1 mt-5 ">
@@ -25,21 +21,26 @@ import { useZkAppStore } from "@/store/zkAppModule"
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import GameBoard from '@/components/GameBoard.vue';
+import GameDetail from '@/components/GameDetail.vue';
 import GameBoardSkeleton from '@/components/GameBoardSkeleton.vue';
 import RoundedColor from '@/components/RoundedColor.vue';
 import { cluesColors } from '@/constants/colors';
 const route = useRoute()
 const { compiled, zkAppStates, error } = storeToRefs(useZkAppStore())
-const { initZkappInstance, joinGame } = useZkAppStore()
+const { initZkappInstance, joinGame, getZkAppStates, getZkProofStates } = useZkAppStore()
 const gameId = route?.params?.id
 onMounted(async () => {
-  if (compiled.value) {
+  /* if (compiled.value) {
     await initZkappInstance(gameId)
-  }
+    await getZkAppStates()
+    await joinGame(gameId)
+  } */
 })
 watch(() => compiled.value, async () => {
   if (compiled.value) {
     await initZkappInstance(gameId)
+   // await getZkAppStates()
+   // await getZkProofStates()
     await joinGame(gameId)
   }
 })

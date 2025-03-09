@@ -58,29 +58,21 @@ export default class ZkappWorkerClient {
     });
     return result as Promise<string>;
   }
-
-  async createNewGameTransaction(
-    feePayer: string,
-    secretCombination: number,
-    randomSalt: string
-  ) {
-    return this._call("createNewGameTransaction", {
+  async createAcceptGameTransaction(feePayer: string) {
+    const result = this._call("createAcceptGameTransaction", {
       feePayer,
-      secretCombination,
-      randomSalt,
     });
+    return result as Promise<string>;
   }
   async sendNewGameProof(
     signedData: SignedData,
-    secretCombination: number,
-    randomSalt: string,
-    rounds: number
+    unseparatedSecretCombination: number,
+    salt: string
   ) {
     return this._call("sendNewGameProof", {
       signedData,
-      secretCombination,
-      randomSalt,
-      rounds,
+      unseparatedSecretCombination,
+      salt,
     });
   }
   async createGuessProof(signedData: SignedData, unseparatedGuess: number) {
@@ -100,8 +92,11 @@ export default class ZkappWorkerClient {
       randomSalt,
     });
   }
-  async getZkappStates() {
-    return this._call("getZkappStates", {});
+  async getZkAppStates() {
+    return this._call("getZkAppStates", {});
+  }
+  async getZkProofStates() {
+    return await this._call("getZkProofStates", {});
   }
   async setLastProof(zkProof: any) {
     return this._call("setLastProof", { zkProof });

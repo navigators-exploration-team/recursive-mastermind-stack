@@ -43,10 +43,10 @@ export const useZkAppStore = defineStore("useZkAppModule", {
     loading: false,
     currentTransactionLink: "",
     zkAppStates: null as null | any,
+    zkProofStates: null as null | any,
     compiled: false,
     zkAppAddress: null as null | string,
     webSocketInstance: null as null | WebSocketService,
-    lastProof: null as null | StepProgramProof,
   }),
   getters: {},
   actions: {
@@ -122,7 +122,8 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       this.webSocketInstance.connect();
       this.webSocketInstance.onMessage(async (data: any) => {
         await this.setLastProof(data.zkProof);
-        await this.getZkappStates();
+        await this.getZkAppStates();
+        await this.getZkProofStates();
       });
     },
     async signFields(content: object): Promise<SignedData | null> {
@@ -153,78 +154,40 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         this.loading = true;
         this.stepDisplay = "Creating a transaction...";
         const combination = serializeSecret(separatedSecretCombination);
-        this.zkAppAddress =
-          await this.zkappWorkerClient!.createInitGameTransaction(
-            this.publicKeyBase58,
-            combination,
-            salt,
-            maxAttempts,
-            refereePubKeyBase58,
-            rewardAmount
-          );
-        this.stepDisplay = "Creating proof...";
-        await this.zkappWorkerClient!.proveTransaction();
-        this.stepDisplay = "Getting transaction JSON...";
-        const transactionJSON =
-          await this.zkappWorkerClient!.getTransactionJSON();
-        this.stepDisplay = "Requesting send transaction...";
-        const { hash } = await (window as any).mina.sendTransaction({
-          transaction: transactionJSON,
-          feePayer: {
-            fee: TRANSACTION_FEE,
-            memo: "",
-          },
-        });
-        await this.joinGame();
-        this.stepDisplay = "";
-        this.error = null;
-      } catch (err: any) {
-        this.error = err?.message || err;
-        console.log("error ", err);
-      } finally {
-        this.loading = false;
-        return this.zkAppAddress;
-      }
-    },
-    async createNewGameTransaction(
-      code: number[],
-      randomSalt: string,
-      rounds: number
-    ) {
-      try {
-        this.loading = true;
-        const combination = serializeSecret(code);
-        const signedData = await this.signFields([combination, randomSalt]);
+        const signedData = await this.signFields([combination, salt]);
         if (signedData) {
+          this.zkAppAddress =
+            await this.zkappWorkerClient!.createInitGameTransaction(
+              this.publicKeyBase58,
+              combination,
+              salt,
+              maxAttempts,
+              refereePubKeyBase58,
+              rewardAmount
+            );
+          this.stepDisplay = "Creating proof...";
+          await this.zkappWorkerClient!.proveTransaction();
+          this.stepDisplay = "Getting transaction JSON...";
+          const transactionJSON =
+            await this.zkappWorkerClient!.getTransactionJSON();
+          this.stepDisplay = "Requesting send transaction...";
+          const { hash } = await (window as any).mina.sendTransaction({
+            transaction: transactionJSON,
+            feePayer: {
+              fee: TRANSACTION_FEE,
+              memo: "",
+            },
+          });
+          await this.joinGame();
+
           const res = await this.zkappWorkerClient!.sendNewGameProof(
             signedData,
             combination,
-            randomSalt,
-            rounds
+            salt
           );
+          console.log("generatedd a proof ");
           this.webSocketInstance?.sendProof(JSON.stringify(res));
-          await this.getZkappStates();
         }
-        this.stepDisplay = "Creating a transaction...";
-        await this.zkappWorkerClient!.createNewGameTransaction(
-          this.publicKeyBase58,
-          combination,
-          randomSalt
-        );
-        this.stepDisplay = "Creating proof...";
-        await this.zkappWorkerClient!.proveTransaction();
-        this.stepDisplay = "Getting transaction JSON...";
-        const transactionJSON =
-          await this.zkappWorkerClient!.getTransactionJSON();
-        this.stepDisplay = "Requesting send transaction...";
-        const { hash } = await (window as any).mina.sendTransaction({
-          transaction: transactionJSON,
-          feePayer: {
-            fee: TRANSACTION_FEE,
-            memo: "",
-          },
-        });
-
         this.stepDisplay = "";
         this.error = null;
       } catch (err: any) {
@@ -235,15 +198,14 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         return this.zkAppAddress;
       }
     },
-    async createGuessTransaction(code: number[]) {
+    async createGuessProof(code: number[]) {
       try {
         this.loading = true;
         this.stepDisplay = "Creating a transaction...";
         const combination = serializeSecret(code);
-
         const signedData = await this.signFields([
           combination,
-          this.zkAppStates.turnCount,
+          this.zkProofStates.turnCount,
         ]);
         if (signedData) {
           const res = await this.zkappWorkerClient!.createGuessProof(
@@ -251,7 +213,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             combination
           );
           this.webSocketInstance?.sendProof(JSON.stringify(res));
-          await this.getZkappStates();
+          await this.getZkAppStates();
         }
 
         this.stepDisplay = "";
@@ -264,7 +226,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         return this.zkAppAddress;
       }
     },
-    async createGiveClueTransaction(code: number[], randomSalt: string) {
+    async createGiveClueProof(code: number[], randomSalt: string) {
       try {
         this.loading = true;
         this.stepDisplay = "Creating a transaction...";
@@ -272,7 +234,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         const signedData = await this.signFields([
           combination,
           randomSalt,
-          this.zkAppStates.turnCount,
+          this.zkProofStates.turnCount,
         ]);
         if (signedData) {
           const res = await this.zkappWorkerClient!.createGiveClueProof(
@@ -281,7 +243,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             randomSalt
           );
           this.webSocketInstance?.sendProof(JSON.stringify(res));
-          await this.getZkappStates();
+          await this.getZkAppStates();
         }
         this.stepDisplay = "";
         this.error = null;
@@ -324,9 +286,17 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       await this.zkappWorkerClient!.initZkappInstance(zkAppAddress);
       this.zkAppAddress = zkAppAddress;
     },
-    async getZkappStates() {
+    async getZkAppStates() {
       try {
-        this.zkAppStates = await this.zkappWorkerClient!.getZkappStates();
+        this.zkAppStates = await this.zkappWorkerClient!.getZkAppStates();
+        this.error = null;
+      } catch (err: any) {
+        this.error = err.message;
+      }
+    },
+    async getZkProofStates() {
+      try {
+        this.zkProofStates = await this.zkappWorkerClient!.getZkProofStates();
         this.error = null;
       } catch (err: any) {
         this.error = err.message;
@@ -334,6 +304,36 @@ export const useZkAppStore = defineStore("useZkAppModule", {
     },
     async setLastProof(zkProof: any) {
       await this.zkappWorkerClient!.setLastProof(zkProof);
+    },
+    async acceptGame() {
+      try {
+        this.loading = true;
+        this.stepDisplay = "Creating a transaction...";
+        await this.zkappWorkerClient!.createAcceptGameTransaction(
+          this.publicKeyBase58
+        );
+        this.stepDisplay = "Creating proof...";
+        await this.zkappWorkerClient!.proveTransaction();
+        this.stepDisplay = "Getting transaction JSON...";
+        const transactionJSON =
+          await this.zkappWorkerClient!.getTransactionJSON();
+        this.stepDisplay = "Requesting send transaction...";
+        const { hash } = await (window as any).mina.sendTransaction({
+          transaction: transactionJSON,
+          feePayer: {
+            fee: TRANSACTION_FEE,
+            memo: "",
+          },
+        });
+        await this.joinGame();
+        this.stepDisplay = "";
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
+        console.log("error ", err);
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });

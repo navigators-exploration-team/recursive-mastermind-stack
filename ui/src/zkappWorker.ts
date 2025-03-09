@@ -3,7 +3,6 @@ import {
   fetchAccount,
   Field,
   AccountUpdate,
-  UInt8,
   PublicKey,
   PrivateKey,
   Signature,
@@ -11,16 +10,17 @@ import {
   UInt64,
 } from "o1js";
 import {
-  deserializeClue,
   MastermindZkApp,
+  separateRewardAndFinalizeSlot,
+  separateTurnCountAndMaxAttemptSolved,
   StepProgram,
   StepProgramProof,
 } from "mina-mastermind";
 import {
-  createColoredClue,
-  createColoredGuess,
   fetchZkAppCacheFiles,
   fetchZkProgramCacheFiles,
+  generateColoredCluesHistory,
+  generateColoredGuessHistory,
   MinaFileSystem,
 } from "./utils";
 import { SignedData } from "./store/zkAppModule";
@@ -111,26 +111,10 @@ const functions = {
     state.transaction!.send();
     return zkAppAddress.toBase58();
   },
-  createNewGameTransaction: async (args: {
-    feePayer: string;
-    secretCombination: number;
-    randomSalt: string;
-  }) => {
-    const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
-    const transaction = await Mina.transaction(feePayerPublickKey, async () => {
-      await state.zkappInstance!.createGame(
-        Field(args.secretCombination),
-        Field(args.randomSalt)
-      );
-    });
-    state.transaction = transaction;
-    state.transaction!.send();
-  },
   sendNewGameProof: async (args: {
     signedData: SignedData;
-    secretCombination: number;
-    randomSalt: string;
-    rounds: number;
+    unseparatedSecretCombination: number;
+    salt: string;
   }) => {
     try {
       const signature = Signature.fromBase58(args.signedData.signature);
@@ -140,9 +124,8 @@ const functions = {
           authPubKey: codeMasterPubKey,
           authSignature: signature,
         },
-        UInt8.from(args.rounds),
-        Field(args.secretCombination),
-        Field(args.randomSalt)
+        Field(args.unseparatedSecretCombination),
+        Field(args.salt)
       );
       state.lastProof = stepProof.proof;
       return stepProof.proof.toJSON();
@@ -192,28 +175,58 @@ const functions = {
     state.lastProof = stepProof.proof;
     return stepProof.proof.toJSON();
   },
-  getZkappStates: async (args: {}) => {
+  createAcceptGameTransaction: async (args: { feePayer: string }) => {
+    const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
+    const transaction = await Mina.transaction(feePayerPublickKey, async () => {
+      await state.zkappInstance!.acceptGame();
+    });
+    state.transaction = transaction;
+    state.transaction!.send();
+  },
+  getZkAppStates: async (args: {}) => {
+    const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
+    await fetchAccount({ publicKey });
+    const [codeBreakerId, rewardFinalizeSlot, turnCountMaxAttemptsIsSolved] =
+      await Promise.all([
+        state.zkappInstance!.codeBreakerId.get(),
+        state.zkappInstance!.rewardFinalizeSlot.get(),
+        state.zkappInstance!.turnCountMaxAttemptsIsSolved.get(),
+      ]);
+    const { rewardAmount, finalizeSlot } =
+      separateRewardAndFinalizeSlot(rewardFinalizeSlot);
+    let [turnCount, maxAttempts, isSolved] =
+      separateTurnCountAndMaxAttemptSolved(turnCountMaxAttemptsIsSolved);
+
+    return {
+      rewardAmount: rewardAmount.toString(),
+      finalizeSlot: finalizeSlot.toString(),
+      codeBreakerId: codeBreakerId.toString(),
+      turnCount: turnCount.toString(),
+      maxAttempts: maxAttempts.toString(),
+      isSolved: isSolved.toString(),
+    };
+  },
+  getZkProofStates: async (args: {}) => {
     if (state.lastProof) {
       const {
-        maxAttempts,
-        turnCount,
-        isSolved,
-        solutionHash,
-        lastGuess,
-        serializedClue,
-        codeBreakerId,
         codeMasterId,
+        codeBreakerId,
+        solutionHash,
+        turnCount,
+        packedGuessHistory,
+        packedClueHistory,
       } = state.lastProof.publicOutput;
-      const deserializedClue = deserializeClue(serializedClue);
+
       return {
-        maxAttempts: maxAttempts.toNumber(),
-        turnCount: turnCount.toNumber(),
-        isSolved: isSolved.toString(),
+        guessesHistory: generateColoredGuessHistory(packedGuessHistory),
         solutionHash: solutionHash.toString(),
-        guessesHistory: createColoredGuess(JSON.stringify(lastGuess)),
-        cluesHistory: createColoredClue(JSON.stringify(deserializedClue)),
-        codebreakerId: codeBreakerId.toString(),
-        codemasterId: codeMasterId.toString(),
+        codeBreakerId: codeBreakerId.toString(),
+        codeMasterId: codeMasterId.toString(),
+        turnCount: Number(turnCount.toString()),
+        cluesHistory: generateColoredCluesHistory(
+          packedClueHistory,
+          Number(turnCount.toString())
+        ),
       };
     }
     return null;

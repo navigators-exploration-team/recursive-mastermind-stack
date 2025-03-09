@@ -4,6 +4,10 @@ import {
   separateCombinationDigits,
   validateCombination,
   deserializeClue,
+  separateRewardAndFinalizeSlot,
+  separateTurnCountAndMaxAttemptSolved,
+  deserializeCombinationHistory,
+  deserializeClueHistory,
 } from './utils.js';
 
 export {
@@ -13,4 +17,8 @@ export {
   validateCombination,
   separateCombinationDigits,
   deserializeClue,
+  separateRewardAndFinalizeSlot,
+  separateTurnCountAndMaxAttemptSolved,
+  deserializeCombinationHistory,
+  deserializeClueHistory,
 };

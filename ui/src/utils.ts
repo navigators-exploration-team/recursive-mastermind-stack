@@ -1,4 +1,8 @@
-import { validateCombination } from "mina-mastermind";
+import {
+  deserializeClueHistory,
+  deserializeCombinationHistory,
+  validateCombination,
+} from "mina-mastermind";
 import { availableColors, cluesColors } from "./constants/colors";
 import { AvailableColor } from "./types";
 import { Field, Cache } from "o1js";
@@ -6,31 +10,57 @@ import { Field, Cache } from "o1js";
 export function formatAddress(address: string) {
   return `${address?.slice(0, 5)}...${address?.slice(-5)}`;
 }
-export function createColoredGuess(guess: string): AvailableColor[] {
+export function generateColoredGuessHistory(
+  packedGuessHistory: Field
+): Array<AvailableColor[]> {
   try {
-    const jsonGuess = JSON.parse(guess);
-    return jsonGuess === "0"
-      ? Array.from({ length: 4 }, () => ({ color: "#222", value: 0 }))
-      : jsonGuess.split("").map((num: string) => {
-          const colorObj = availableColors.find((c) => c.value === Number(num));
-          return colorObj ?? { color: "#222", value: 0 };
-        });
+    const deserializedGuessHistory =
+      deserializeCombinationHistory(packedGuessHistory);
+    const guesses = deserializedGuessHistory.map((e: Field) => e.toString());
+    return guesses.map((e: string) => {
+      return e === "0"
+        ? Array.from({ length: 4 }, () => ({ color: "#222", value: 0 }))
+        : e.split("").map((num: string) => {
+            const colorObj = availableColors.find(
+              (c) => c.value === Number(num)
+            );
+            return colorObj ?? { color: "#222", value: 0 };
+          });
+    });
   } catch (error) {
-    console.error("Invalid JSON input:", error);
+    console.error("error: ", error);
     return [];
   }
 }
-export function createColoredClue(clue: string): AvailableColor[] {
-  try {
-    const clues: string[] = JSON.parse(clue);
-    return clues.map((num) => {
-      const colorObj = cluesColors.find((c) => c.value === Number(num));
-      return colorObj ?? { color: "#222", value: 0 };
+export function generateColoredCluesHistory(
+  packedClueHistory: Field,
+  round: number
+): Array<AvailableColor[]> {
+  function transformToBinary(arr: string[]): string[] {
+    return arr.map((str) => {
+      let num = parseInt(str, 10);
+      if (isNaN(num) || num < 0 || num > 255) {
+        throw new Error(`Invalid input: ${str}`);
+      }
+      let binary = num.toString(2).padStart(8, "0");
+      let groups = binary.match(/../g) as string[];
+      return groups
+        .map((b) => parseInt(b, 2))
+        .reverse()
+        .join("");
     });
-  } catch (error) {
-    console.error("Invalid JSON input:", error);
-    return [];
   }
+  const deserializedClueHistory = deserializeClueHistory(packedClueHistory);
+  const cluess = deserializedClueHistory.map((e: Field) => e.toString());
+  const binaryClues = transformToBinary(cluess);
+  return binaryClues.map((numStr, index) => {
+    return index >= Math.floor((round - 1) / 2)
+      ? Array.from({ length: 4 }, () => ({ color: "#222", value: 0 }))
+      : numStr.split("").map((num) => {
+          const colorObj = cluesColors.find((c) => c.value === Number(num));
+          return colorObj ?? { color: "#222", value: 0 };
+        });
+  });
 }
 export function validateColorCombination(combination: AvailableColor[]) {
   const combinationDigits = combination.map(({ value }) => Field(value));
@@ -49,6 +79,7 @@ export function validateColorCombination(combination: AvailableColor[]) {
     };
   }
 }
+
 export const MinaFileSystem = (files: any): Cache => ({
   read({ persistentId, uniqueId, dataType }: any) {
     // read current uniqueId, return data if it matches
