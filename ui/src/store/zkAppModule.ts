@@ -178,14 +178,13 @@ export const useZkAppStore = defineStore("useZkAppModule", {
               memo: "",
             },
           });
-          await this.joinGame();
+          await this.joinGame(); 
 
           const res = await this.zkappWorkerClient!.sendNewGameProof(
             signedData,
             combination,
             salt
           );
-          console.log("generatedd a proof ");
           this.webSocketInstance?.sendProof(JSON.stringify(res));
         }
         this.stepDisplay = "";
@@ -213,7 +212,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             combination
           );
           this.webSocketInstance?.sendProof(JSON.stringify(res));
-          await this.getZkAppStates();
+          await this.getZkProofStates();
         }
 
         this.stepDisplay = "";
@@ -243,7 +242,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             randomSalt
           );
           this.webSocketInstance?.sendProof(JSON.stringify(res));
-          await this.getZkAppStates();
+          await this.getZkProofStates();
         }
         this.stepDisplay = "";
         this.error = null;
@@ -288,6 +287,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
     },
     async getZkAppStates() {
       try {
+        console.log("zk proof")
         this.zkAppStates = await this.zkappWorkerClient!.getZkAppStates();
         this.error = null;
       } catch (err: any) {
