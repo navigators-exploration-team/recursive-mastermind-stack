@@ -4,7 +4,8 @@
         <div class="d-flex flex-1 gap-5">
             <div class="d-flex gap-3  guesses">
                 <RoundedColor v-for="(el, index) in guess" :bgColor="el.color" :value="el.value" width="40px"
-                    height="40px" @click="handleSetColor(index)" />
+                    height="40px" :editable="isCurrentRound && !isCodeMasterTurn" @input="handleSetColor($event, index)"
+                    @focusNext="focusNextInput(index)" @focusPrev="focusPrevInput(index)" ref="inputRefs" />
             </div>
             <div class="clue__container d-flex flex-wrap gap-2">
                 <RoundedColor v-for="el in clue" :bgColor="el.color" width="18px" :value="el.value" height="18px" />
@@ -23,7 +24,7 @@
 </template>
 <script setup lang="ts">
 import RoundedColor from "@/components/RoundedColor.vue";
-import { computed, ref } from "vue";
+import { computed, nextTick, ref } from "vue";
 import { AvailableColor, CodePicker } from "@/types";
 import { useZkAppStore } from "@/store/zkAppModule";
 import { storeToRefs } from "pinia";
@@ -32,6 +33,21 @@ import { validateColorCombination } from "../utils";
 import { ElMessage } from "element-plus";
 const { createGuessProof, createGiveClueProof } = useZkAppStore();
 const { zkAppStates, error, zkProofStates } = storeToRefs(useZkAppStore());
+
+
+const inputRefs = ref<(InstanceType<typeof RoundedColor> | null)[]>([]);
+
+const focusNextInput = (index: number) => {
+    if (index < inputRefs.value.length - 1) {
+        nextTick(() => inputRefs.value[index + 1]?.focus());
+    }
+};
+
+const focusPrevInput = (index: number) => {
+    if (index > 0) {
+        nextTick(() => inputRefs.value[index - 1]?.focus());
+    }
+};
 
 const handleGiveClue = async (formData: CodePicker) => {
     isVerifyGuessModalOpen.value = false
@@ -53,9 +69,9 @@ const combinationValidation = computed(() => {
 })
 
 const emit = defineEmits(["setColor"]);
-const handleSetColor = (index: number) => {
+const handleSetColor = (selectedColor: AvailableColor, index: number) => {
     if (isCurrentRound.value && !isCodeMasterTurn.value) {
-        emit("setColor", index);
+        emit("setColor", { index, selectedColor });
     }
 };
 const props = defineProps({
@@ -117,7 +133,7 @@ const handleVerifyGuess = () => {
     border: 1px solid #222;
 }
 
-.clue__container{
-    width:50px;
+.clue__container {
+    width: 50px;
 }
 </style>

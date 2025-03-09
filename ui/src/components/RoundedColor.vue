@@ -1,14 +1,18 @@
 <template>
     <div class="d-flex align-items-center gap-2">
-        <div class="rounded__color d-flex align-items-center justify-content-center fs-9"
-            :class="{ blinkColor: blinkColor }" @click="handleColorClick">
+        <div class="rounded__color d-flex align-items-center justify-content-center fs-3"
+            :class="{ blinkColor: blinkColor }" v-if="!editable">
             <span class="rounded__value" v-if="bgColor !== '#222'">{{ value }}</span>
+
         </div>
+        <el-input v-else :model-value="value === 0 ? null : value" class="code-input" maxlength="1" @input="handleInput"
+            @keydown.delete="handleDelete" ref="inputRef" />
         <span v-if="title" class="ms-2">{{ title }}</span>
     </div>
 </template>
 <script setup lang="ts">
-import { defineProps } from 'vue'
+import { defineProps, nextTick, ref } from 'vue'
+import { availableColors } from '../constants/colors';
 const props = defineProps({
     value: {
         type: Number,
@@ -33,15 +37,62 @@ const props = defineProps({
     title: {
         type: String,
         required: false
+    },
+    editable: {
+        type: Boolean,
+        required: false,
+        default: false
     }
 })
-const emit = defineEmits(["click"])
-const handleColorClick = () => {
-    emit("click")
-}
+const emit = defineEmits(["input", "focusNext", "focusPrev"])
+const inputRef = ref<InstanceType<typeof import("element-plus")["ElInputNumber"]> | null>(null);
+
+const focus = () => {
+    nextTick(() => {
+        if (inputRef.value) {
+            (inputRef.value as any).focus();
+        }
+    });
+};
+
+defineExpose({ focus }); // Make the function accessible from the parent
+
+const handleInput = (value: string) => {
+    const selectedColor = availableColors.find((c) => c.value === Number(value));
+    emit("input", selectedColor ? selectedColor : { color: "#222", value: 0 })
+    if (selectedColor) {
+        nextTick(() => emit("focusNext"));
+    }
+
+};
+
+const handleDelete = () => {
+    if(props.value === 0){
+        nextTick(() => emit("focusPrev")); 
+    } 
+};
+
 
 </script>
-<style>
+<style scoped>
+:deep(.el-input__wrapper) {
+    background: v-bind(bgColor);
+    border-radius: 50%;
+}
+
+.code-input {
+    width: 40px;
+    height: 40px;
+    text-align: center;
+    font-size: 20px;
+    border-radius: 50%;
+    outline: none;
+}
+
+:deep(.el-input__inner) {
+    padding-left: 3px;
+}
+
 .rounded__color {
     background-color: v-bind(bgColor);
     border-radius: 50%;
@@ -58,7 +109,7 @@ const handleColorClick = () => {
 }
 
 .rounded__value {
-    font-size: 12px;
+    font-size: 16px;
     color: #444444;
 }
 

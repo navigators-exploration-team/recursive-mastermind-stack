@@ -21,7 +21,7 @@
                             Turn
                             <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#ffde21" height="18px" />
                         </div>
-                        <el-button size="large" class="penalize-player-btn" @click="handleShowPenalizeDialog">
+                        <el-button  class="penalize-player-btn" @click="handleShowPenalizeDialog">
                             Penalize Player
                         </el-button>
                     </div>
@@ -41,12 +41,13 @@
                 </template>
             </div>
 
-            <div class="d-flex">
+            <div class="d-flex mt-1">
                 <div class="board__container d-flex">
                     <div class="color-picker__container d-flex flex-column gap-3 p-2">
                         <RoundedColor height="40px" width="40px" v-for="el in availableColors" :bg-color="el.color"
-                            :value="el.value" @click="handlePickColor(el)" />
+                            :value="el.value"  />
                     </div>
+
                     <div>
                         <div class=" d-flex flex-start gap-2 p-3"> Game: {{ formatAddress(zkAppAddress) }}
                             <CopyToClipBoard :text="zkAppAddress" />
@@ -78,6 +79,7 @@ import { formatAddress } from '@/utils'
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 import { cluesColors } from '@/constants/colors';
 import PenalizePlayerForm from './forms/PenalizePlayerForm.vue';
+import Test from './Test.vue';
 
 const { submitGameProof } = useZkAppStore()
 const { zkAppAddress, zkProofStates, zkAppStates } = storeToRefs(useZkAppStore())
@@ -88,12 +90,9 @@ const guesses = ref<Array<AvailableColor[]>>(
     zkProofStates.value?.guessesHistory
 );
 const clues = computed<Array<AvailableColor>>(() => zkProofStates.value?.cluesHistory);
-const selectedColor = ref<AvailableColor>({ color: "#222", value: 0 })
-const handlePickColor = (pickedColor: AvailableColor) => {
-    selectedColor.value = pickedColor
-}
-const handleSetColor = (index: number, row: number) => {
-    guesses.value[row][index] = { ...selectedColor.value }
+
+const handleSetColor = (payload: {index:number,selectedColor:AvailableColor}, row: number) => {
+    guesses.value[row][payload.index] = { ...payload.selectedColor }
 }
 const handleSubmitGameProof = async () => {
     await submitGameProof()
