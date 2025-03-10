@@ -1,3 +1,4 @@
 node_modules
 zkAppCache
 dist
+.env

@@ -8,6 +8,7 @@ import {
   separateTurnCountAndMaxAttemptSolved,
   deserializeCombinationHistory,
   deserializeClueHistory,
+  checkIfSolved
 } from './utils.js';
 
 export {
@@ -21,4 +22,5 @@ export {
   separateTurnCountAndMaxAttemptSolved,
   deserializeCombinationHistory,
   deserializeClueHistory,
+  checkIfSolved
 };

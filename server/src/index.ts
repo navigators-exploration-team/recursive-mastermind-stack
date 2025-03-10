@@ -1,10 +1,11 @@
 import express from "express";
 import { WebSocketServer, WebSocket } from "ws";
 import { StepProgramProof } from "mina-mastermind";
+import { checkGameProgress, setupContract } from "./zkAppHandler.js";
 
 const app = express();
 const PORT = 3000;
-
+setupContract();
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -15,7 +16,7 @@ const games = new Map<
   string,
   {
     players: Set<WebSocket>;
-    lastProof: StepProgramProof | null;
+    lastProof: string | null;
   }
 >();
 
@@ -42,15 +43,14 @@ wss.on("connection", (ws) => {
           ws.send(JSON.stringify({ zkProof: lastProof }));
         }
       } else if (action === "sendProof") {
+        let receivedProof = null;
         try {
           if (!zkProof) {
             ws.send(JSON.stringify({ error: "Missing zkProof!" }));
             return;
           }
 
-          const receivedProof = await StepProgramProof.fromJSON(
-            JSON.parse(zkProof)
-          );
+          receivedProof = await StepProgramProof.fromJSON(JSON.parse(zkProof));
           receivedProof.verify();
         } catch (e) {
           ws.send(JSON.stringify({ error: "Invalid zkProof!" }));
@@ -62,6 +62,8 @@ wss.on("connection", (ws) => {
           ws.send(JSON.stringify({ error: "Game not found!" }));
           return;
         }
+        await checkGameProgress(gameId, receivedProof);
+
         game.lastProof = zkProof;
         games.set(gameId, game);
         game.players.forEach((player) => {
