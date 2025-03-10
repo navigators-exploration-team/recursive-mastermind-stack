@@ -32,7 +32,7 @@ import CodePickerForm from "./forms/CodePickerForm.vue";
 import { validateColorCombination } from "../utils";
 import { ElMessage } from "element-plus";
 const { createGuessProof, createGiveClueProof } = useZkAppStore();
-const { zkAppStates, error, zkProofStates } = storeToRefs(useZkAppStore());
+const { error, zkProofStates } = storeToRefs(useZkAppStore());
 
 
 const inputRefs = ref<(InstanceType<typeof RoundedColor> | null)[]>([]);

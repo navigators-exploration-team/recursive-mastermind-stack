@@ -4,12 +4,9 @@
             <label class="mb-2">Secret Code</label>
             <div class="board__container w-100">
                 <div class="d-flex gap-2 p-2 justify-content-center w-100">
-                    <RoundedColor height="40px" width="40px" v-for="(secret, index) in secretCode"
-                        :bg-color="secret.color" @click="handleSetSecretCode(index)" :value="secret.value" />
-                </div>
-                <div class="color-picker__container d-flex justify-content-center gap-3 p-2">
-                    <RoundedColor height="40px" width="40px" v-for="el in availableColors" :bg-color="el.color"
-                        :value="el.value" @click="handlePickColor(el)" />
+                    <RoundedColor height="40px" width="40px" editable v-for="(secret, index) in secretCode"
+                        :bg-color="secret.color" :value="secret.value" @input="handleSetSecretCode($event, index)"
+                        @focusNext="focusNextInput(index)" @focusPrev="focusPrevInput(index)" ref="inputRefs" />
                 </div>
             </div>
         </div>
@@ -28,9 +25,8 @@
     </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { AvailableColor } from '@/types';
-import { availableColors } from '@/constants/colors';
 import { Field } from 'o1js';
 import RoundedColor from '@/components/RoundedColor.vue';
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
@@ -50,9 +46,22 @@ const props = defineProps({
     }
 })
 const emit = defineEmits(['submit'])
-const handlePickColor = (pickedColor: AvailableColor) => {
-    selectedColor.value = pickedColor
-}
+
+const inputRefs = ref<(InstanceType<typeof RoundedColor> | null)[]>([]);
+
+const focusNextInput = (index: number) => {
+    if (index < inputRefs.value.length - 1) {
+        nextTick(() => inputRefs.value[index + 1]?.focus());
+    }
+};
+
+const focusPrevInput = (index: number) => {
+    if (index > 0) {
+        nextTick(() => inputRefs.value[index - 1]?.focus());
+    }
+};
+
+
 
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 
@@ -76,7 +85,6 @@ const rules = ref({
     ]
 });
 
-const selectedColor = ref<AvailableColor>({ color: "#222", value: 0 });
 const form = ref({
     randomSalt: props.isRandomSalt ? generateRandomSalt(20)
         : localStorage.getItem('randomSalt')
@@ -91,8 +99,8 @@ const secretCode = ref<Array<AvailableColor>>(
 const combinationValidation = computed(() => {
     return validateColorCombination(secretCode.value)
 })
-const handleSetSecretCode = (index: number) => {
-    secretCode.value[index] = { ...selectedColor.value };
+const handleSetSecretCode = (selectedColor: AvailableColor, index: number) => {
+    secretCode.value[index] = { ...selectedColor };
 };
 const handleSubmitForm = () => {
     if (!ruleFormRef.value) return;
