@@ -4,7 +4,8 @@
             <label>Player Public Key</label>
             <el-input size="large" v-model="form.penalizedPlayer"></el-input>
         </el-form-item>
-        <el-button size="large" type="primary" class="w-100" @click="handlePenalize">Penalize Player</el-button>
+        <el-button size="large" type="primary" :loading="loading" class="w-100 penalize-btn"
+            @click="handlePenalize">Penalize Player</el-button>
     </el-form>
 </template>
 <script lang="ts" setup>
@@ -14,7 +15,7 @@ import { PublicKey } from 'o1js';
 import { useZkAppStore } from '@/store/zkAppModule';
 import { storeToRefs } from 'pinia';
 const { penalizePlayerTransaction } = useZkAppStore();
-const {error} = storeToRefs(useZkAppStore())
+const { error, loading } = storeToRefs(useZkAppStore())
 const form = ref({
     penalizedPlayer: ""
 })
@@ -54,3 +55,10 @@ const handlePenalize = async () => {
 
 
 </script>
+<style scoped>
+.penalize-btn {
+    background-color: #FF4D4D;
+    color: white;
+    border: white;
+}
+</style>

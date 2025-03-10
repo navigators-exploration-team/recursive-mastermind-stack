@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
 import ZkappWorkerClient from "../zkappWorkerClient";
 import { WebSocketService } from "../services/websocket";
-import { StepProgramProof } from "mina-mastermind";
 import { serializeSecret } from "../utils";
 
 export interface SignedData {
@@ -47,6 +46,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
     compiled: false,
     zkAppAddress: null as null | string,
     webSocketInstance: null as null | WebSocketService,
+    userRole: null as null | string,
   }),
   getters: {},
   actions: {
@@ -81,6 +81,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
               const newAccounts = await window.mina?.requestAccounts();
               this.publicKeyBase58 = newAccounts?.[0];
             }
+            await this.getRole();
           });
           console.log("setup completed...");
           this.error = null;
@@ -126,21 +127,19 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         await this.getZkProofStates();
       });
     },
-    async signFields(content: object): Promise<SignedData | null> {
-      let signedData = null;
+    async signFields(content: object): Promise<SignedData> {
       try {
-        this.loading = true;
         this.stepDisplay = "Signing a message...";
-        signedData = await (window as any).mina.signFields({
+
+        const signedData = await (window as any).mina.signFields({
           message: content,
         });
+
         this.stepDisplay = "";
-        this.error = null;
-      } catch (err: any) {
-        this.error = err?.message || err;
-        console.log("error ", err);
-      } finally {
         return signedData;
+      } catch (err: any) {
+        console.log("error ", err);
+        throw new Error(err?.message || "Signing failed");
       }
     },
     async createInitGameTransaction(
@@ -155,47 +154,52 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         this.stepDisplay = "Creating a transaction...";
         const combination = serializeSecret(separatedSecretCombination);
         const signedData = await this.signFields([combination, salt]);
-        if (signedData) {
-          this.zkAppAddress =
-            await this.zkappWorkerClient!.createInitGameTransaction(
-              this.publicKeyBase58,
-              combination,
-              salt,
-              maxAttempts,
-              refereePubKeyBase58,
-              rewardAmount
-            );
-          this.stepDisplay = "Creating proof...";
-          await this.zkappWorkerClient!.proveTransaction();
-          this.stepDisplay = "Getting transaction JSON...";
-          const transactionJSON =
-            await this.zkappWorkerClient!.getTransactionJSON();
-          this.stepDisplay = "Requesting send transaction...";
-          const { hash } = await (window as any).mina.sendTransaction({
-            transaction: transactionJSON,
-            feePayer: {
-              fee: TRANSACTION_FEE,
-              memo: "",
-            },
-          });
-          await this.joinGame(); 
 
-          const res = await this.zkappWorkerClient!.sendNewGameProof(
-            signedData,
+        this.zkAppAddress =
+          await this.zkappWorkerClient!.createInitGameTransaction(
+            this.publicKeyBase58,
             combination,
-            salt
+            salt,
+            maxAttempts,
+            refereePubKeyBase58,
+            rewardAmount
           );
-          this.webSocketInstance?.sendProof(JSON.stringify(res));
-        }
+
+        this.stepDisplay = "Creating proof...";
+        await this.zkappWorkerClient!.proveTransaction();
+
+        this.stepDisplay = "Getting transaction JSON...";
+        const transactionJSON =
+          await this.zkappWorkerClient!.getTransactionJSON();
+
+        this.stepDisplay = "Requesting send transaction...";
+        const { hash } = await (window as any).mina.sendTransaction({
+          transaction: transactionJSON,
+          feePayer: {
+            fee: TRANSACTION_FEE,
+            memo: "",
+          },
+        });
+
+        await this.joinGame();
+
+        const res = await this.zkappWorkerClient!.sendNewGameProof(
+          signedData,
+          combination,
+          salt
+        );
+        this.webSocketInstance?.sendProof(JSON.stringify(res));
+
         this.stepDisplay = "";
         this.error = null;
       } catch (err: any) {
         this.error = err?.message || err;
         console.log("error ", err);
+        return null;
       } finally {
         this.loading = false;
-        return this.zkAppAddress;
       }
+      return this.zkAppAddress;
     },
     async createGuessProof(code: number[]) {
       try {
@@ -287,7 +291,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
     },
     async getZkAppStates() {
       try {
-        console.log("fetching zkApp states ...")
+        console.log("fetching zkApp states ...");
         this.zkAppStates = await this.zkappWorkerClient!.getZkAppStates();
         this.error = null;
       } catch (err: any) {
@@ -335,7 +339,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         this.loading = false;
       }
     },
-    async penalizePlayerTransaction(playerPubKeyBase58:string) {
+    async penalizePlayerTransaction(playerPubKeyBase58: string) {
       try {
         this.loading = true;
         this.stepDisplay = "Creating a transaction...";
@@ -364,6 +368,11 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       } finally {
         this.loading = false;
       }
+    },
+    async getRole() {
+      this.userRole = await this.zkappWorkerClient!.getUserRole(
+        this.publicKeyBase58
+      );
     },
   },
 });

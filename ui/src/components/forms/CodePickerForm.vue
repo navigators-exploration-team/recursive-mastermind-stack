@@ -18,9 +18,12 @@
                     <CopyToClipBoard :text="form.randomSalt || ''" />
                 </div>
             </el-form-item>
-            <el-button size="large" type="primary" :disabled="!combinationValidation.isValid"
-                :title="combinationValidation.message" @click="handleSubmitForm" class="my-5 w-100">{{ btnText
-                }}</el-button>
+            <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
+                <el-button size="large" type="primary" :disabled="!combinationValidation.isValid || !compiled"
+                    :loading="!compiled || loading" :title="combinationValidation.message" @click="handleSubmitForm"
+                    class="my-5 w-100">{{ btnText
+                    }}</el-button>
+            </el-tooltip>
         </el-form>
     </div>
 </template>
@@ -32,6 +35,10 @@ import RoundedColor from '@/components/RoundedColor.vue';
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 import { generateRandomSalt, validateColorCombination } from '../../utils';
 import { ElForm } from 'element-plus';
+import { storeToRefs } from 'pinia';
+import { useZkAppStore } from '@/store/zkAppModule';
+
+const { compiled, loading } = storeToRefs(useZkAppStore())
 
 
 const props = defineProps({

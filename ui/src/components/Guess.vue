@@ -12,9 +12,10 @@
             </div>
         </div>
         <div v-if="isCurrentRound">
-            <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn">Verify</el-button>
+            <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn"
+                :loading="loading">Verify</el-button>
             <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
-                :title="combinationValidation.message" v-else>Check</el-button>
+                :title="combinationValidation.message" :loading="loading" v-else>Check</el-button>
         </div>
         <el-dialog v-model="isVerifyGuessModalOpen" modal-class="dialog-class" custom-class="dialog-class"
             style="padding: 0px!important;" destroy-on-close width="80%">
@@ -32,7 +33,7 @@ import CodePickerForm from "./forms/CodePickerForm.vue";
 import { validateColorCombination } from "../utils";
 import { ElMessage } from "element-plus";
 const { createGuessProof, createGiveClueProof } = useZkAppStore();
-const { error, zkProofStates } = storeToRefs(useZkAppStore());
+const { error, zkProofStates, loading } = storeToRefs(useZkAppStore());
 
 
 const inputRefs = ref<(InstanceType<typeof RoundedColor> | null)[]>([]);

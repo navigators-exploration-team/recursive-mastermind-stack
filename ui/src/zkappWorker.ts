@@ -8,6 +8,7 @@ import {
   Signature,
   Cache,
   UInt64,
+  Poseidon,
 } from "o1js";
 import {
   MastermindZkApp,
@@ -186,12 +187,17 @@ const functions = {
   getZkAppStates: async (args: {}) => {
     const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
     await fetchAccount({ publicKey });
-    const [codeBreakerId, rewardFinalizeSlot, turnCountMaxAttemptsIsSolved] =
-      await Promise.all([
-        state.zkappInstance!.codeBreakerId.get(),
-        state.zkappInstance!.rewardFinalizeSlot.get(),
-        state.zkappInstance!.turnCountMaxAttemptsIsSolved.get(),
-      ]);
+    const [
+      codeMasterId,
+      codeBreakerId,
+      rewardFinalizeSlot,
+      turnCountMaxAttemptsIsSolved,
+    ] = await Promise.all([
+      state.zkappInstance!.codeMasterId.get(),
+      state.zkappInstance!.codeBreakerId.get(),
+      state.zkappInstance!.rewardFinalizeSlot.get(),
+      state.zkappInstance!.turnCountMaxAttemptsIsSolved.get(),
+    ]);
     const { rewardAmount, finalizeSlot } =
       separateRewardAndFinalizeSlot(rewardFinalizeSlot);
     let [turnCount, maxAttempts, isSolved] =
@@ -201,6 +207,7 @@ const functions = {
       rewardAmount: rewardAmount.toString(),
       finalizeSlot: finalizeSlot.toString(),
       codeBreakerId: codeBreakerId.toString(),
+      codeMasterId: codeMasterId.toString(),
       turnCount: turnCount.toString(),
       maxAttempts: maxAttempts.toString(),
       isSolved: isSolved.toString(),
@@ -231,6 +238,21 @@ const functions = {
     }
     return null;
   },
+  getUserRole: async (args: { playerPubKeyBase58: string }) => {
+    const publicKey = PublicKey.fromBase58(args.playerPubKeyBase58 as string);
+    await fetchAccount({ publicKey });
+    const playerId = Poseidon.hash(publicKey.toFields());
+    const [codeMasterId, codeBreakerId] = await Promise.all([
+      state.zkappInstance!.codeMasterId.get(),
+      state.zkappInstance!.codeBreakerId.get(),
+    ]);
+
+    return playerId.toString() === codeMasterId.toString()
+      ? "CODE_MASTER"
+      : playerId.toString() === codeBreakerId.toString()
+      ? "CODE_BREAKER"
+      : "UNKNOWN";
+  },
   setLastProof: async (args: { zkProof: any }) => {
     state.lastProof = await StepProgramProof.fromJSON(JSON.parse(args.zkProof));
   },
@@ -248,11 +270,11 @@ const functions = {
     penalizedPlayerPubKeyBase58: string;
   }) => {
     const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
-    const penalizedPlayerPubKey = PublicKey.fromBase58(args.penalizedPlayerPubKeyBase58);
-    const transaction = await Mina.transaction(feePayerPublickKey,async () => {
-      await state.zkappInstance!.forfeitWin(
-        penalizedPlayerPubKey
-      );
+    const penalizedPlayerPubKey = PublicKey.fromBase58(
+      args.penalizedPlayerPubKeyBase58
+    );
+    const transaction = await Mina.transaction(feePayerPublickKey, async () => {
+      await state.zkappInstance!.forfeitWin(penalizedPlayerPubKey);
     });
     state.transaction = transaction;
     state.transaction!.send();

@@ -98,6 +98,11 @@ export default class ZkappWorkerClient {
   async getZkProofStates() {
     return await this._call("getZkProofStates", {});
   }
+  async getUserRole(playerPubKeyBase58: string) {
+    return (await this._call("getUserRole", {
+      playerPubKeyBase58,
+    })) as Promise<string>;
+  }
   async setLastProof(zkProof: any) {
     return this._call("setLastProof", { zkProof });
   }
