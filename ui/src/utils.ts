@@ -2,7 +2,7 @@ import {
   deserializeClueHistory,
   deserializeCombinationHistory,
   validateCombination,
-} from "mina-mastermind";
+} from "mina-mastermind-recursive";
 import { availableColors, cluesColors } from "./constants/colors";
 import { AvailableColor } from "./types";
 import { Field, Cache } from "o1js";

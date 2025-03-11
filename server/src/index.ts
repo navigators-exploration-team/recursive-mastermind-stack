@@ -1,7 +1,7 @@
 import express from "express";
 import { WebSocketServer, WebSocket } from "ws";
-import { StepProgramProof } from "mina-mastermind";
 import { checkGameProgress, setupContract } from "./zkAppHandler.js";
+import { StepProgramProof } from "mina-mastermind-recursive";
 
 const app = express();
 const PORT = 3000;
@@ -52,6 +52,11 @@ wss.on("connection", (ws) => {
 
           receivedProof = await StepProgramProof.fromJSON(JSON.parse(zkProof));
           receivedProof.verify();
+          if (
+            Number(receivedProof.publicOutput.turnCount.toString()) % 2 !== 0
+          ) {
+            await checkGameProgress(gameId, receivedProof);
+          }
         } catch (e) {
           ws.send(JSON.stringify({ error: "Invalid zkProof!" }));
           return;
@@ -62,7 +67,6 @@ wss.on("connection", (ws) => {
           ws.send(JSON.stringify({ error: "Game not found!" }));
           return;
         }
-        await checkGameProgress(gameId, receivedProof);
 
         game.lastProof = zkProof;
         games.set(gameId, game);
