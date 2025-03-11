@@ -5,10 +5,10 @@
                 <RoundedColor :bgColor="el.color" :value="el.value" :title="el.title" width="18px" height="18px" />
             </div>
         </div>
-        <div class="gameplay__container d-flex flex-column align-items-center w-100 h-100">
+        <div class="gameplay__container d-flex flex-column align-items-center w-100 h-100 mt-2">
             <div class="w-100 d-flex justify-content-start">
                 <template
-                    v-if="!(zkAppStates.isSolved === 'true' || zkProofStates?.turnCount > zkAppStates?.maxAttempts * 2)">
+                    v-if="!(isGameSolved || zkProofStates?.turnCount > zkAppStates?.maxAttempts * 2)">
                     <div class="d-flex align-items-center justify-content-between w-100">
                         <div class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
                             v-if="isCodeMasterTurn">
@@ -28,14 +28,12 @@
                 </template>
                 <template v-else>
                     <div class="w-100 d-flex align-items-center justify-content-between">
-                        <div v-if="zkAppStates.isSolved === 'true'" class="my-4">
+                        <div v-if="isGameSolved" class="my-4">
                             The code breaker has won!
                         </div>
                         <div v-else-if="zkProofStates.turnCount > zkAppStates.maxAttempts * 2" class="my-4">
                             The code master has won!
                         </div>
-                        <el-button size="large" type="primary" @click="handleSubmitGameProof">Submit game
-                            proof</el-button>
                     </div>
 
                 </template>
@@ -79,7 +77,6 @@ import { formatAddress } from '@/utils'
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 import { cluesColors } from '@/constants/colors';
 import PenalizePlayerForm from './forms/PenalizePlayerForm.vue';
-import Test from './Test.vue';
 
 const { submitGameProof } = useZkAppStore()
 const { zkAppAddress, zkProofStates, zkAppStates } = storeToRefs(useZkAppStore())
@@ -89,14 +86,12 @@ const isCodeMasterTurn = computed(() => {
 const guesses = ref<Array<AvailableColor[]>>(
     zkProofStates.value?.guessesHistory
 );
-const clues = computed<Array<AvailableColor>>(() => zkProofStates.value?.cluesHistory);
+const clues = computed<Array<AvailableColor[]>>(() => zkProofStates.value?.cluesHistory);
 
 const handleSetColor = (payload: {index:number,selectedColor:AvailableColor}, row: number) => {
     guesses.value[row][payload.index] = { ...payload.selectedColor }
 }
-const handleSubmitGameProof = async () => {
-    await submitGameProof()
-}
+
 const isPenalizeDialogVisible = ref(false)
 const handleShowPenalizeDialog = () => {
     isPenalizeDialogVisible.value = true
@@ -104,6 +99,9 @@ const handleShowPenalizeDialog = () => {
 const closePenalizePlayerDialog = () => {
     isPenalizeDialogVisible.value = false
 }
+const isGameSolved = computed(()=> {
+    return clues.value?.some((clue:AvailableColor[]) => clue?.every((el:AvailableColor) => el.value === 2))
+})
 watch(() => zkProofStates.value?.turnCount, () => {
     guesses.value = zkProofStates.value.guessesHistory
 })

@@ -24,14 +24,22 @@ import { ElMessage } from 'element-plus';
 import { formatAddress } from '@/utils'
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 import { onMounted } from "vue";
+import { ElNotification } from 'element-plus';
 
-const { zkAppStates, loading, error, zkAppAddress, userRole } = storeToRefs(useZkAppStore())
+const { zkAppStates, loading, error, zkAppAddress, userRole, currentTransactionLink } = storeToRefs(useZkAppStore())
 const { acceptGame, getRole } = useZkAppStore()
 
 const handleAcceptGame = async () => {
     await acceptGame()
     if (error.value) {
         ElMessage.error({ message: error.value, duration: 6000 });
+    } else {
+        ElNotification({
+            title: 'Success',
+            message: `Transaction Hash :  ${currentTransactionLink.value}`,
+            type: 'success',
+            duration: 5000
+        })
     }
 }
 onMounted(async () => {

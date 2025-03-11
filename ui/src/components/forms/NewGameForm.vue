@@ -33,9 +33,12 @@ import { ElForm, ElMessage } from 'element-plus';
 import { CodePicker } from '@/types';
 import { GameParams } from '../../types';
 import { PublicKey } from 'o1js';
-const { zkAppAddress, compiled, error } = storeToRefs(useZkAppStore())
+import { ElNotification } from 'element-plus';
+
+const { zkAppAddress, error, currentTransactionLink } = storeToRefs(useZkAppStore())
 const router = useRouter()
 const { createInitGameTransaction } = useZkAppStore()
+
 const game = ref<GameParams>({
     maxAttempts: null,
     rewardAmount: null,
@@ -101,11 +104,17 @@ const handleInitGame = async (formData: CodePicker) => {
                 formData.randomSalt,
                 game.value.maxAttempts,
                 game.value.refereePubKeyBase58,
-                game.value.rewardAmount
+                game.value.rewardAmount! *  1e9
             )
             if (error.value) {
                 ElMessage.error({ message: error.value, duration: 6000 });
             } else {
+                ElNotification({
+                    title: 'Success',
+                    message: `Transaction Hash : ${currentTransactionLink.value}`,
+                    type: 'success',
+                    duration: 5000
+                })
                 router.push({
                     name: "gameplay", params: {
                         id: zkAppAddress.value

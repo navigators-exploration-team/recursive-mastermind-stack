@@ -180,6 +180,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             memo: "",
           },
         });
+        this.currentTransactionLink=hash
 
         await this.joinGame();
 
@@ -276,6 +277,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             memo: "",
           },
         });
+        this.currentTransactionLink=hash
         this.stepDisplay = "";
         this.error = null;
       } catch (err: any) {
@@ -329,6 +331,8 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             memo: "",
           },
         });
+        console.log(hash,"hash")
+        this.currentTransactionLink=hash
         await this.joinGame();
         this.stepDisplay = "";
         this.error = null;
@@ -360,6 +364,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             memo: "",
           },
         });
+        this.currentTransactionLink=hash
         this.stepDisplay = "";
         this.error = null;
       } catch (err: any) {
