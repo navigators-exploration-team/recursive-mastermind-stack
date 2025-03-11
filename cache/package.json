@@ -9,7 +9,8 @@
     "start": "node dist/cache.js"
   },
   "dependencies": {
-    "o1js": "2.2.0"
+    "o1js": "2.2.0",
+    "mina-mastermind-recursive": "0.1.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",

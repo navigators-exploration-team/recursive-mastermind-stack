@@ -1,6 +1,6 @@
 import { Cache } from "o1js";
 import fs from "fs";
-import { MastermindZkApp, StepProgram } from "mina-mastermind";
+import { MastermindZkApp, StepProgram } from "mina-mastermind-recursive";
 
 const cacheZkApp = async () => {
   const zkAppCache: Cache = Cache.FileSystem("./zkAppCache");
