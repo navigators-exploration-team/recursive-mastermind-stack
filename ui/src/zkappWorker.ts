@@ -16,7 +16,7 @@ import {
   separateTurnCountAndMaxAttemptSolved,
   StepProgram,
   StepProgramProof,
-} from "mina-mastermind";
+} from "mina-mastermind-recursive";
 import {
   fetchZkAppCacheFiles,
   fetchZkProgramCacheFiles,
@@ -45,14 +45,12 @@ const state = {
 const functions = {
   setActiveInstanceToLightnet: async () => {
     const network = Mina.Network({
-      mina: "http://localhost:8080/graphql",
-      archive: "http://127.0.0.1:8282",
-      lightnetAccountManager: "http://localhost:8181",
+      mina: import.meta.env.VITE_MINA_NETWORK_URL,
     });
     Mina.setActiveInstance(network);
   },
   loadContract: async (args: {}) => {
-    const { MastermindZkApp } = await import("mina-mastermind");
+    const { MastermindZkApp } = await import("mina-mastermind-recursive");
     state.MastermindContract = MastermindZkApp;
   },
   compileContract: async (args: {}) => {

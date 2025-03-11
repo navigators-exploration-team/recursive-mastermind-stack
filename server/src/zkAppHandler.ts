@@ -1,20 +1,19 @@
+import { fetchAccount, Mina, PrivateKey, PublicKey } from "o1js";
+import dotenv from "dotenv";
 import {
   checkIfSolved,
   deserializeClue,
   MastermindZkApp,
   separateTurnCountAndMaxAttemptSolved,
-  StepProgram, 
+  StepProgram,
   StepProgramProof,
-} from "mina-mastermind";
-import { fetchAccount, Mina, PrivateKey, PublicKey } from "o1js";
-import dotenv from "dotenv";
+} from "mina-mastermind-recursive";
 dotenv.config();
 
 export const setupContract = async () => {
   const network = Mina.Network({
-    mina: "http://localhost:8080/graphql",
-    lightnetAccountManager: "http://localhost:8181",
-  });
+    mina: process.env.MINA_NETWORK_URL as string,
+  }); 
   Mina.setActiveInstance(network);
   console.time("compiling");
   await StepProgram.compile();
@@ -34,15 +33,14 @@ export async function checkGameProgress(
       const turnCountMaxAttemptsIsSolved =
         await zkApp.turnCountMaxAttemptsIsSolved.get();
 
-      const [_, maxAttempts, isSolved] =
-         separateTurnCountAndMaxAttemptSolved(
-          turnCountMaxAttemptsIsSolved
-        );
+      const [_, maxAttempts, isSolved] = separateTurnCountAndMaxAttemptSolved(
+        turnCountMaxAttemptsIsSolved
+      );
       const turnCount = zkProof.publicOutput.turnCount.toString();
       const deserializedClue = deserializeClue(
         zkProof.publicOutput.serializedClue
       );
-      const isGameSolved =  checkIfSolved(deserializedClue);
+      const isGameSolved = checkIfSolved(deserializedClue);
       if (
         Number(maxAttempts.toString()) * 2 < Number(turnCount) ||
         isGameSolved.toString() === "true"
@@ -55,13 +53,13 @@ export async function checkGameProgress(
         const transaction = await Mina.transaction(
           {
             sender: senderPublicKey,
-            fee: 0.1,
+            fee: 1e8,
           },
           async () => {
             await zkApp.submitGameProof(zkProof);
           }
         );
-
+        console.log("transaction... ")
         await transaction.prove();
         transaction.sign([senderPrivateKey]);
         const pendingTx = await transaction.send();

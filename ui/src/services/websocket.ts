@@ -1,4 +1,4 @@
-import { StepProgramProof } from "mina-mastermind";
+import { StepProgramProof } from "mina-mastermind-recursive";
 
 export class WebSocketService {
   ws: WebSocket | null = null;
@@ -12,7 +12,7 @@ export class WebSocketService {
   connect() {
     if (this.ws) return;
 
-    this.ws = new WebSocket("ws://localhost:3000");
+    this.ws = new WebSocket(import.meta.env.VITE_WEB_SOCKET_URL);
 
     this.ws.onopen = () => {
       this.send({ action: "join", gameId: this.gameId });
