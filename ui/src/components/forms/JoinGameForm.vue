@@ -23,7 +23,6 @@ import { useZkAppStore } from '@/store/zkAppModule';
 const router = useRouter()
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const { compiled } = storeToRefs(useZkAppStore())
-const { joinGame } = useZkAppStore()
 
 const rules = ref({
     gameAddress: [

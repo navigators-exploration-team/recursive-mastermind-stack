@@ -2,6 +2,7 @@ import express from "express";
 import { WebSocketServer, WebSocket } from "ws";
 import { checkGameProgress, setupContract } from "./zkAppHandler.js";
 import { StepProgramProof } from "mina-mastermind-recursive";
+import { getGame, saveGame } from "./kvStorageService.js";
 
 const app = express();
 const PORT = 3000;
@@ -12,13 +13,7 @@ const server = app.listen(PORT, () => {
 
 const wss = new WebSocketServer({ server });
 
-const games = new Map<
-  string,
-  {
-    players: Set<WebSocket>;
-    lastProof: string | null;
-  }
->();
+const activePlayers = new Map<string, Set<WebSocket>>();
 
 wss.on("connection", (ws) => {
   ws.on("message", async (message) => {
@@ -26,53 +21,49 @@ wss.on("connection", (ws) => {
       const data = JSON.parse(message.toString());
       const { gameId, action, zkProof } = data;
 
-      let lastProof = zkProof;
       if (!gameId || !action) {
         ws.send(JSON.stringify({ error: "Bad request!" }));
         return;
       }
       if (action === "join") {
-        if (!games.has(gameId)) {
-          games.set(gameId, { players: new Set([ws]), lastProof });
-        } else {
-          const game = games.get(gameId)!;
-          lastProof = game.lastProof;
-          game.players.add(ws);
+        let game = await getGame(gameId);
+        let lastProof = game?.lastProof || null;
+        let timestamp = game?.timestamp || null;
+        if (!activePlayers.has(gameId)) {
+          activePlayers.set(gameId, new Set());
         }
+        activePlayers.get(gameId)?.add(ws);
         if (lastProof) {
-          ws.send(JSON.stringify({ zkProof: lastProof }));
+          ws.send(JSON.stringify({ zkProof: lastProof, timestamp }));
         }
       } else if (action === "sendProof") {
-        let receivedProof = null;
-        try {
-          if (!zkProof) {
-            ws.send(JSON.stringify({ error: "Missing zkProof!" }));
-            return;
-          }
 
+        if (!zkProof) {
+          ws.send(JSON.stringify({ error: "Missing zkProof!" }));
+          return;
+        }
+
+        let receivedProof;
+        try {
           receivedProof = await StepProgramProof.fromJSON(JSON.parse(zkProof));
           receivedProof.verify();
           if (
-            Number(receivedProof.publicOutput.turnCount.toString()) % 2 !== 0
+            Number(receivedProof.publicOutput.turnCount.toString()) % 2 !==
+            0
           ) {
             await checkGameProgress(gameId, receivedProof);
           }
         } catch (e) {
           ws.send(JSON.stringify({ error: "Invalid zkProof!" }));
           return;
-        }
+        } 
 
-        const game = games.get(gameId);
-        if (!game) {
-          ws.send(JSON.stringify({ error: "Game not found!" }));
-          return;
-        }
-
-        game.lastProof = zkProof;
-        games.set(gameId, game);
-        game.players.forEach((player) => {
+        const timestamp = Date.now();
+        await saveGame(gameId, { lastProof: zkProof, timestamp });
+        const players = activePlayers.get(gameId) || new Set();
+        players.forEach((player: WebSocket) => {
           if (player !== ws) {
-            player.send(JSON.stringify({ zkProof }));
+            player.send(JSON.stringify({ zkProof, timestamp }));
           }
         });
       } else {
@@ -84,9 +75,12 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("close", () => {
-    for (const [_, game] of games) {
-      game.players.delete(ws);
-    }
+    activePlayers.forEach((players, gameId) => {
+      players.delete(ws);
+      if (players.size === 0) {
+        activePlayers.delete(gameId);
+      }
+    });
   });
 
   ws.on("error", (err) => {

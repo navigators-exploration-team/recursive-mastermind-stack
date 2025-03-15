@@ -55,7 +55,7 @@ const focus = () => {
     });
 };
 
-defineExpose({ focus }); // Make the function accessible from the parent
+defineExpose({ focus });
 
 const handleInput = (value: string) => {
     const selectedColor = availableColors.find((c) => c.value === Number(value));
