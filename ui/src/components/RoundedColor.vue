@@ -11,7 +11,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { defineProps, nextTick, ref } from 'vue'
+import { nextTick, ref } from 'vue'
 import { availableColors } from '../constants/colors';
 const props = defineProps({
     value: {

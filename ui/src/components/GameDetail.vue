@@ -13,8 +13,16 @@
             </div>
 
         </div>
-        <el-button v-else size="large" :disabled="loading" :loading="loading" type="primary" class="w-100"
-            @click="handleAcceptGame">Accept game</el-button>
+        <el-button v-else-if="!isLastAcceptedGame" size="large" :disabled="loading" :loading="loading" type="primary"
+            class="w-100" @click="handleAcceptGame">Accept game</el-button>
+        <div class="d-flex align-items-end gap-2" v-else>
+            Waiting for the game to start
+            <div class="dots mb-1">
+                <span class="dot" v-for="(dot, index) in 3" :key="index"
+                    :style="{ animationDelay: `${index * 0.3}s` }"></span>
+            </div>
+
+        </div>
     </div>
 </template>
 <script lang="ts" setup>
@@ -23,14 +31,19 @@ import { storeToRefs } from "pinia";
 import { ElMessage } from 'element-plus';
 import { formatAddress } from '@/utils'
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
-import { onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { ElNotification } from 'element-plus';
+import { useRoute } from "vue-router";
 
 const { zkAppStates, loading, error, zkAppAddress, userRole, currentTransactionLink } = storeToRefs(useZkAppStore())
 const { acceptGame, getRole } = useZkAppStore()
-
+const acceptedGameId = ref()
+const route = useRoute()
 const handleAcceptGame = async () => {
+
     await acceptGame()
+    acceptedGameId.value = route?.params?.id
+    localStorage.setItem("lastAcceptedGame", acceptedGameId.value)
     if (error.value) {
         ElMessage.error({ message: error.value, duration: 6000 });
     } else {
@@ -42,8 +55,13 @@ const handleAcceptGame = async () => {
         })
     }
 }
+const isLastAcceptedGame = computed(() => {
+    return acceptedGameId.value === route?.params?.id
+})
 onMounted(async () => {
     await getRole()
+    acceptedGameId.value = localStorage.getItem("lastAcceptedGame")
+
 })
 </script>
 <style scoped>

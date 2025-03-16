@@ -27,7 +27,6 @@ declare global {
     mina?: MinaWallet;
   }
 }
-const TRANSACTION_FEE = 0.1;
 
 export const useZkAppStore = defineStore("useZkAppModule", {
   state: () => ({
@@ -176,7 +175,6 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         const { hash } = await (window as any).mina.sendTransaction({
           transaction: transactionJSON,
           feePayer: {
-            fee: TRANSACTION_FEE,
             memo: "",
           },
         });
@@ -273,7 +271,6 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         const { hash } = await (window as any).mina.sendTransaction({
           transaction: transactionJSON,
           feePayer: {
-            fee: TRANSACTION_FEE,
             memo: "",
           },
         });
@@ -327,7 +324,6 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         const { hash } = await (window as any).mina.sendTransaction({
           transaction: transactionJSON,
           feePayer: {
-            fee: TRANSACTION_FEE,
             memo: "",
           },
         });
@@ -359,7 +355,6 @@ export const useZkAppStore = defineStore("useZkAppModule", {
         const { hash } = await (window as any).mina.sendTransaction({
           transaction: transactionJSON,
           feePayer: {
-            fee: TRANSACTION_FEE,
             memo: "",
           },
         });
