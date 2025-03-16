@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import ZkappWorkerClient from "../zkappWorkerClient";
-import { WebSocketService } from "../services/websocket";
 import { serializeSecret } from "../utils";
+import { WebSocketService } from "../services/websocket";
 
 export interface SignedData {
   publicKey: string;
@@ -119,8 +119,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       this.webSocketInstance = new WebSocketService(
         gameId ?? (this.zkAppAddress as string)
       );
-      this.webSocketInstance.connect();
-      this.webSocketInstance.onMessage(async (data: any) => {
+      this.webSocketInstance!.setCallback(async (data: any) => {
         await this.setLastProof(data.zkProof);
         await this.getZkAppStates();
         await this.getZkProofStates();
@@ -187,7 +186,11 @@ export const useZkAppStore = defineStore("useZkAppModule", {
           combination,
           salt
         );
-        this.webSocketInstance?.sendProof(JSON.stringify(res));
+        this.webSocketInstance?.send({
+          action: "sendProof",
+          gameId: this.zkAppAddress,
+          zkProof: JSON.stringify(res),
+        });
 
         this.stepDisplay = "";
         this.error = null;
@@ -214,7 +217,11 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             signedData,
             combination
           );
-          this.webSocketInstance?.sendProof(JSON.stringify(res));
+          this.webSocketInstance?.send({
+            action: "sendProof",
+            gameId: this.zkAppAddress,
+            zkProof: JSON.stringify(res),
+          });
           await this.getZkProofStates();
         }
 
@@ -244,7 +251,11 @@ export const useZkAppStore = defineStore("useZkAppModule", {
             combination,
             randomSalt
           );
-          this.webSocketInstance?.sendProof(JSON.stringify(res));
+          this.webSocketInstance?.send({
+            action: "sendProof",
+            gameId: this.zkAppAddress,
+            zkProof: JSON.stringify(res),
+          });
           await this.getZkProofStates();
         }
         this.stepDisplay = "";

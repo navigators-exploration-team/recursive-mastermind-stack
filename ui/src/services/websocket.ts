@@ -1,59 +1,57 @@
+import { useWebSocket } from "@vueuse/core";
 import { StepProgramProof } from "mina-mastermind-recursive";
 
 export class WebSocketService {
-  ws: WebSocket | null = null;
+  socket: ReturnType<typeof useWebSocket>;
   gameId: string;
   onMessageCallback: ((data: any) => void) | null = null;
 
   constructor(gameId: string) {
     this.gameId = gameId;
+
+    this.socket = useWebSocket(import.meta.env.VITE_WEB_SOCKET_URL, {
+      autoReconnect: {
+        retries: 5,
+        delay: 1000,
+        onFailed: () => {
+          console.error("Max reconnection attempts reached!");
+        },
+      },
+      immediate: true,
+      onMessage: async (ws: WebSocket, event: MessageEvent) => {
+        try {
+          const data = JSON.parse(event.data);
+          console.log("Received data:", data);
+          if (data.zkProof) {
+            const receivedProof = await StepProgramProof.fromJSON(
+              JSON.parse(data.zkProof)
+            );
+            receivedProof.verify();
+            if (this.onMessageCallback) this.onMessageCallback(data);
+          }
+        } catch (e) {
+          console.log("Error handling message:", e);
+        }
+      },
+      onConnected: async (ws: WebSocket) => {
+        this.send({ action: "join", gameId });
+      },
+    });
   }
 
-  connect() {
-    if (this.ws) return;
-
-    this.ws = new WebSocket(import.meta.env.VITE_WEB_SOCKET_URL);
-
-    this.ws.onopen = () => {
-      this.send({ action: "join", gameId: this.gameId });
-    };
-
-    this.ws.onmessage = async (event) => {
-      const data = JSON.parse(event.data);
-      console.log("Received data");
-      if (data.zkProof) {
-        const receivedProof = await StepProgramProof.fromJSON(
-          JSON.parse(data.zkProof)
-        );
-        receivedProof.verify();
-        if (this.onMessageCallback) this.onMessageCallback(data);
-      }
-    };
-
-    this.ws.onclose = () => {
-      console.log("WebSocket disconnected");
-      this.ws = null;
-    };
-  }
-
-  send(data: object) {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify(data));
-    }
-  }
-
-  sendProof(proof: string) {
-    this.send({ action: "sendProof", gameId: this.gameId, zkProof: proof });
-  }
-
-  onMessage(callback: (data: any) => void) {
+  setCallback(callback: (data: any) => void) {
     this.onMessageCallback = callback;
   }
 
-  disconnect() {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
+  send(msg: object) {
+    this.socket.send(JSON.stringify(msg));
+  }
+
+  open() {
+    this.socket.open();
+  }
+
+  close() {
+    this.socket.close();
   }
 }

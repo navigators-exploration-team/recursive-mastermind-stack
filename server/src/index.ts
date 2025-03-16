@@ -4,8 +4,8 @@ import { checkGameProgress, setupContract } from "./zkAppHandler.js";
 import { StepProgramProof } from "mina-mastermind-recursive";
 import { getGame, saveGame } from "./kvStorageService.js";
 
-const app = express();
-const PORT = 3000;
+const app = express();   
+const PORT = 3000;    
 setupContract();
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
@@ -14,8 +14,8 @@ const server = app.listen(PORT, () => {
 const wss = new WebSocketServer({ server });
 
 const activePlayers = new Map<string, Set<WebSocket>>();
-
-wss.on("connection", (ws) => {
+              
+wss.on("connection", (ws) => {   
   ws.on("message", async (message) => {
     try {
       const data = JSON.parse(message.toString());
