@@ -1,5 +1,5 @@
 import { useWebSocket } from "@vueuse/core";
-import { StepProgramProof } from "mina-mastermind-recursive";
+import { StepProgramProof } from "@navigators-exploration-team/mina-mastermind"
 
 export class WebSocketService {
   socket: ReturnType<typeof useWebSocket>;

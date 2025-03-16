@@ -7,7 +7,7 @@ import {
   separateTurnCountAndMaxAttemptSolved,
   StepProgram,
   StepProgramProof,
-} from "mina-mastermind-recursive";
+} from "@navigators-exploration-team/mina-mastermind";
 dotenv.config();
 
 export const setupContract = async () => {

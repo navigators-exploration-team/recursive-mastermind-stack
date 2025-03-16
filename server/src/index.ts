@@ -1,7 +1,7 @@
 import express from "express";
 import { WebSocketServer, WebSocket } from "ws";
 import { checkGameProgress, setupContract } from "./zkAppHandler.js";
-import { StepProgramProof } from "mina-mastermind-recursive";
+import { StepProgramProof } from "@navigators-exploration-team/mina-mastermind";
 import { getGame, saveGame } from "./kvStorageService.js";
 
 const app = express();   

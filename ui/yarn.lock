@@ -177,6 +177,11 @@
   resolved "https://registry.yarnpkg.com/@jridgewell/sourcemap-codec/-/sourcemap-codec-1.5.0.tgz#3188bcb273a414b0d215fd22a58540b989b9409a"
   integrity sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==
 
+"@navigators-exploration-team/mina-mastermind@^0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@navigators-exploration-team/mina-mastermind/-/mina-mastermind-0.1.0.tgz#75a568a735345735592c252ffd47da55e012793c"
+  integrity sha512-bYzQHp5xLAk3cpeBAGi2tbNBYjpu2xRRhSz4XLLpyBwqT6GqTSX9JhC9wOx214pSIYevkrTCL5fyJx8wRXh7ig==
+
 "@nuxt/opencollective@^0.3.2":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@nuxt/opencollective/-/opencollective-0.3.3.tgz#80ff0eb8f6fca1d0ed5a089b9688f41bff2dd8ab"
@@ -876,11 +881,6 @@ mime-types@^2.1.12:
   integrity sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==
   dependencies:
     mime-db "1.52.0"
-
-mina-mastermind-recursive@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/mina-mastermind-recursive/-/mina-mastermind-recursive-0.1.0.tgz#9f979f57de51fd1f1dfb9390f0fe8b9c9f72b3b6"
-  integrity sha512-NWnLcECeR/ao7RNb1/24RFjyaOarjzFnWkVKtVhIJQuXmQdhkWcJXCZoWgr/+vk4HbFxe1as3XOl8/01j6bZ6A==
 
 minimatch@^9.0.3:
   version "9.0.5"

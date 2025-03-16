@@ -1,9 +1,9 @@
 <template>
     <div class="d-flex gap-4 align-items-center">
-        <el-form :model="game" :rules="rules" ref="ruleFormRef" class="w-100">
+        <el-form :model="game" :rules="rules" ref="ruleFormRef" class="w-100" @submit.prevent>
             <el-form-item prop="gameAddress" class="w-100">
                 <label>ZkApp Address</label>
-                <el-input placeholder="Insert ZkApp Address" size="large" v-model="game.gameAddress"></el-input>
+                <el-input placeholder="Insert ZkApp Address" size="large" v-model="game.gameAddress" ></el-input>
             </el-form-item>
             <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
                 <el-button class="w-100 mt-2" size="large" type="primary" @click="handleJoinGame" :visible="compiled"

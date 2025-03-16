@@ -16,7 +16,7 @@ import {
   separateTurnCountAndMaxAttemptSolved,
   StepProgram,
   StepProgramProof,
-} from "mina-mastermind-recursive";
+} from "@navigators-exploration-team/mina-mastermind";
 import {
   fetchZkAppCacheFiles,
   fetchZkProgramCacheFiles,
@@ -50,7 +50,7 @@ const functions = {
     Mina.setActiveInstance(network);
   },
   loadContract: async (args: {}) => {
-    const { MastermindZkApp } = await import("mina-mastermind-recursive");
+    const { MastermindZkApp } = await import("@navigators-exploration-team/mina-mastermind");
     state.MastermindContract = MastermindZkApp;
   },
   compileContract: async (args: {}) => {
@@ -107,7 +107,6 @@ const functions = {
     transaction.sign([zkAppPrivateKey]);
     state.transaction = transaction;
     state.zkAppAddress = zkAppAddress.toBase58();
-    state.transaction!.send();
     return zkAppAddress.toBase58();
   },
   sendNewGameProof: async (args: {
@@ -180,7 +179,6 @@ const functions = {
       await state.zkappInstance!.acceptGame();
     });
     state.transaction = transaction;
-    state.transaction!.send();
   },
   getZkAppStates: async (args: {}) => {
     const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
@@ -261,7 +259,6 @@ const functions = {
       );
     });
     state.transaction = transaction;
-    state.transaction!.send();
   },
   createPenalizePlayerTransaction: async (args: {
     feePayer: string;
@@ -275,7 +272,6 @@ const functions = {
       await state.zkappInstance!.forfeitWin(penalizedPlayerPubKey);
     });
     state.transaction = transaction;
-    state.transaction!.send();
   },
 };
 
