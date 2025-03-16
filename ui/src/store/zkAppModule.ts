@@ -116,6 +116,7 @@ export const useZkAppStore = defineStore("useZkAppModule", {
       this.error = null;
     },
     async joinGame(gameId?: string) {
+      // @ts-ignore
       this.webSocketInstance = new WebSocketService(
         gameId ?? (this.zkAppAddress as string)
       );

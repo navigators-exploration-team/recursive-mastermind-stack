@@ -49,11 +49,11 @@ const functions = {
     });
     Mina.setActiveInstance(network);
   },
-  loadContract: async (args: {}) => {
+  loadContract: async () => {
     const { MastermindZkApp } = await import("@navigators-exploration-team/mina-mastermind");
     state.MastermindContract = MastermindZkApp;
   },
-  compileContract: async (args: {}) => {
+  compileContract: async () => {
     try {
       const zkAppCacheFiles = await fetchZkAppCacheFiles();
       const zkProgramCacheFiles = await fetchZkProgramCacheFiles();
@@ -180,7 +180,7 @@ const functions = {
     });
     state.transaction = transaction;
   },
-  getZkAppStates: async (args: {}) => {
+  getZkAppStates: async () => {
     const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
     await fetchAccount({ publicKey });
     const [
@@ -209,7 +209,7 @@ const functions = {
       isSolved: isSolved.toString(),
     };
   },
-  getZkProofStates: async (args: {}) => {
+  getZkProofStates: async () => {
     if (state.lastProof) {
       const {
         codeMasterId,
@@ -252,7 +252,7 @@ const functions = {
   setLastProof: async (args: { zkProof: any }) => {
     state.lastProof = await StepProgramProof.fromJSON(JSON.parse(args.zkProof));
   },
-  submitGameProof: async (args: {}) => {
+  submitGameProof: async () => {
     const transaction = await Mina.transaction(async () => {
       await state.zkappInstance!.submitGameProof(
         state.lastProof as StepProgramProof

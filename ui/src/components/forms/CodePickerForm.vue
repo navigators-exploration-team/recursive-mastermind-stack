@@ -80,7 +80,7 @@ const rules = ref({
             trigger: "change",
         },
         {
-            validator: (rule: any, value: any, callback: any) => {
+            validator: (_rule: any, value: any, callback: any) => {
                 try {
                     Field(value)
                     callback();

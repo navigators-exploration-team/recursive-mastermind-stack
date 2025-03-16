@@ -114,7 +114,7 @@ export const MinaFileSystem = (files: any): Cache => ({
 
     return undefined;
   },
-  write({ persistentId, uniqueId, dataType }: any, data: any) {
+  write({  }: any, _data: any) {
     //console.log('write');
     // console.log({ persistentId, uniqueId, dataType });
   },

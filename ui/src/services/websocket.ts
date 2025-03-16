@@ -18,7 +18,7 @@ export class WebSocketService {
         },
       },
       immediate: true,
-      onMessage: async (ws: WebSocket, event: MessageEvent) => {
+      onMessage: async (_ws: WebSocket, event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
           console.log("Received data:", data);
@@ -33,7 +33,7 @@ export class WebSocketService {
           console.log("Error handling message:", e);
         }
       },
-      onConnected: async (ws: WebSocket) => {
+      onConnected: async (_ws: WebSocket) => {
         this.send({ action: "join", gameId });
       },
     });

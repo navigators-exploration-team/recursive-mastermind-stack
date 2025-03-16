@@ -47,8 +47,8 @@
                     </div>
 
                     <div>
-                        <div class=" d-flex flex-start gap-2 p-3"> Game: {{ formatAddress(zkAppAddress) }}
-                            <CopyToClipBoard :text="zkAppAddress" />
+                        <div class=" d-flex flex-start gap-2 p-3"> Game: {{ formatAddress(zkAppAddress as string) }}
+                            <CopyToClipBoard :text="(zkAppAddress as string)" />
                         </div>
                         <div v-for="(guess, row) in guesses?.slice(0, zkAppStates.maxAttempts)">
                             <Guess :attemptNo="row" @setColor="handleSetColor($event, row)" :guess="guess"
@@ -78,7 +78,6 @@ import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
 import { cluesColors } from '@/constants/colors';
 import PenalizePlayerForm from './forms/PenalizePlayerForm.vue';
 
-const { submitGameProof } = useZkAppStore()
 const { zkAppAddress, zkProofStates, zkAppStates } = storeToRefs(useZkAppStore())
 const isCodeMasterTurn = computed(() => {
     return zkProofStates.value?.turnCount % 2 === 0;

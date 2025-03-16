@@ -53,7 +53,7 @@ const rules = ref({
             trigger: "change",
         },
         {
-            validator: (rule: any, value: any, callback: any) => {
+            validator: (_rule: any, value: any, callback: any) => {
                 if (value >= 5 && value <= 15) {
                     callback();
                 } else {
@@ -76,7 +76,7 @@ const rules = ref({
             trigger: "change",
         },
         {
-            validator: (rule: any, value: any, callback: any) => {
+            validator: (_rule: any, value: any, callback: any) => {
                 try {
                     PublicKey.fromBase58(value)
                     callback();
@@ -102,8 +102,8 @@ const handleInitGame = async (formData: CodePicker) => {
             await createInitGameTransaction(
                 formData.code,
                 formData.randomSalt,
-                game.value.maxAttempts,
-                game.value.refereePubKeyBase58,
+                (game.value.maxAttempts as number),
+                (game.value.refereePubKeyBase58 as string),
                 game.value.rewardAmount! *  1e9
             )
             if (error.value) {

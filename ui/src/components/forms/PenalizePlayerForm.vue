@@ -28,7 +28,7 @@ const rules = ref({
             trigger: "change",
         },
         {
-            validator: (rule: any, value: any, callback: any) => {
+            validator: (_rule: any, value: any, callback: any) => {
                 try {
                     PublicKey.fromBase58(value)
                     callback();

@@ -1,14 +1,14 @@
 <template>
     <div class="d-flex flex-column gap-4 align-items-start w-100">
-        <div class="d-flex align-items-center gap-2"> Game ID : {{ formatAddress(zkAppAddress) }}
-            <CopyToClipBoard :text="zkAppAddress" />
+        <div class="d-flex align-items-center gap-2"> Game ID : {{ formatAddress(zkAppAddress as string) }}
+            <CopyToClipBoard :text="(zkAppAddress as string)" />
         </div>
         <div>Number of Attempts : {{ zkAppStates.maxAttempts }}</div>
         <div>Reward Amount : {{ zkAppStates.rewardAmount / 1e9 }} MINA</div>
         <div class="d-flex align-items-end gap-2" v-if="userRole === 'CODE_MASTER'">
             Waiting for code breaker to accept the game
             <div class="dots mb-1">
-                <span class="dot" v-for="(dot, index) in 3" :key="index"
+                <span class="dot" v-for="(_dot, index) in 3" :key="index"
                     :style="{ animationDelay: `${index * 0.3}s` }"></span>
             </div>
 
@@ -18,7 +18,7 @@
         <div class="d-flex align-items-end gap-2" v-else>
             Waiting for the game to start
             <div class="dots mb-1">
-                <span class="dot" v-for="(dot, index) in 3" :key="index"
+                <span class="dot" v-for="(_dot, index) in 3" :key="index"
                     :style="{ animationDelay: `${index * 0.3}s` }"></span>
             </div>
 

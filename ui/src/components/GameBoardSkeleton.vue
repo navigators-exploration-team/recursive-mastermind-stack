@@ -14,7 +14,7 @@
                             <div class=" d-flex flex-start gap-2 p-3">
                                 <el-skeleton-item variant="p" width="100px" />
                             </div>
-                            <div v-for="(el, index) in Array.from({ length: 8 })" :key="index">
+                            <div v-for="(_el, index) in Array.from({ length: 8 })" :key="index">
                                 <GuessSkeleton />
                             </div>
                         </div>
@@ -24,7 +24,7 @@
                             <span><el-skeleton-item style="width: 50px" variant="p" /></span>
                         </div>
                         <div class="d-flex flex-column align-items-start px-3">
-                            <div v-for="(el, key) in Array.from({ length: 8 })" :key="key"
+                            <div v-for="(_el, key) in Array.from({ length: 8 })" :key="key"
                                 class="p-2 d-flex align-items-center gap-2">
                                 <span><el-skeleton-item style="width: 100px" variant="p" /></span>
                             </div>
