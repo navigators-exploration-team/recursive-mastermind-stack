@@ -19,6 +19,8 @@ const addHeadersPlugin = (): Plugin => ({
 export default defineConfig({
   server: {
     port: 3001,
+    host: true,
+    hmr: true,
     headers: {
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Embedder-Policy": "require-corp",
