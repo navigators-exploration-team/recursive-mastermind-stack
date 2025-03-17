@@ -1,23 +1,31 @@
 <template>
-    <ul class="d-flex flex-column align-items-start gap-3 ">
+    <ul class="d-flex flex-column w-100 align-items-start gap-3 p-4">
         <li>The game involves two players: a Code Master and a Code Breaker.</li>
         <li>The Code Master sets a secret combination and the Code Breaker tries to guess it.</li>
         <li>The clue indicates the following:</li>
         <ul>
-            <li><strong>Hits:</strong> Digits that are correctly guessed and in the correct position.</li>
+            <li>
+                <strong>Hits:</strong> Digits that are correctly guessed and in the correct
+                position.
+            </li>
         </ul>
         <ul>
             <li><strong>Blows:</strong> Digits that are correct but in the wrong position.</li>
         </ul>
-        <div class=" d-flex flex-column align-items-start w-100">
+        <div class="d-flex flex-column align-items-start w-100">
             <div>Example:</div>
             <div class="w-100 d-flex flex-column align-items-center mt-3 gap-3">
                 <div>
                     <div class="my-2">Secret Code</div>
                     <div class="d-flex flex-1 gap-5">
-                        <div class="d-flex gap-3  secret-container py-2 px-5">
-                            <RoundedColor v-for="(el) in secret" :bgColor="el.color" :value="el.value" width="40px"
-                                height="40px" />
+                        <div class="d-flex gap-3 secret-container py-2 px-5">
+                            <RoundedColor
+                                v-for="el in secret"
+                                :bgColor="el.color"
+                                :value="el.value"
+                                width="40px"
+                                height="40px"
+                            />
                         </div>
                     </div>
                     <div class="my-2">Guess And Clue</div>
@@ -25,7 +33,6 @@
                         <Guess :guess="guess" :clue="clue" />
                     </div>
                 </div>
-
             </div>
         </div>
         <ul>
@@ -53,40 +60,40 @@
             </ul>
         </ul>
         <li>
-            The game continues with alternating guesses and clues until the Code Breaker achieves 4 hits and
-            uncovers the secret combination or fails to do so within <strong>the maximum allowed attempts.</strong>
+            The game continues with alternating guesses and clues until the Code Breaker achieves 4
+            hits and uncovers the secret combination or fails to do so within
+            <strong>the maximum allowed attempts.</strong>
         </li>
     </ul>
 </template>
 <script lang="ts" setup>
-import RoundedColor from '@/components/RoundedColor.vue';
-import Guess from '@/components/Guess.vue';
+import RoundedColor from "@/components/RoundedColor.vue";
+import Guess from "@/components/Guess.vue";
 
-import { ref } from 'vue';
+import { ref } from "vue";
 
 const secret = ref([
-    { color: "#f9f9f9", value: 5 },
-    { color: "#A1887F", value: 9 },
-    { color: "#FFD54F", value: 3 },
-    { color: "#22AC6A", value: 4 },
-])
+    { color: "#7FFFD4", value: 5 },
+    { color: "#fcf6bd", value: 9 },
+    { color: "#FFBF00", value: 3 },
+    { color: "#0BDA51", value: 4 },
+]);
 const guess = ref([
-    { color: "#f9f9f9", value: 5 },
-    { color: "#7E57C2", value: 7 },
-    { color: "#FF66B2", value: 8 },
-    { color: "#A1887F", value: 9 },
-])
+    { color: "#7FFFD4", value: 5 },
+    { color: "#73C2FB", value: 7 },
+    { color: "#D473D4", value: 8 },
+    { color: "#fcf6bd", value: 9 },
+]);
 const clue = ref([
-    { color: "#44e544", value: 2, title: "Hit" },
-    { color: "#ff7373", value: 0, title: "Miss" },
-    { color: "#ff7373", value: 0, title: "Miss" },
-    { color: "#ffc14e", value: 1, title: "Blow" },
-])
+    { color: "#66FF00", value: 2, title: "Hit" },
+    { color: "#ED2939", value: 0, title: "Miss" },
+    { color: "#ED2939", value: 0, title: "Miss" },
+    { color: "#ffd800", value: 1, title: "Blow" },
+]);
 </script>
 <style scoped>
 .secret-container {
     border: 1px solid #222;
-
 }
 
 li {
