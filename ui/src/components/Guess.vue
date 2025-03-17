@@ -31,7 +31,7 @@
                 size="small"
                 :disabled="userRole !== 'CODE_MASTER'"
                 @click="handleVerifyGuess"
-                v-if="isCodeMasterTurn"
+                v-if="isCodeMasterTurn && userRole === 'CODE_MASTER'"
                 :loading="loading"
                 >Verify</el-button
             >
@@ -41,7 +41,7 @@
                 @click="handleSubmitGuess"
                 :title="combinationValidation.message"
                 :loading="loading"
-                v-else
+                v-if="!isCodeMasterTurn && userRole === 'CODE_BREAKER'"
                 >Check</el-button
             >
         </div>
