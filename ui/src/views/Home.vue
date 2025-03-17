@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-around gap-2 m-3 align-items-center">
             <el-button
                 type="primary"
-                color="#8000FF"
+                color="#00ADB5"
                 size="large"
                 style="width: 120px; text-align: center; white-space: normal"
                 :plain="step !== 'RULES'"
@@ -12,7 +12,7 @@
             >
             <el-button
                 type="primary"
-                color="#8000FF"
+                color="#00ADB5"
                 size="large"
                 style="width: 120px; text-align: center; white-space: normal"
                 :plain="step !== 'TUTORIAL'"
@@ -21,7 +21,7 @@
             >
             <el-button
                 type="primary"
-                color="#8000FF"
+                color="#00ADB5"
                 size="large"
                 style="width: 120px; text-align: center; white-space: normal"
                 :plain="step !== 'NEW_GAME'"
@@ -30,7 +30,7 @@
             >
             <el-button
                 type="primary"
-                color="#8000FF"
+                color="#00ADB5"
                 size="large"
                 style="width: 120px; text-align: center; white-space: normal"
                 :plain="step !== 'JOIN'"

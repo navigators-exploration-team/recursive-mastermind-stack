@@ -2,23 +2,56 @@
     <div class="d-flex guess__container p-2 align-items-center gap-2">
         <span v-if="attemptNo !== -1">{{ attemptNo + 1 }}</span>
         <div class="d-flex flex-1 gap-5">
-            <div class="d-flex gap-3  guesses">
-                <RoundedColor v-for="(el, index) in guess" :bgColor="el.color" :value="el.value" width="40px"
-                    height="40px" :editable="isCurrentRound && !isCodeMasterTurn" @input="handleSetColor($event, index)"
-                    @focusNext="focusNextInput(index)" @focusPrev="focusPrevInput(index)" ref="inputRefs" />
+            <div class="d-flex gap-3 guesses">
+                <RoundedColor
+                    v-for="(el, index) in guess"
+                    :bgColor="el.color"
+                    :value="el.value"
+                    width="40px"
+                    height="40px"
+                    :editable="isCurrentRound && !isCodeMasterTurn"
+                    @input="handleSetColor($event, index)"
+                    @focusNext="focusNextInput(index)"
+                    @focusPrev="focusPrevInput(index)"
+                    ref="inputRefs"
+                />
             </div>
             <div class="clue__container d-flex flex-wrap gap-2">
-                <RoundedColor v-for="el in clue" :bgColor="el.color" width="18px" :value="el.value" height="18px" />
+                <RoundedColor
+                    v-for="el in clue"
+                    :bgColor="el.color"
+                    width="18px"
+                    :value="el.value"
+                    height="18px"
+                />
             </div>
         </div>
         <div v-if="isCurrentRound">
-            <el-button size="small" @click="handleVerifyGuess" v-if="isCodeMasterTurn"
-                :loading="loading">Verify</el-button>
-            <el-button size="small" :disabled="!combinationValidation.isValid" @click="handleSubmitGuess"
-                :title="combinationValidation.message" :loading="loading" v-else>Check</el-button>
+            <el-button
+                size="small"
+                @click="handleVerifyGuess"
+                v-if="isCodeMasterTurn"
+                :loading="loading"
+                >Verify</el-button
+            >
+            <el-button
+                size="small"
+                :disabled="!combinationValidation.isValid"
+                @click="handleSubmitGuess"
+                :title="combinationValidation.message"
+                :loading="loading"
+                v-else
+                >Check</el-button
+            >
         </div>
-        <el-dialog v-model="isVerifyGuessModalOpen" modal-class="dialog-class" custom-class="dialog-class"
-            style="padding: 0px!important;" destroy-on-close width="80%">
+        <el-dialog
+            v-model="isVerifyGuessModalOpen"
+            modal-class="dialog-class"
+            custom-class="dialog-class"
+            style="padding: 0px !important"
+            destroy-on-close
+            width="80%"
+        >
             <CodePickerForm @submit="handleGiveClue" btnText="Give clue" :isRandomSalt="false" />
         </el-dialog>
     </div>
@@ -35,7 +68,6 @@ import { ElMessage } from "element-plus";
 const { createGuessProof, createGiveClueProof } = useZkAppStore();
 const { error, zkProofStates, loading } = storeToRefs(useZkAppStore());
 
-
 const inputRefs = ref<(InstanceType<typeof RoundedColor> | null)[]>([]);
 
 const focusNextInput = (index: number) => {
@@ -51,12 +83,11 @@ const focusPrevInput = (index: number) => {
 };
 
 const handleGiveClue = async (formData: CodePicker) => {
-    isVerifyGuessModalOpen.value = false
+    isVerifyGuessModalOpen.value = false;
     await createGiveClueProof(formData.code, formData.randomSalt);
     if (error.value) {
         ElMessage.error({ message: error.value, duration: 6000 });
     }
-
 };
 const isVerifyGuessModalOpen = ref(false);
 const isCodeMasterTurn = computed(() => {
@@ -66,8 +97,8 @@ const isCurrentRound = computed(() => {
     return Math.ceil(zkProofStates.value?.turnCount / 2) === props.attemptNo + 1;
 });
 const combinationValidation = computed(() => {
-    return validateColorCombination(props.guess)
-})
+    return validateColorCombination(props.guess);
+});
 
 const emit = defineEmits(["setColor"]);
 const handleSetColor = (selectedColor: AvailableColor, index: number) => {
@@ -79,7 +110,7 @@ const props = defineProps({
     attemptNo: {
         type: Number,
         required: false,
-        default: -1
+        default: -1,
     },
     guess: {
         type: Array<AvailableColor>,
@@ -101,8 +132,6 @@ const handleSubmitGuess = async () => {
 const handleVerifyGuess = () => {
     isVerifyGuessModalOpen.value = true;
 };
-
-
 </script>
 <style>
 .dialog-class {
@@ -110,20 +139,17 @@ const handleVerifyGuess = () => {
     --el-dialog-padding-primary: -20px !important;
     padding: none !important;
     padding: 0px !important;
-
 }
 
 :deep(.el-dialog) {
     padding: 0px !important;
     --el-dialog-padding-primary: 0px !important;
     padding: none !important;
-
 }
 
 .el-dialog__body {
     background: #121212 !important;
     padding: 20px !important;
-
 }
 
 .el-dialog__header {
@@ -131,7 +157,7 @@ const handleVerifyGuess = () => {
 }
 
 .guess__container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
 }
 
 .clue__container {

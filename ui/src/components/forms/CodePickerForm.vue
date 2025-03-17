@@ -39,7 +39,7 @@
             >
                 <el-button
                     size="large"
-                    color="#8000FF"
+                    color="#00ADB5"
                     type="primary"
                     :disabled="!combinationValidation.isValid || !compiled"
                     :loading="!compiled || loading"

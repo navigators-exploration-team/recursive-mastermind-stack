@@ -93,7 +93,7 @@ const clue = ref([
 </script>
 <style scoped>
 .secret-container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
 }
 
 li {

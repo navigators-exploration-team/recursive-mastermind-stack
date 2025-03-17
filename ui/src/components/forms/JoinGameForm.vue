@@ -36,7 +36,7 @@
             >
                 <el-button
                     class="w-100 mt-2"
-                    color="#8000FF"
+                    color="#00ADB5"
                     size="large"
                     type="primary"
                     @click="handleJoinGame"

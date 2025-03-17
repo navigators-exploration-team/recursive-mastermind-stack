@@ -30,7 +30,6 @@ watch(
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: white;
-    background: #121212;
 }
 
 .app-container {
