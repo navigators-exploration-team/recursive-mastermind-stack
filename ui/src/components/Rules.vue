@@ -94,6 +94,7 @@ const clue = ref([
 <style scoped>
 .secret-container {
     border: 1px solid #eeeeee;
+    width: 330px;
 }
 
 li {

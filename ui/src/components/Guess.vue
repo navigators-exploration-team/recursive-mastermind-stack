@@ -9,7 +9,7 @@
                     :value="el.value"
                     width="40px"
                     height="40px"
-                    :editable="isCurrentRound && !isCodeMasterTurn"
+                    :editable="isCurrentRound && !isCodeMasterTurn && userRole === 'CODE_BREAKER'"
                     @input="handleSetColor($event, index)"
                     @focusNext="focusNextInput(index)"
                     @focusPrev="focusPrevInput(index)"
@@ -29,6 +29,7 @@
         <div v-if="isCurrentRound">
             <el-button
                 size="small"
+                :disabled="userRole !== 'CODE_MASTER'"
                 @click="handleVerifyGuess"
                 v-if="isCodeMasterTurn"
                 :loading="loading"
@@ -36,7 +37,7 @@
             >
             <el-button
                 size="small"
-                :disabled="!combinationValidation.isValid"
+                :disabled="!combinationValidation.isValid || userRole !== 'CODE_BREAKER'"
                 @click="handleSubmitGuess"
                 :title="combinationValidation.message"
                 :loading="loading"
@@ -58,17 +59,21 @@
 </template>
 <script setup lang="ts">
 import RoundedColor from "@/components/RoundedColor.vue";
-import { computed, nextTick, ref } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import { AvailableColor, CodePicker } from "@/types";
 import { useZkAppStore } from "@/store/zkAppModule";
 import { storeToRefs } from "pinia";
 import CodePickerForm from "./forms/CodePickerForm.vue";
 import { validateColorCombination } from "../utils";
 import { ElMessage } from "element-plus";
-const { createGuessProof, createGiveClueProof } = useZkAppStore();
-const { error, zkProofStates, loading } = storeToRefs(useZkAppStore());
+const { createGuessProof, createGiveClueProof, getRole } = useZkAppStore();
+const { error, zkProofStates, loading, userRole } = storeToRefs(useZkAppStore());
 
 const inputRefs = ref<(InstanceType<typeof RoundedColor> | null)[]>([]);
+
+onMounted(async () => {
+    await getRole();
+});
 
 const focusNextInput = (index: number) => {
     if (index < inputRefs.value.length - 1) {
@@ -158,6 +163,7 @@ const handleVerifyGuess = () => {
 
 .guess__container {
     border: 1px solid #eeeeee;
+    width: 330px;
 }
 
 .clue__container {

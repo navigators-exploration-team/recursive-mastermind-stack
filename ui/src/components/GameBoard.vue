@@ -45,9 +45,9 @@
                                 height="8px"
                             />
                         </div>
-                        <el-button class="penalize-player-btn" @click="handleShowPenalizeDialog">
+                        <!-- <el-button class="penalize-player-btn" @click="handleShowPenalizeDialog">
                             Penalize Player
-                        </el-button>
+                        </el-button> -->
                     </div>
                 </template>
                 <template v-else>
@@ -127,9 +127,9 @@ const handleSetColor = (payload: { index: number; selectedColor: AvailableColor 
 };
 
 const isPenalizeDialogVisible = ref(false);
-const handleShowPenalizeDialog = () => {
-    isPenalizeDialogVisible.value = true;
-};
+// const handleShowPenalizeDialog = () => {
+//     isPenalizeDialogVisible.value = true;
+// };
 const closePenalizePlayerDialog = () => {
     isPenalizeDialogVisible.value = false;
 };
@@ -147,20 +147,20 @@ watch(
 </script>
 <style scoped>
 .board__container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
 }
 
 .logs__container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
     border-left: none;
 }
 
 .color-picker__container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
 }
 
 .logs-title {
-    border-bottom: 1px solid #222;
+    border-bottom: 1px solid #eeeeee;
 }
 
 :deep(.el-popper) {
@@ -168,7 +168,7 @@ watch(
 }
 
 .separator {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
     width: 2px;
 }
 
