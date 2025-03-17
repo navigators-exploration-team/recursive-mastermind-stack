@@ -7,6 +7,7 @@ RUN yarn install --frozen-lockfile
 
 COPY tsconfig.json ./
 COPY src ./src
+COPY certs ./certs
 
 RUN yarn build
 
@@ -14,6 +15,7 @@ FROM node:20-slim AS runner
 
 WORKDIR /app
 
+COPY --from=builder /app/certs ./certs
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/yarn.lock ./
 RUN yarn install --production --frozen-lockfile
