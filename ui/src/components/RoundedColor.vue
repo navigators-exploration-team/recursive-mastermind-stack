@@ -1,50 +1,59 @@
 <template>
     <div class="d-flex align-items-center gap-2">
-        <div class="rounded__color d-flex align-items-center justify-content-center fs-3"
-            :class="{ blinkColor: blinkColor }" v-if="!editable">
+        <div
+            class="rounded__color d-flex align-items-center justify-content-center fs-3"
+            :class="{ blinkColor: blinkColor }"
+            v-if="!editable"
+        >
             <span class="rounded__value" v-if="bgColor !== '#222'">{{ value }}</span>
-
         </div>
-        <el-input v-else :model-value="value === 0 ? null : value" class="code-input" maxlength="1" @input="handleInput"
-            @keydown.delete="handleDelete" ref="inputRef" />
+        <el-input
+            v-else
+            :model-value="value === 0 ? null : value"
+            class="code-input"
+            maxlength="1"
+            @input="handleInput"
+            @keydown.delete="handleDelete"
+            ref="inputRef"
+        />
         <span v-if="title" class="ms-2">{{ title }}</span>
     </div>
 </template>
 <script setup lang="ts">
-import { nextTick, ref } from 'vue'
-import { availableColors } from '../constants/colors';
+import { nextTick, ref } from "vue";
+import { availableColors } from "../constants/colors";
 const props = defineProps({
     value: {
         type: Number,
-        required: true
+        required: true,
     },
     bgColor: {
         type: String,
-        required: true
+        required: true,
     },
     width: {
         type: String,
-        required: true
+        required: true,
     },
     height: {
         type: String,
-        required: true
+        required: true,
     },
     blinkColor: {
         type: String,
-        required: false
+        required: false,
     },
     title: {
         type: String,
-        required: false
+        required: false,
     },
     editable: {
         type: Boolean,
         required: false,
-        default: false
-    }
-})
-const emit = defineEmits(["input", "focusNext", "focusPrev"])
+        default: false,
+    },
+});
+const emit = defineEmits(["input", "focusNext", "focusPrev"]);
 const inputRef = ref<InstanceType<typeof import("element-plus")["ElInputNumber"]> | null>(null);
 
 const focus = () => {
@@ -59,20 +68,17 @@ defineExpose({ focus });
 
 const handleInput = (value: string) => {
     const selectedColor = availableColors.find((c) => c.value === Number(value));
-    emit("input", selectedColor ? selectedColor : { color: "#222", value: 0 })
+    emit("input", selectedColor ? selectedColor : { color: "#393E46", value: 0 });
     if (selectedColor) {
         nextTick(() => emit("focusNext"));
     }
-
 };
 
 const handleDelete = () => {
-    if(props.value === 0){
-        nextTick(() => emit("focusPrev")); 
-    } 
+    if (props.value === 0) {
+        nextTick(() => emit("focusPrev"));
+    }
 };
-
-
 </script>
 <style scoped>
 :deep(.el-input__wrapper) {

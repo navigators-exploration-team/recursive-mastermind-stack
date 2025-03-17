@@ -1,6 +1,7 @@
 <template>
     <div class="d-flex flex-column gap-4 align-items-start w-100">
-        <div class="d-flex align-items-center gap-2"> Game ID : {{ formatAddress(zkAppAddress as string) }}
+        <div class="d-flex align-items-center gap-2">
+            Game ID : {{ formatAddress(zkAppAddress as string) }}
             <CopyToClipBoard :text="(zkAppAddress as string)" />
         </div>
         <div>Number of Attempts : {{ zkAppStates.maxAttempts }}</div>
@@ -8,61 +9,76 @@
         <div class="d-flex align-items-end gap-2" v-if="userRole === 'CODE_MASTER'">
             Waiting for code breaker to accept the game
             <div class="dots mb-1">
-                <span class="dot" v-for="(_dot, index) in 3" :key="index"
-                    :style="{ animationDelay: `${index * 0.3}s` }"></span>
+                <span
+                    class="dot"
+                    v-for="(_dot, index) in 3"
+                    :key="index"
+                    :style="{ animationDelay: `${index * 0.3}s` }"
+                ></span>
             </div>
-
         </div>
-        <el-button v-else-if="!isLastAcceptedGame" size="large" :disabled="loading" :loading="loading" type="primary"
-            class="w-100" @click="handleAcceptGame">Accept game</el-button>
+        <el-button
+            v-else-if="!isLastAcceptedGame"
+            size="large"
+            color="#00ADB5"
+            :disabled="loading"
+            :loading="loading"
+            type="primary"
+            class="w-100"
+            @click="handleAcceptGame"
+            >Accept game</el-button
+        >
         <div class="d-flex align-items-end gap-2" v-else>
             Waiting for the game to start
             <div class="dots mb-1">
-                <span class="dot" v-for="(_dot, index) in 3" :key="index"
-                    :style="{ animationDelay: `${index * 0.3}s` }"></span>
+                <span
+                    class="dot"
+                    v-for="(_dot, index) in 3"
+                    :key="index"
+                    :style="{ animationDelay: `${index * 0.3}s` }"
+                ></span>
             </div>
-
         </div>
     </div>
 </template>
 <script lang="ts" setup>
 import { useZkAppStore } from "@/store/zkAppModule";
 import { storeToRefs } from "pinia";
-import { ElMessage } from 'element-plus';
-import { formatAddress } from '@/utils'
-import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
+import { ElMessage } from "element-plus";
+import { formatAddress } from "@/utils";
+import CopyToClipBoard from "@/components/CopyToClipBoard.vue";
 import { computed, onMounted, ref } from "vue";
-import { ElNotification } from 'element-plus';
+import { ElNotification } from "element-plus";
 import { useRoute } from "vue-router";
 
-const { zkAppStates, loading, error, zkAppAddress, userRole, currentTransactionLink } = storeToRefs(useZkAppStore())
-const { acceptGame, getRole } = useZkAppStore()
-const acceptedGameId = ref()
-const route = useRoute()
+const { zkAppStates, loading, error, zkAppAddress, userRole, currentTransactionLink } = storeToRefs(
+    useZkAppStore()
+);
+const { acceptGame, getRole } = useZkAppStore();
+const acceptedGameId = ref();
+const route = useRoute();
 const handleAcceptGame = async () => {
-
-    await acceptGame()
-    acceptedGameId.value = route?.params?.id
-    localStorage.setItem("lastAcceptedGame", acceptedGameId.value)
+    await acceptGame();
+    acceptedGameId.value = route?.params?.id;
+    localStorage.setItem("lastAcceptedGame", acceptedGameId.value);
     if (error.value) {
         ElMessage.error({ message: error.value, duration: 6000 });
     } else {
         ElNotification({
-            title: 'Success',
+            title: "Success",
             message: `Transaction Hash :  ${currentTransactionLink.value}`,
-            type: 'success',
-            duration: 5000
-        })
+            type: "success",
+            duration: 5000,
+        });
     }
-}
+};
 const isLastAcceptedGame = computed(() => {
-    return acceptedGameId.value === route?.params?.id
-})
+    return acceptedGameId.value === route?.params?.id;
+});
 onMounted(async () => {
-    await getRole()
-    acceptedGameId.value = localStorage.getItem("lastAcceptedGame")
-
-})
+    await getRole();
+    acceptedGameId.value = localStorage.getItem("lastAcceptedGame");
+});
 </script>
 <style scoped>
 .dots {
@@ -81,7 +97,6 @@ onMounted(async () => {
 }
 
 @keyframes blink {
-
     0%,
     100% {
         opacity: 0.2;

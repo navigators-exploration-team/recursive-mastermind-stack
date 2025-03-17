@@ -1,127 +1,152 @@
 <template>
     <div>
-        <div class="d-flex gap-3">
+        <div class="d-flex justify-content-between">
             <div v-for="el in cluesColors" :key="el.color">
-                <RoundedColor :bgColor="el.color" :value="el.value" :title="el.title" width="18px" height="18px" />
+                <RoundedColor
+                    :bgColor="el.color"
+                    :value="el.value"
+                    :title="el.title"
+                    width="24px"
+                    height="24px"
+                />
             </div>
         </div>
         <div class="gameplay__container d-flex flex-column align-items-center w-100 h-100 mt-2">
             <div class="w-100 d-flex justify-content-start">
                 <template
-                    v-if="!(isGameSolved || zkProofStates?.turnCount > zkAppStates?.maxAttempts * 2)">
+                    v-if="
+                        !(isGameSolved || zkProofStates?.turnCount > zkAppStates?.maxAttempts * 2)
+                    "
+                >
                     <div class="d-flex align-items-center justify-content-between w-100">
-                        <div class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
-                            v-if="isCodeMasterTurn">
-                            Code
-                            Master Turn
-                            <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#0000ff" height="18px" />
+                        <div
+                            class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
+                            v-if="isCodeMasterTurn"
+                        >
+                            Code Master Turn
+                            <RoundedColor
+                                bgColor="#222"
+                                width="8px"
+                                :value="0"
+                                blinkColor="#0000ff"
+                                height="8px"
+                            />
                         </div>
-                        <div class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2 " v-else>Code
-                            Breaker
-                            Turn
-                            <RoundedColor bgColor="#222" width="18px" :value="0" blinkColor="#ffde21" height="18px" />
+                        <div
+                            class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2"
+                            v-else
+                        >
+                            Code Breaker Turn
+                            <RoundedColor
+                                bgColor="#222"
+                                width="8px"
+                                :value="0"
+                                blinkColor="#ffde21"
+                                height="8px"
+                            />
                         </div>
-                        <el-button  class="penalize-player-btn" @click="handleShowPenalizeDialog">
-                            Penalize Player
-                        </el-button>
                     </div>
                 </template>
                 <template v-else>
                     <div class="w-100 d-flex align-items-center justify-content-between">
-                        <div v-if="isGameSolved" class="my-4">
-                            The code breaker has won!
-                        </div>
-                        <div v-else-if="zkProofStates.turnCount > zkAppStates.maxAttempts * 2" class="my-4">
+                        <div v-if="isGameSolved" class="my-4">The code breaker has won!</div>
+                        <div
+                            v-else-if="zkProofStates.turnCount > zkAppStates.maxAttempts * 2"
+                            class="my-4"
+                        >
                             The code master has won!
                         </div>
+                        <el-button class="claim-btn" @click="claimRewardTransaction">
+                            Claim Reward
+                        </el-button>
                     </div>
-
                 </template>
             </div>
 
             <div class="d-flex mt-1">
                 <div class="board__container d-flex">
                     <div class="color-picker__container d-flex flex-column gap-3 p-2">
-                        <RoundedColor height="40px" width="40px" v-for="el in availableColors" :bg-color="el.color"
-                            :value="el.value"  />
+                        <RoundedColor
+                            height="40px"
+                            width="40px"
+                            v-for="el in availableColors"
+                            :bg-color="el.color"
+                            :value="el.value"
+                        />
                     </div>
 
                     <div>
-                        <div class=" d-flex flex-start gap-2 p-3"> Game: {{ formatAddress(zkAppAddress as string) }}
+                        <div class="d-flex flex-start gap-2 p-3">
+                            Game: {{ formatAddress(zkAppAddress as string) }}
                             <CopyToClipBoard :text="(zkAppAddress as string)" />
                         </div>
                         <div v-for="(guess, row) in guesses?.slice(0, zkAppStates.maxAttempts)">
-                            <Guess :attemptNo="row" @setColor="handleSetColor($event, row)" :guess="guess"
-                                :clue="clues[row]" />
+                            <Guess
+                                :attemptNo="row"
+                                @setColor="handleSetColor($event, row)"
+                                :guess="guess"
+                                :clue="clues[row]"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <el-dialog v-model="isPenalizeDialogVisible" style="padding: 0px!important;" destroy-on-close>
-            <PenalizePlayerForm @close="closePenalizePlayerDialog" />
-        </el-dialog>
     </div>
-
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import Guess from '@/components/Guess.vue';
-import RoundedColor from '@/components/RoundedColor.vue';
-import { availableColors } from '@/constants/colors';
-import { AvailableColor } from '@/types';
-import { useZkAppStore } from "@/store/zkAppModule"
-import { storeToRefs } from 'pinia';
-import { formatAddress } from '@/utils'
-import CopyToClipBoard from "@/components/CopyToClipBoard.vue"
-import { cluesColors } from '@/constants/colors';
-import PenalizePlayerForm from './forms/PenalizePlayerForm.vue';
+import { computed, ref, watch } from "vue";
+import Guess from "@/components/Guess.vue";
+import RoundedColor from "@/components/RoundedColor.vue";
+import { availableColors } from "@/constants/colors";
+import { AvailableColor } from "@/types";
+import { useZkAppStore } from "@/store/zkAppModule";
+import { storeToRefs } from "pinia";
+import { formatAddress } from "@/utils";
+import CopyToClipBoard from "@/components/CopyToClipBoard.vue";
+import { cluesColors } from "@/constants/colors";
 
-const { zkAppAddress, zkProofStates, zkAppStates } = storeToRefs(useZkAppStore())
+const { claimRewardTransaction } = useZkAppStore();
+const { zkAppAddress, zkProofStates, zkAppStates } = storeToRefs(useZkAppStore());
 const isCodeMasterTurn = computed(() => {
     return zkProofStates.value?.turnCount % 2 === 0;
 });
-const guesses = ref<Array<AvailableColor[]>>(
-    zkProofStates.value?.guessesHistory
-);
+const guesses = ref<Array<AvailableColor[]>>(zkProofStates.value?.guessesHistory);
 const clues = computed<Array<AvailableColor[]>>(() => zkProofStates.value?.cluesHistory);
 
-const handleSetColor = (payload: {index:number,selectedColor:AvailableColor}, row: number) => {
-    guesses.value[row][payload.index] = { ...payload.selectedColor }
-}
+const handleSetColor = (payload: { index: number; selectedColor: AvailableColor }, row: number) => {
+    guesses.value[row][payload.index] = { ...payload.selectedColor };
+};
 
-const isPenalizeDialogVisible = ref(false)
-const handleShowPenalizeDialog = () => {
-    isPenalizeDialogVisible.value = true
-}
-const closePenalizePlayerDialog = () => {
-    isPenalizeDialogVisible.value = false
-}
-const isGameSolved = computed(()=> {
-    return clues.value?.some((clue:AvailableColor[]) => clue?.every((el:AvailableColor) => el.value === 2))
-})
-watch(() => zkProofStates.value?.turnCount, () => {
-    guesses.value = zkProofStates.value.guessesHistory
-})
-
+const isGameSolved = computed(() => {
+    return clues.value?.some((clue: AvailableColor[]) =>
+        clue?.every((el: AvailableColor) => el.value === 2)
+    );
+});
+watch(
+    () => zkProofStates.value?.turnCount,
+    () => {
+        guesses.value = zkProofStates.value.guessesHistory;
+    }
+);
 </script>
 <style scoped>
 .board__container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
 }
 
 .logs__container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
     border-left: none;
 }
 
 .color-picker__container {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
 }
 
 .logs-title {
-    border-bottom: 1px solid #222;
+    border-bottom: 1px solid #eeeeee;
 }
 
 :deep(.el-popper) {
@@ -129,12 +154,12 @@ watch(() => zkProofStates.value?.turnCount, () => {
 }
 
 .separator {
-    border: 1px solid #222;
+    border: 1px solid #eeeeee;
     width: 2px;
 }
 
-.penalize-player-btn {
-    background-color: #FF4D4D;
+.claim-btn {
+    background-color: #17b14d;
     color: white;
 }
 </style>
