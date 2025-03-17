@@ -163,7 +163,7 @@ const handleVerifyGuess = () => {
 
 .guess__container {
     border: 1px solid #eeeeee;
-    width: 330px;
+    width: 420px;
 }
 
 .clue__container {

@@ -45,9 +45,6 @@
                                 height="8px"
                             />
                         </div>
-                        <!-- <el-button class="penalize-player-btn" @click="handleShowPenalizeDialog">
-                            Penalize Player
-                        </el-button> -->
                     </div>
                 </template>
                 <template v-else>
@@ -59,6 +56,9 @@
                         >
                             The code master has won!
                         </div>
+                        <el-button class="claim-btn" @click="claimRewardTransaction">
+                            Claim Reward
+                        </el-button>
                     </div>
                 </template>
             </div>
@@ -92,13 +92,6 @@
                 </div>
             </div>
         </div>
-        <el-dialog
-            v-model="isPenalizeDialogVisible"
-            style="padding: 0px !important"
-            destroy-on-close
-        >
-            <PenalizePlayerForm @close="closePenalizePlayerDialog" />
-        </el-dialog>
     </div>
 </template>
 
@@ -113,8 +106,8 @@ import { storeToRefs } from "pinia";
 import { formatAddress } from "@/utils";
 import CopyToClipBoard from "@/components/CopyToClipBoard.vue";
 import { cluesColors } from "@/constants/colors";
-import PenalizePlayerForm from "./forms/PenalizePlayerForm.vue";
 
+const { claimRewardTransaction } = useZkAppStore();
 const { zkAppAddress, zkProofStates, zkAppStates } = storeToRefs(useZkAppStore());
 const isCodeMasterTurn = computed(() => {
     return zkProofStates.value?.turnCount % 2 === 0;
@@ -126,13 +119,6 @@ const handleSetColor = (payload: { index: number; selectedColor: AvailableColor 
     guesses.value[row][payload.index] = { ...payload.selectedColor };
 };
 
-const isPenalizeDialogVisible = ref(false);
-// const handleShowPenalizeDialog = () => {
-//     isPenalizeDialogVisible.value = true;
-// };
-const closePenalizePlayerDialog = () => {
-    isPenalizeDialogVisible.value = false;
-};
 const isGameSolved = computed(() => {
     return clues.value?.some((clue: AvailableColor[]) =>
         clue?.every((el: AvailableColor) => el.value === 2)
@@ -172,8 +158,8 @@ watch(
     width: 2px;
 }
 
-.penalize-player-btn {
-    background-color: #ff4d4d;
+.claim-btn {
+    background-color: #17b14d;
     color: white;
 }
 </style>
