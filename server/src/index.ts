@@ -3,26 +3,13 @@ import { WebSocketServer, WebSocket } from "ws";
 import { checkGameProgress, setupContract } from "./zkAppHandler.js";
 import { StepProgramProof } from "@navigators-exploration-team/mina-mastermind";
 import { getGame, saveGame } from "./kvStorageService.js";
-import https from "https";
-import http from "http";
-import fs from "fs";
 
 const app = express();   
 const PORT = 3000;    
 setupContract();
-const useHttps = process.env.USE_HTTPS === 'true';
-
-let server;
-if (useHttps) {
-  const sslOptions = {
-    key: fs.readFileSync("/app/certs/server.key"),
-    cert: fs.readFileSync("/app/certs/server.crt"),
-  };
-  server = https.createServer(sslOptions, app);
-} else {
-  server = http.createServer(app);
-}
-
+const server = app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
 
 const wss = new WebSocketServer({ server });
 
@@ -99,9 +86,4 @@ wss.on("connection", (ws) => {
   ws.on("error", (err) => {
     console.error("WebSocket error:", err);
   });
-});
-
-server.listen(PORT, () => {
-  const protocol = useHttps ? "https" : "http";
-  console.log(`Server is running on ${protocol}://localhost:${PORT}`);
 });
