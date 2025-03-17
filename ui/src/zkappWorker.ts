@@ -44,13 +44,16 @@ const state = {
 
 const functions = {
   setActiveInstanceToLightnet: async () => {
+    console.log("mina url : ", import.meta.env.VITE_MINA_NETWORK_URL);
     const network = Mina.Network({
       mina: import.meta.env.VITE_MINA_NETWORK_URL,
     });
     Mina.setActiveInstance(network);
   },
   loadContract: async () => {
-    const { MastermindZkApp } = await import("@navigators-exploration-team/mina-mastermind");
+    const { MastermindZkApp } = await import(
+      "@navigators-exploration-team/mina-mastermind"
+    );
     state.MastermindContract = MastermindZkApp;
   },
   compileContract: async () => {
