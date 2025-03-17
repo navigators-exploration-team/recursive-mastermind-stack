@@ -1,5 +1,5 @@
-import { fetchAccount, Mina, PrivateKey, PublicKey } from "o1js";
-import dotenv from "dotenv";
+import { fetchAccount, Mina, PrivateKey, PublicKey } from 'o1js';
+import dotenv from 'dotenv';
 import {
   checkIfSolved,
   deserializeClue,
@@ -7,18 +7,18 @@ import {
   separateTurnCountAndMaxAttemptSolved,
   StepProgram,
   StepProgramProof,
-} from "@navigators-exploration-team/mina-mastermind";
+} from '@navigators-exploration-team/mina-mastermind';
 dotenv.config();
 
 export const setupContract = async () => {
   const network = Mina.Network({
     mina: process.env.MINA_NETWORK_URL as string,
-  }); 
+  });
   Mina.setActiveInstance(network);
-  console.time("compiling");
+  console.time('compiling');
   await StepProgram.compile();
   await MastermindZkApp.compile();
-  console.timeEnd("compiling");
+  console.timeEnd('compiling');
 };
 export async function checkGameProgress(
   gameId: string,
@@ -43,7 +43,7 @@ export async function checkGameProgress(
       const isGameSolved = checkIfSolved(deserializedClue);
       if (
         Number(maxAttempts.toString()) * 2 < Number(turnCount) ||
-        isGameSolved.toString() === "true"
+        isGameSolved.toString() === 'true'
       ) {
         const senderPrivateKey = PrivateKey.fromBase58(
           process.env.SERVER_PRIVATE_KEY as string
@@ -59,15 +59,15 @@ export async function checkGameProgress(
             await zkApp.submitGameProof(zkProof);
           }
         );
-        console.log("transaction... ")
+        console.log('transaction... ');
         await transaction.prove();
         transaction.sign([senderPrivateKey]);
         const pendingTx = await transaction.send();
 
-        console.log("Transaction sent: ", pendingTx.hash);
+        console.log('Transaction sent: ', pendingTx.hash);
       }
     }
   } catch (e) {
-    console.log("error : ", e);
+    console.log('error : ', e);
   }
 }

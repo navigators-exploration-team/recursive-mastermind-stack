@@ -1,28 +1,30 @@
 {
-  "name": "cache-files--generator",
-  "type": "module",
-  "version": "1.0.0",
-  "main": "src/main.ts",
-  "license": "MIT",
-  "scripts": {
-    "build": "npx tsc",
-    "start": "node dist/index.js",
-    "dev": "nodemon"
-  },
-  "dependencies": {
-    "@navigators-exploration-team/mina-mastermind": "0.2.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "o1js": "2.2.0",
-    "ws": "^8.18.1"
-  },
-  "devDependencies": {
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.13.5",
-    "@types/ws": "^8.5.14",
-    "nodemon": "^3.1.9",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
-  }
+    "name": "cache-files--generator",
+    "type": "module",
+    "version": "1.0.0",
+    "main": "src/main.ts",
+    "license": "MIT",
+    "scripts": {
+        "build": "npx tsc",
+        "start": "node dist/index.js",
+        "dev": "nodemon",
+        "format": "prettier --write --ignore-unknown **/*"
+    },
+    "dependencies": {
+        "@navigators-exploration-team/mina-mastermind": "0.2.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.7",
+        "express": "^4.21.2",
+        "o1js": "2.2.0",
+        "prettier": "^3.5.3",
+        "ws": "^8.18.1"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.13.5",
+        "@types/ws": "^8.5.14",
+        "nodemon": "^3.1.9",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.7.3"
+    }
 }

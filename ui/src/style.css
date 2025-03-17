@@ -1,18 +1,18 @@
 Body {
-    font-family: "Roboto Mono";
+  font-family: 'Roboto Mono';
 }
 .cursor-pointer {
-    cursor: pointer;
+  cursor: pointer;
 }
 .flex-1 {
-    flex: 1 1 0;
+  flex: 1 1 0;
 }
 
 html,
 body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background: #222831 !important;
-    color: white;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #222831 !important;
+  color: white;
 }

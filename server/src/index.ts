@@ -1,11 +1,11 @@
-import express from "express";
-import { WebSocketServer, WebSocket } from "ws";
-import { checkGameProgress, setupContract } from "./zkAppHandler.js";
-import { StepProgramProof } from "@navigators-exploration-team/mina-mastermind";
-import { getGame, saveGame } from "./kvStorageService.js";
+import express from 'express';
+import { WebSocketServer, WebSocket } from 'ws';
+import { checkGameProgress, setupContract } from './zkAppHandler.js';
+import { StepProgramProof } from '@navigators-exploration-team/mina-mastermind';
+import { getGame, saveGame } from './kvStorageService.js';
 
-const app = express();   
-const PORT = 3000;    
+const app = express();
+const PORT = 3000;
 setupContract();
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
@@ -14,18 +14,18 @@ const server = app.listen(PORT, () => {
 const wss = new WebSocketServer({ server });
 
 const activePlayers = new Map<string, Set<WebSocket>>();
-              
-wss.on("connection", (ws) => {   
-  ws.on("message", async (message) => {
+
+wss.on('connection', (ws) => {
+  ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
       const { gameId, action, zkProof } = data;
 
       if (!gameId || !action) {
-        ws.send(JSON.stringify({ error: "Bad request!" }));
+        ws.send(JSON.stringify({ error: 'Bad request!' }));
         return;
       }
-      if (action === "join") {
+      if (action === 'join') {
         let game = await getGame(gameId);
         let lastProof = game?.lastProof || null;
         let timestamp = game?.timestamp || null;
@@ -36,10 +36,9 @@ wss.on("connection", (ws) => {
         if (lastProof) {
           ws.send(JSON.stringify({ zkProof: lastProof, timestamp }));
         }
-      } else if (action === "sendProof") {
-
+      } else if (action === 'sendProof') {
         if (!zkProof) {
-          ws.send(JSON.stringify({ error: "Missing zkProof!" }));
+          ws.send(JSON.stringify({ error: 'Missing zkProof!' }));
           return;
         }
 
@@ -54,9 +53,9 @@ wss.on("connection", (ws) => {
             await checkGameProgress(gameId, receivedProof);
           }
         } catch (e) {
-          ws.send(JSON.stringify({ error: "Invalid zkProof!" }));
+          ws.send(JSON.stringify({ error: 'Invalid zkProof!' }));
           return;
-        } 
+        }
 
         const timestamp = Date.now();
         await saveGame(gameId, { lastProof: zkProof, timestamp });
@@ -67,14 +66,14 @@ wss.on("connection", (ws) => {
           }
         });
       } else {
-        ws.send(JSON.stringify({ error: "Unknown action!" }));
+        ws.send(JSON.stringify({ error: 'Unknown action!' }));
       }
     } catch (err) {
-      ws.send(JSON.stringify({ error: "Internal error!" }));
+      ws.send(JSON.stringify({ error: 'Internal error!' }));
     }
   });
 
-  ws.on("close", () => {
+  ws.on('close', () => {
     activePlayers.forEach((players, gameId) => {
       players.delete(ws);
       if (players.size === 0) {
@@ -83,7 +82,7 @@ wss.on("connection", (ws) => {
     });
   });
 
-  ws.on("error", (err) => {
-    console.error("WebSocket error:", err);
+  ws.on('error', (err) => {
+    console.error('WebSocket error:', err);
   });
 });

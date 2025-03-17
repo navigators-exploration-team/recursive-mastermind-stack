@@ -1,5 +1,5 @@
-import { useWebSocket } from "@vueuse/core";
-import { StepProgramProof } from "@navigators-exploration-team/mina-mastermind"
+import { useWebSocket } from '@vueuse/core';
+import { StepProgramProof } from '@navigators-exploration-team/mina-mastermind';
 
 export class WebSocketService {
   socket: ReturnType<typeof useWebSocket>;
@@ -8,20 +8,20 @@ export class WebSocketService {
 
   constructor(gameId: string) {
     this.gameId = gameId;
-    console.log("web socket server : ",import.meta.env.VITE_WEB_SOCKET_URL)
+    console.log('web socket server : ', import.meta.env.VITE_WEB_SOCKET_URL);
     this.socket = useWebSocket(import.meta.env.VITE_WEB_SOCKET_URL, {
       autoReconnect: {
         retries: 5,
         delay: 1000,
         onFailed: () => {
-          console.error("Max reconnection attempts reached!");
+          console.error('Max reconnection attempts reached!');
         },
       },
       immediate: true,
       onMessage: async (_ws: WebSocket, event: MessageEvent) => {
         try {
           const data = JSON.parse(event.data);
-          console.log("Received data:", data);
+          console.log('Received data:', data);
           if (data.zkProof) {
             const receivedProof = await StepProgramProof.fromJSON(
               JSON.parse(data.zkProof)
@@ -30,11 +30,11 @@ export class WebSocketService {
             if (this.onMessageCallback) this.onMessageCallback(data);
           }
         } catch (e) {
-          console.log("Error handling message:", e);
+          console.log('Error handling message:', e);
         }
       },
       onConnected: async (_ws: WebSocket) => {
-        this.send({ action: "join", gameId });
+        this.send({ action: 'join', gameId });
       },
     });
   }

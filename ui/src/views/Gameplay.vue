@@ -12,47 +12,48 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
-import { useZkAppStore } from "@/store/zkAppModule"
+import { useZkAppStore } from '@/store/zkAppModule';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 import GameBoard from '@/components/GameBoard.vue';
 import GameDetail from '@/components/GameDetail.vue';
 import GameBoardSkeleton from '@/components/GameBoardSkeleton.vue';
 
-const route = useRoute()
-const { compiled, zkAppStates } = storeToRefs(useZkAppStore())
-const { initZkappInstance, joinGame, getZkAppStates } = useZkAppStore()
-const gameId = route?.params?.id as string
+const route = useRoute();
+const { compiled, zkAppStates } = storeToRefs(useZkAppStore());
+const { initZkappInstance, joinGame, getZkAppStates } = useZkAppStore();
+const gameId = route?.params?.id as string;
 const initializeGame = async () => {
   if (compiled.value) {
-    await initZkappInstance(gameId)
-    await joinGame(gameId)
+    await initZkappInstance(gameId);
+    await joinGame(gameId);
     intervalId.value = setInterval(async () => {
-      await getZkAppStates()
+      await getZkAppStates();
       if (zkAppStates.value && zkAppStates.value.codeBreakerId !== '0') {
         if (intervalId.value) {
-          clearInterval(intervalId.value)
+          clearInterval(intervalId.value);
         }
       }
-    }, 3000)
+    }, 3000);
   }
-}
+};
 onMounted(async () => {
-  await initializeGame()
-})
-watch(() => compiled.value, async () => {
-  await initializeGame()
-})
-
+  await initializeGame();
+});
+watch(
+  () => compiled.value,
+  async () => {
+    await initializeGame();
+  }
+);
 
 const intervalId = ref<number | null>(null);
 
 onUnmounted(async () => {
   if (intervalId.value) {
-    clearInterval(intervalId.value)
+    clearInterval(intervalId.value);
   }
-
-})
+});
 </script>
 <style lang="css">
 .board__container {
