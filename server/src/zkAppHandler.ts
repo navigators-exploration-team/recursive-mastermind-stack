@@ -1,4 +1,4 @@
-import { fetchAccount, Mina, PrivateKey, PublicKey } from 'o1js';
+import { Bool, fetchAccount, Mina, PrivateKey, PublicKey } from 'o1js';
 import dotenv from 'dotenv';
 import {
   checkIfSolved,
@@ -20,7 +20,8 @@ export const setupContract = async () => {
   await MastermindZkApp.compile();
   console.timeEnd('compiling');
 };
-export async function checkGameProgress(
+
+export async function checkGameStatus(
   gameId: string,
   zkProof: StepProgramProof
 ) {
@@ -40,34 +41,50 @@ export async function checkGameProgress(
       const deserializedClue = deserializeClue(
         zkProof.publicOutput.serializedClue
       );
-      const isGameSolved = checkIfSolved(deserializedClue);
-      if (
-        Number(maxAttempts.toString()) * 2 < Number(turnCount) ||
-        isGameSolved.toString() === 'true'
-      ) {
-        const senderPrivateKey = PrivateKey.fromBase58(
-          process.env.SERVER_PRIVATE_KEY as string
-        );
-        const senderPublicKey = senderPrivateKey.toPublicKey();
+      const isGameSolved = checkIfSolved(deserializedClue) as Bool;
 
-        const transaction = await Mina.transaction(
-          {
-            sender: senderPublicKey,
-            fee: 1e8,
-          },
-          async () => {
-            await zkApp.submitGameProof(zkProof);
-          }
-        );
-        console.log('transaction... ');
-        await transaction.prove();
-        transaction.sign([senderPrivateKey]);
-        const pendingTx = await transaction.send();
-
-        console.log('Transaction sent: ', pendingTx.hash);
-      }
+      return {
+        maxAttempts: Number(maxAttempts.toString()),
+        turnCount: Number(turnCount),
+        isSolved: isGameSolved.toBoolean(),
+      };
     }
   } catch (e) {
     console.log('error : ', e);
   }
+
+  return {
+    maxAttempts: null,
+    turnCount: null,
+    isSolved: null,
+  };
+}
+
+export async function sendFinalProofToMina(
+  gameId: string,
+  zkProof: StepProgramProof
+) {
+  const senderPrivateKey = PrivateKey.fromBase58(
+    process.env.SERVER_PRIVATE_KEY as string
+  );
+  const senderPublicKey = senderPrivateKey.toPublicKey();
+  const zkApp = new MastermindZkApp(PublicKey.fromBase58(gameId));
+
+  console.log('creating transaction... ');
+  const transaction = await Mina.transaction(
+    {
+      sender: senderPublicKey,
+      fee: 1e8,
+    },
+    async () => {
+      await zkApp.submitGameProof(zkProof);
+    }
+  );
+  console.log('proving transaction... ');
+  await transaction.prove();
+  transaction.sign([senderPrivateKey]);
+  console.log('sending transaction... ');
+  const pendingTx = await transaction.send();
+  console.log('Transaction sent: ', pendingTx.hash);
+  return pendingTx.hash;
 }
