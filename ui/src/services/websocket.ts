@@ -1,5 +1,6 @@
 import { useWebSocket } from '@vueuse/core';
 import { StepProgramProof } from '@navigators-exploration-team/mina-mastermind';
+import { useZkAppStore } from '@/store/zkAppModule';
 
 export class WebSocketService {
   socket: ReturnType<typeof useWebSocket>;
@@ -28,6 +29,10 @@ export class WebSocketService {
             );
             receivedProof.verify();
             if (this.onMessageCallback) this.onMessageCallback(data);
+          }
+          if(data.hash) {
+            const { setLastTransactionHash } = useZkAppStore();
+            setLastTransactionHash(data.hash)
           }
         } catch (e) {
           console.log('Error handling message:', e);

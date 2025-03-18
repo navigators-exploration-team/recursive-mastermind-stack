@@ -46,6 +46,8 @@ export const useZkAppStore = defineStore('useZkAppModule', {
     zkAppAddress: null as null | string,
     webSocketInstance: null as null | WebSocketService,
     userRole: null as null | string,
+    lastTransactionLink: null as null | string,
+
   }),
   getters: {},
   actions: {
@@ -384,5 +386,8 @@ export const useZkAppStore = defineStore('useZkAppModule', {
         this.publicKeyBase58
       );
     },
+    setLastTransactionHash(hash:string) {
+      this.lastTransactionLink = hash
+    }
   },
 });
