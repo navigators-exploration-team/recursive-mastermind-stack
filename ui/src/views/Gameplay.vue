@@ -34,7 +34,7 @@ const initializeGame = async () => {
           clearInterval(intervalId.value);
         }
       }
-    }, 3000);
+    }, 30000);
   }
 };
 onMounted(async () => {
