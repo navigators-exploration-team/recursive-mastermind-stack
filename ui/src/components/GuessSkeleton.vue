@@ -30,6 +30,7 @@
 <script lang="ts" setup></script>
 <style scoped>
 .guess__container {
+  width: 420px;
   border: 1px solid #222;
 }
 
