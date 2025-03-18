@@ -64,11 +64,11 @@ const acceptedGameId = ref();
 const route = useRoute();
 const handleAcceptGame = async () => {
   await acceptGame();
-  acceptedGameId.value = route?.params?.id;
-  localStorage.setItem('lastAcceptedGame', acceptedGameId.value);
   if (error.value) {
     ElMessage.error({ message: error.value, duration: 6000 });
   } else {
+    acceptedGameId.value = route?.params?.id;
+    localStorage.setItem('lastAcceptedGame', acceptedGameId.value);
     ElNotification({
       title: 'Success',
       message: `Transaction Hash :  ${currentTransactionLink.value}`,

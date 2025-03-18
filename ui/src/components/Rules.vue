@@ -36,7 +36,7 @@
           </div>
           <div class="my-2">Guess And Clue</div>
           <div class="">
-            <Guess :guess="guess" :clue="clue" />
+            <Guess :guess="guess" :clue="clue" style="width: 330px" />
           </div>
         </div>
       </div>
