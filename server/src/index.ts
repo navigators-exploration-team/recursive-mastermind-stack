@@ -96,10 +96,10 @@ wss.on('connection', (ws) => {
         console.log(isSolved, turnCount, maxAttempts);
 
         if (
-          isSolved &&
-          turnCount &&
+          isSolved ||
+          (turnCount &&
           maxAttempts &&
-          2 * turnCount >= maxAttempts
+          turnCount > maxAttempts * 2)
         ) {
           const hash = await sendFinalProofToMina(gameId, receivedProof);
           players.forEach((player: WebSocket) => {

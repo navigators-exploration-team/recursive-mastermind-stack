@@ -28,15 +28,24 @@
           <div class="w-100 d-flex align-items-center justify-content-between">
             <div v-if="isGameSolved" class="my-4 w-100 d-flex justify-content-between align-items-center">
               The code breaker has won!
-              <div v-if="userRole === 'CODE_BREAKER'">
-                <el-button class="claim-btn" @click="claimRewardTransaction" v-if="showRewardButton">
+              <div v-if="userRole === 'CODE_BREAKER' && !rewardClaimed">
+                <el-button class="claim-btn" @click="handleClaimReward" v-if="showRewardButton" :disabled="loading"
+                  :loading="loading">
                   Claim Reward
                 </el-button>
                 <div v-else>
-                  Waiting for last proof submission
-                  <div class="dots mb-1">
-                    <span class="dot" v-for="(_dot, index) in 3" :key="index"
-                      :style="{ animationDelay: `${index * 0.3}s` }"></span>
+                  <div class="ms-1 d-flex align-items-end gap-2">
+                    Submitting proof
+                    <div class="dots mb-1">
+                      <span class="dot" v-for="(_dot, index) in 3" :key="index"
+                        :style="{ animationDelay: `${index * 0.3}s` }"></span>
+                    </div>
+                  </div>
+                  <div v-if="lastTransactionLink">
+                    <a :href="`https://minascan.io/devnet/tx/${lastTransactionLink}?type=zk-tx`" target="_blank"
+                      rel="noopener noreferrer">
+                      Transaction Hash
+                    </a>
                   </div>
                 </div>
               </div>
@@ -45,10 +54,28 @@
             <div v-else-if="zkProofStates.turnCount > zkAppStates.maxAttempts * 2"
               class="my-4 w-100 d-flex justify-content-between align-items-center">
               The code master has won!
-              <div v-if="userRole === 'CODE_MASTER'">
-                <el-button class="claim-btn" @click="claimRewardTransaction" v-if="showRewardButton">
+              <div v-if="userRole === 'CODE_MASTER' && !rewardClaimed">
+                <el-button class="claim-btn" @click="handleClaimReward" v-if="showRewardButton" :disabled="loading"
+                  :loading="loading">
                   Claim Reward
                 </el-button>
+                <div v-else>
+                  <div class="ms-1 d-flex align-items-end gap-2">
+                    Submitting proof
+                    <div class="dots mb-1">
+                      <span class="dot" v-for="(_dot, index) in 3" :key="index"
+                        :style="{ animationDelay: `${index * 0.3}s` }"></span>
+                    </div>
+                  </div>
+                  <div v-if="lastTransactionLink">
+                    <a :href="`https://minascan.io/devnet/tx/${lastTransactionLink}?type=zk-tx`" target="_blank"
+                      rel="noopener noreferrer">
+                      Transaction Hash
+                    </a>
+                  </div>
+
+
+                </div>
               </div>
 
             </div>
@@ -89,9 +116,11 @@ import { storeToRefs } from 'pinia';
 import { formatAddress } from '@/utils';
 import CopyToClipBoard from '@/components/CopyToClipBoard.vue';
 import { cluesColors } from '@/constants/colors';
+import { ElNotification } from 'element-plus';
+import { ElMessage } from 'element-plus';
 
 const { claimRewardTransaction, getRole, getZkAppStates } = useZkAppStore();
-const { zkAppAddress, zkProofStates, zkAppStates, userRole } =
+const { zkAppAddress, zkProofStates, zkAppStates, userRole, lastTransactionLink, error, loading, currentTransactionLink } =
   storeToRefs(useZkAppStore());
 const isCodeMasterTurn = computed(() => {
   return zkProofStates.value?.turnCount % 2 === 0;
@@ -103,14 +132,28 @@ const guesses = ref<Array<AvailableColor[]>>(
 const clues = computed<Array<AvailableColor[]>>(
   () => zkProofStates.value?.cluesHistory
 );
-
+const rewardClaimed = ref(false)
 const handleSetColor = (
   payload: { index: number; selectedColor: AvailableColor },
   row: number
 ) => {
   guesses.value[row][payload.index] = { ...payload.selectedColor };
 };
+const handleClaimReward = async () => {
+  await claimRewardTransaction()
+  if (error.value) {
+    ElMessage.error({ message: error.value, duration: 6000 });
+  } else {
+    rewardClaimed.value = true
+    ElNotification({
+      title: 'Success',
+      message: `Transaction Hash : ${currentTransactionLink.value}`,
+      type: 'success',
+      duration: 5000,
+    });
 
+  }
+}
 const isGameSolved = computed(() => {
   return clues.value?.some((clue: AvailableColor[]) =>
     clue?.every((el: AvailableColor) => el.value === 2)
