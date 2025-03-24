@@ -1,0 +1,20 @@
+{
+  "name": "cache-files--generator",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "src/cache.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cache.js"
+  },
+  "dependencies": {
+    "@navigators-exploration-team/mina-mastermind": "^0.1.0",
+    "o1js": "2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}

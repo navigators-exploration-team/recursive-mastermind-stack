@@ -1,0 +1,37 @@
+{
+  "name": "ui",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write --ignore-unknown **/*"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.1",
+    "@navigators-exploration-team/mina-mastermind": "0.2.0",
+    "@vueuse/core": "^13.0.0",
+    "add": "^2.0.6",
+    "axios": "^1.7.7",
+    "bootstrap": "^5.3.3",
+    "bootstrap-vue": "^2.23.1",
+    "element-plus": "^2.8.8",
+    "install": "^0.13.0",
+    "o1js": "2.2.0",
+    "path": "^0.12.7",
+    "pinia": "^2.2.6",
+    "prettier": "^3.5.3",
+    "vue": "^3.5.12",
+    "vue-router": "^4.4.5",
+    "yarn": "^1.22.22"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@vitejs/plugin-vue": "^5.1.4",
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10",
+    "vue-tsc": "^2.1.8"
+  }
+}

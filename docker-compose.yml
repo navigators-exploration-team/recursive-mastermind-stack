@@ -1,0 +1,41 @@
+services:
+  server-dev:
+    profiles: ["dev"]
+    build: 
+      context: ./server
+      dockerfile: docker/dockerfile.dev
+    volumes:
+      - ./server/src:/app/src
+    ports:
+      - "4000:3000"
+    env_file:
+      - server/.env
+    restart: unless-stopped
+  server-prod:
+    profiles: ["prod"]
+    build: 
+      context: ./server
+      dockerfile: docker/dockerfile.prod
+    volumes:
+      - ./server/src:/app/src
+    ports:
+      - "4000:3000"
+    env_file:
+      - server/.env
+    restart: unless-stopped
+  vue-app-dev-client:
+    profiles: ["dev"]
+    build:
+      context: ./ui
+      dockerfile: docker/dockerfile.dev
+    volumes:
+      - ./ui/src:/app/src
+      - ./ui/index.ts:/app/index.ts
+      - ./ui/package.json:/app/package.json
+      - ./ui/public:/app/public
+    ports:
+      - 5000:3001
+    tty: true
+    stdin_open: true
+    env_file:
+      - ui/.env
