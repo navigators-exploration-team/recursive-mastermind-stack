@@ -1,56 +1,22 @@
 <template>
   <div class="d-flex flex-column align-items-center w-100 h-100">
-    <el-form
-      :model="game"
-      :rules="rules"
-      style="max-width: 400px; width: 100%"
-      ref="ruleFormRef"
-    >
+    <el-form :model="game" :rules="rules" style="max-width: 400px; width: 100%" ref="ruleFormRef">
       <el-form-item prop="maxAttempts">
         <label>Number of Attempts</label>
-        <el-input
-          type="number"
-          v-model.number="game.maxAttempts"
-          size="large"
-          placeholder="Insert a number between 5 and 15"
-          :max="15"
-          :min="5"
-          @blur="setAttempts"
-        ></el-input>
+        <el-input type="number" v-model.number="game.maxAttempts" size="large"
+          placeholder="Insert a number between 5 and 15" :max="15" :min="5" @blur="setAttempts"></el-input>
       </el-form-item>
       <el-form-item prop="rewardAmount">
         <label>Reward Amount</label>
-        <el-input
-          type="number"
-          placeholder="Insert reward amount"
-          v-model.number="game.rewardAmount"
-          size="large"
-        ></el-input>
+        <el-input type="number" placeholder="Insert reward amount" v-model.number="game.rewardAmount"
+          size="large"></el-input>
       </el-form-item>
       <el-form-item prop="refereePubKeyBase58">
         <label>Refree Public Key</label>
-        <el-input
-          placeholder="Insert refree public key"
-          v-model="game.refereePubKeyBase58"
-          size="large"
-        >
-          <template #append>
-            <el-button
-              type="primary"
-              class="d-flex align-items-center justify-content-center gap-2"
-              :icon="FolderOpened"
-              @click="pasteFromClipboard"
-            >
-              Paste
-            </el-button>
-          </template>
-        </el-input>
+        <PasteFromClipBoard placeholder="Insert refree public key" @change="handleRefreeChange"
+          :inputValue="game.refereePubKeyBase58" />
       </el-form-item>
-      <CodePickerForm
-        @submit="handleInitGame"
-        btnText="Submit Code"
-        isRandomSalt
-      />
+      <CodePickerForm @submit="handleInitGame" btnText="Submit Code" isRandomSalt />
     </el-form>
   </div>
 </template>
@@ -65,6 +31,7 @@ import { CodePicker } from '@/types';
 import { GameParams } from '../../types';
 import { PublicKey } from 'o1js';
 import { ElNotification } from 'element-plus';
+import PasteFromClipBoard from '@/components/shared/PasteFromClipBoard.vue';
 
 const { zkAppAddress, error, currentTransactionLink } =
   storeToRefs(useZkAppStore());
@@ -159,20 +126,10 @@ const handleInitGame = async (formData: CodePicker) => {
     }
   });
 };
-const pasteFromClipboard = async () => {
-  try {
-    const text = await navigator.clipboard.readText();
-    if (text.trim()) {
-      game.value.refereePubKeyBase58 = text.trim();
-    } else {
-      ElMessage.warning('Clipboard is empty!');
-    }
-  } catch (error) {
-    console.error('Failed to read clipboard: ', error);
-    ElMessage.error('Failed to access clipboard!');
-  }
-};
-import { FolderOpened } from '@element-plus/icons-vue';
+const handleRefreeChange = (input: string) => {
+  game.value.refereePubKeyBase58 = input
+
+}
 </script>
 
 <style scoped>

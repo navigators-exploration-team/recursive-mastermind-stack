@@ -4,18 +4,9 @@
       <label class="mb-2">Secret Code</label>
       <div class="board__container w-100">
         <div class="d-flex gap-2 p-2 justify-content-center w-100">
-          <RoundedColor
-            height="40px"
-            width="40px"
-            editable
-            v-for="(secret, index) in secretCode"
-            :bg-color="secret.color"
-            :value="secret.value"
-            @input="handleSetSecretCode($event, index)"
-            @focusNext="focusNextInput(index)"
-            @focusPrev="focusPrevInput(index)"
-            ref="inputRefs"
-          />
+          <RoundedColor height="40px" width="40px" editable v-for="(secret, index) in secretCode"
+            :bg-color="secret.color" :value="secret.value" @input="handleSetSecretCode($event, index)"
+            @focusNext="focusNextInput(index)" @focusPrev="focusPrevInput(index)" ref="inputRefs" />
         </div>
       </div>
     </div>
@@ -23,31 +14,14 @@
       <el-form-item class="mt-4" prop="randomSalt">
         <label>Salt</label>
         <div class="d-flex w-100 gap-2 align-items-center">
-          <el-input
-            type="text"
-            size="large"
-            v-model="form.randomSalt"
-            :readonly="isRandomSalt"
-          ></el-input>
+          <el-input type="text" size="large" v-model="form.randomSalt" :readonly="isRandomSalt"></el-input>
           <CopyToClipBoard :text="form.randomSalt || ''" />
         </div>
       </el-form-item>
-      <el-tooltip
-        placement="bottom"
-        :visible="!compiled"
-        content="Please wait for compilation"
-      >
-        <el-button
-          size="large"
-          color="#00ADB5"
-          type="primary"
-          :disabled="!combinationValidation.isValid || !compiled"
-          :loading="!compiled || loading"
-          :title="combinationValidation.message"
-          @click="handleSubmitForm"
-          class="my-5 w-100"
-          >{{ btnText }}</el-button
-        >
+      <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
+        <el-button size="large" color="#00ADB5" type="primary" :disabled="!combinationValidation.isValid || !compiled"
+          :loading="!compiled || loading" :title="combinationValidation.message" @click="handleSubmitForm"
+          class="my-5 w-100">{{ btnText }}</el-button>
       </el-tooltip>
     </el-form>
   </div>
@@ -57,7 +31,7 @@ import { computed, nextTick, ref } from 'vue';
 import { AvailableColor } from '@/types';
 import { Field } from 'o1js';
 import RoundedColor from '@/components/RoundedColor.vue';
-import CopyToClipBoard from '@/components/CopyToClipBoard.vue';
+import CopyToClipBoard from '@/components/shared/CopyToClipBoard.vue';
 import { generateRandomSalt, validateColorCombination } from '../../utils';
 import { ElForm } from 'element-plus';
 import { storeToRefs } from 'pinia';

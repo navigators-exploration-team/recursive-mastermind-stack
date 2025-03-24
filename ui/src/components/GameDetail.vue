@@ -8,36 +8,13 @@
     <div>Reward Amount : {{ zkAppStates.rewardAmount / 1e9 }} MINA</div>
     <div class="d-flex align-items-end gap-2" v-if="userRole === 'CODE_MASTER'">
       Waiting for code breaker to accept the game
-      <div class="dots mb-1">
-        <span
-          class="dot"
-          v-for="(_dot, index) in 3"
-          :key="index"
-          :style="{ animationDelay: `${index * 0.3}s` }"
-        ></span>
-      </div>
+      <DotsLoader />
     </div>
-    <el-button
-      v-else-if="!isLastAcceptedGame"
-      size="large"
-      color="#00ADB5"
-      :disabled="loading"
-      :loading="loading"
-      type="primary"
-      class="w-100"
-      @click="handleAcceptGame"
-      >Accept game</el-button
-    >
+    <el-button v-else-if="!isLastAcceptedGame" size="large" color="#00ADB5" :disabled="loading" :loading="loading"
+      type="primary" class="w-100" @click="handleAcceptGame">Accept game</el-button>
     <div class="d-flex align-items-end gap-2" v-else>
       Waiting for the game to start
-      <div class="dots mb-1">
-        <span
-          class="dot"
-          v-for="(_dot, index) in 3"
-          :key="index"
-          :style="{ animationDelay: `${index * 0.3}s` }"
-        ></span>
-      </div>
+      <DotsLoader />
     </div>
   </div>
 </template>
@@ -46,10 +23,11 @@ import { useZkAppStore } from '@/store/zkAppModule';
 import { storeToRefs } from 'pinia';
 import { ElMessage } from 'element-plus';
 import { formatAddress } from '@/utils';
-import CopyToClipBoard from '@/components/CopyToClipBoard.vue';
+import CopyToClipBoard from '@/components/shared/CopyToClipBoard.vue';
 import { computed, onMounted, ref } from 'vue';
 import { ElNotification } from 'element-plus';
 import { useRoute } from 'vue-router';
+import DotsLoader from '@/components/shared/DotsLoader.vue';
 
 const {
   zkAppStates,
@@ -85,30 +63,3 @@ onMounted(async () => {
   acceptedGameId.value = localStorage.getItem('lastAcceptedGame');
 });
 </script>
-<style scoped>
-.dots {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  background-color: white;
-  border-radius: 50%;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-
-  50% {
-    opacity: 1;
-  }
-}
-</style>
