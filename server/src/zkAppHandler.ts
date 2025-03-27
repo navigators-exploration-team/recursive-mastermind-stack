@@ -60,31 +60,3 @@ export async function checkGameStatus(
   };
 }
 
-export async function sendFinalProofToMina(
-  gameId: string,
-  zkProof: StepProgramProof
-) {
-  const senderPrivateKey = PrivateKey.fromBase58(
-    process.env.SERVER_PRIVATE_KEY as string
-  );
-  const senderPublicKey = senderPrivateKey.toPublicKey();
-  const zkApp = new MastermindZkApp(PublicKey.fromBase58(gameId));
-
-  console.log('creating transaction... ');
-  const transaction = await Mina.transaction(
-    {
-      sender: senderPublicKey,
-      fee: 1e8,
-    },
-    async () => {
-      await zkApp.submitGameProof(zkProof);
-    }
-  );
-  console.log('proving transaction... ');
-  await transaction.prove();
-  transaction.sign([senderPrivateKey]);
-  console.log('sending transaction... ');
-  const pendingTx = await transaction.send();
-  console.log('Transaction sent: ', pendingTx.hash);
-  return pendingTx.hash;
-}

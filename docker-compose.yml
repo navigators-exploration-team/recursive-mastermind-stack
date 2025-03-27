@@ -6,10 +6,15 @@ services:
       dockerfile: docker/dockerfile.dev
     volumes:
       - ./server/src:/app/src
+      - ./server/package.json:/app/package.json
+      - ./server/yarn.lock:/app/yarn.lock
+      - ./server/nodemon.json:/app/nodemon.json
     ports:
-      - "4000:3000"
+      - "3000:3000"
     env_file:
       - server/.env
+    depends_on:
+      - redis    
     restart: unless-stopped
   server-prod:
     profiles: ["prod"]
@@ -19,7 +24,7 @@ services:
     volumes:
       - ./server/src:/app/src
     ports:
-      - "4000:3000"
+      - "3000:3000"
     env_file:
       - server/.env
     restart: unless-stopped
@@ -34,8 +39,32 @@ services:
       - ./ui/package.json:/app/package.json
       - ./ui/public:/app/public
     ports:
-      - 5000:3001
+      - 3001:3001
     tty: true
     stdin_open: true
     env_file:
       - ui/.env
+  redis:
+    profiles: ["prod","dev"]
+    image: redis:latest
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: always
+  worker:
+    profiles: ["prod","dev"]
+    build:
+      context: ./worker
+      dockerfile: docker/dockerfile.dev
+    volumes:
+      - ./worker/src:/app/src
+    env_file:
+      - worker/.env
+    depends_on:
+      - redis
+    restart: always
+
+volumes:
+  redis_data:
