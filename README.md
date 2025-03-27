@@ -24,8 +24,7 @@
   - [Prerequisites](#1-prerequisites)
     - [Install Docker](#install-docker)
   - [Running Lightnet](#2-running-lightnet)
-  - [Running the server](#3-running-the-server)
-  - [Running the UI](#4-running-the-ui)
+  - [Running the Application](#3-Running-the-Application)
   - [Working with Lightnet Test Accounts](#working-with-lightnet-test-accounts)
     - [HTTP GET](#http-get)
     - [Supported Query Parameters](#supported-query-parameters)
@@ -181,26 +180,22 @@ By default, starting the Lightnet blockchain network also launches archive data 
 
 If your testing does **not** require archive data tools and you want to use fewer system resources, you can disable them using the `--no-archive` option, as shown above.
 
-## 3. Running the server
-Duplicate the `.env.example` file and rename it to `.env`. Ensure all environment variables are correctly configured.  
-To start the server, run the following commands inside the `server` directory:
+## 3. Running the Application
+
+### Environment Setup
+Duplicate the `.env.example` file in the following directories and rename it to `.env`:
+- `server`
+- `ui`
+- `worker`
+
+Ensure all environment variables are correctly configured in each `.env` file.
+
+### Starting the Application
+Run the following command to start the application using Docker:
 
 ```sh
-yarn install
-yarn dev
+docker compose --profile dev up -d
 ```
-
-## 4. Running the UI
-Duplicate the `.env.example` file and rename it to `.env`. Ensure all environment variables are correctly configured.  
-To start the frontend, run the following commands inside the `ui` directory:
-
-```sh
-yarn install
-yarn dev
-```
-
-This will launch the UI, allowing you to interact with the zkApp.
-
 ## Working with Lightnet Test Accounts
 
 To get a set of testing accounts for Lightnet, you can use the following API:
