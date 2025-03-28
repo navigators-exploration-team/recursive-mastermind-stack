@@ -152,6 +152,13 @@ export const useZkAppStore = defineStore('useZkAppModule', {
     ) {
       try {
         this.loading = true;
+        const hasEnoughFunds = await this.zkappWorkerClient?.hasEnoughFunds(
+          this.publicKeyBase58,
+          rewardAmount
+        );
+        if(!hasEnoughFunds){
+          throw new Error("You don't have enough funds!")
+        }
         this.stepDisplay = 'Creating a transaction...';
         const combination = serializeSecret(separatedSecretCombination);
         const signedData = await this.signFields([combination, salt]);
@@ -325,6 +332,13 @@ export const useZkAppStore = defineStore('useZkAppModule', {
     async acceptGame() {
       try {
         this.loading = true;
+        const hasEnoughFunds = await this.zkappWorkerClient?.hasEnoughFunds(
+          this.publicKeyBase58,
+          this.zkAppStates.rewardAmount
+        );
+        if(!hasEnoughFunds){
+          throw new Error("You don't have enough funds!")
+        }
         this.stepDisplay = 'Creating a transaction...';
         await this.zkappWorkerClient!.createAcceptGameTransaction(
           this.publicKeyBase58
@@ -386,8 +400,8 @@ export const useZkAppStore = defineStore('useZkAppModule', {
         this.publicKeyBase58
       );
     },
-    setLastTransactionHash(hash:string) {
-      this.lastTransactionLink = hash
-    }
+    setLastTransactionHash(hash: string) {
+      this.lastTransactionLink = hash;
+    },
   },
 });

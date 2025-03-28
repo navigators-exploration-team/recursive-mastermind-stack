@@ -28,7 +28,12 @@ export default class ZkappWorkerClient {
     });
     return result as ReturnType<typeof fetchAccount>;
   }
-
+  async hasEnoughFunds(
+    publicKey: string,
+    rewardAmount: number
+  ): Promise<boolean> {
+    return await this._call('hasEnoughFunds', { publicKey, rewardAmount }) as Promise<boolean>;
+  }
   async proveTransaction() {
     return this._call('proveTransaction', {});
   }
