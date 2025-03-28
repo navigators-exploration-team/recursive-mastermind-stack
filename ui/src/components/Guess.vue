@@ -98,7 +98,7 @@ const focusPrevInput = (index: number) => {
 
 const handleGiveClue = async (formData: CodePicker) => {
   isVerifyGuessModalOpen.value = false;
-  await createGiveClueProof(formData.code, formData.randomSalt);
+  await createGiveClueProof(formData.code.map((e: AvailableColor) => e.value), formData.randomSalt);
   if (error.value) {
     ElMessage.error({ message: error.value, duration: 6000 });
   }

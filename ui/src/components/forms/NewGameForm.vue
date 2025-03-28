@@ -16,7 +16,7 @@
         <PasteFromClipBoard placeholder="Insert refree public key" @change="handleRefreeChange"
           :inputValue="game.refereePubKeyBase58" />
       </el-form-item>
-      <CodePickerForm @submit="handleInitGame" btnText="Submit Code" isRandomSalt />
+      <CodePickerForm @submit="handleInitGame" btnText="Submit Code" isRandomSalt :hideOnMount="false"  />
     </el-form>
   </div>
 </template>
@@ -27,7 +27,7 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import CodePickerForm from '@/components/forms/CodePickerForm.vue';
 import { ElForm, ElMessage } from 'element-plus';
-import { CodePicker } from '@/types';
+import { AvailableColor, CodePicker } from '@/types';
 import { GameParams } from '../../types';
 import { PublicKey } from 'o1js';
 import { ElNotification } from 'element-plus';
@@ -101,7 +101,7 @@ const handleInitGame = async (formData: CodePicker) => {
   ruleFormRef.value.validate(async (valid) => {
     if (valid) {
       await createInitGameTransaction(
-        formData.code,
+        formData.code.map((e: AvailableColor) => e.value),
         formData.randomSalt,
         game.value.maxAttempts as number,
         game.value.refereePubKeyBase58 as string,
@@ -116,6 +116,19 @@ const handleInitGame = async (formData: CodePicker) => {
           type: 'success',
           duration: 5000,
         });
+        let games = {}
+        const storedGames = localStorage.getItem("games")
+        if (storedGames) {
+          games = { ...JSON.parse(storedGames) }
+        }
+        games = {
+          ...games,
+          [zkAppAddress.value as string]:{
+            randomSalt:formData.randomSalt,
+            secretCode: formData.code
+          }
+        }
+        localStorage.setItem("games",JSON.stringify(games))
         router.push({
           name: 'gameplay',
           params: {
