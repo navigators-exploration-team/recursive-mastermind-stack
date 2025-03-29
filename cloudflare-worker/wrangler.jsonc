@@ -14,6 +14,10 @@
 		{
 		  "binding": "GAME_KV",
 		  "id": "ec89a6e35be04ce3aefad15b2d37dccb"
+		},
+		{
+			"binding":"USER_KV",
+			"id": "8b25b944c68e48b883ef55456b3740b9"
 		}
 	  ]
 	

@@ -4,9 +4,16 @@ import { Queue, QueueEvents } from 'bullmq';
 import { setupContract } from './zkAppHandler.js';
 import dotenv from 'dotenv';
 import { handleJoinGame, handleProof } from './services.js';
+import cors from "cors";
+import gamesRoute from './routes/gamesRoute.js';
+
 dotenv.config();
 
 const app = express();
+app.use(cors());
+
+app.use(express.json());
+
 const PORT = process.env.SERVER_PORT;
 const REDIS_PORT = parseInt(process.env.REDIS_PORT as string) || 6379;
 const REDIS_HOST = process.env.REDIS_HOST;
@@ -14,6 +21,8 @@ setupContract();
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+app.use("/games",gamesRoute);
 
 const wss = new WebSocketServer({ server });
 const activePlayers = new Map<string, Set<WebSocket>>();

@@ -41,16 +41,15 @@
     <Rules v-if="step === 'RULES'" />
     <GuideFlow v-if="step === 'TUTORIAL'" />
     <NewGameForm v-if="step === 'NEW_GAME'" />
-    <JoinGameForm v-if="step === 'JOIN'" />
+    <JoinGame v-if="step === 'JOIN'"/>
   </div>
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
 import NewGameForm from '@/components/forms/NewGameForm.vue';
 import GuideFlow from '@/components/GuideFlow.vue';
-import JoinGameForm from '@/components/forms/JoinGameForm.vue';
 import Rules from '@/components/Rules.vue';
-
+import JoinGame from '@/views/JoinGame.vue';
 const step = ref('RULES');
 const setStep = (currentStep: string) => {
   step.value = currentStep;
