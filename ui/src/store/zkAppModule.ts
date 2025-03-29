@@ -130,7 +130,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
     },
     async signFields(content: object): Promise<SignedData> {
       try {
-        this.stepDisplay = 'Signing a message...';
+        this.stepDisplay = 'Signing...';
 
         const signedData = await (window as any).mina.signFields({
           message: content,
@@ -173,7 +173,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
             rewardAmount
           );
 
-        this.stepDisplay = 'Creating proof...';
+        this.stepDisplay = 'Generating proof...';
         await this.zkappWorkerClient!.proveTransaction();
 
         this.stepDisplay = 'Getting transaction JSON...';
@@ -218,17 +218,19 @@ export const useZkAppStore = defineStore('useZkAppModule', {
     async createGuessProof(code: number[]) {
       try {
         this.loading = true;
-        this.stepDisplay = 'Creating a transaction...';
+        this.stepDisplay = 'Creating signature...';
         const combination = serializeSecret(code);
         const signedData = await this.signFields([
           combination,
           this.zkProofStates.turnCount,
         ]);
         if (signedData) {
+          this.stepDisplay = 'Generating proof...';
           const res = await this.zkappWorkerClient!.createGuessProof(
             signedData,
             combination
           );
+          this.stepDisplay = 'Sending proof...';
           this.webSocketInstance?.send({
             action: 'sendProof',
             gameId: this.zkAppAddress,
@@ -237,20 +239,20 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           await this.getZkProofStates();
         }
 
-        this.stepDisplay = '';
         this.error = null;
       } catch (err: any) {
         this.error = err?.message || err;
         console.log('error ', err);
       } finally {
         this.loading = false;
+        this.stepDisplay = '';
         return this.zkAppAddress;
       }
     },
     async createGiveClueProof(code: number[], randomSalt: string) {
       try {
         this.loading = true;
-        this.stepDisplay = 'Creating a transaction...';
+        this.stepDisplay = 'Creating signature...';
         const combination = serializeSecret(code);
         const signedData = await this.signFields([
           combination,
@@ -258,11 +260,13 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           this.zkProofStates.turnCount,
         ]);
         if (signedData) {
+          this.stepDisplay = 'Generating proof...';
           const res = await this.zkappWorkerClient!.createGiveClueProof(
             signedData,
             combination,
             randomSalt
           );
+          this.stepDisplay = 'Sending proof...';
           this.webSocketInstance?.send({
             action: 'sendProof',
             gameId: this.zkAppAddress,
@@ -270,12 +274,12 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           });
           await this.getZkProofStates();
         }
-        this.stepDisplay = '';
         this.error = null;
       } catch (err: any) {
         this.error = err?.message || err;
         console.log('error ', err);
       } finally {
+        this.stepDisplay = '';
         this.loading = false;
         return this.zkAppAddress;
       }
@@ -285,7 +289,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
         this.loading = true;
         this.stepDisplay = 'Creating a transaction...';
         await this.zkappWorkerClient!.submitGameProof();
-        this.stepDisplay = 'Creating proof...';
+        this.stepDisplay = 'Generating proof...';
         await this.zkappWorkerClient!.proveTransaction();
         this.stepDisplay = 'Getting transaction JSON...';
         const transactionJSON =
@@ -345,7 +349,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
         await this.zkappWorkerClient!.createAcceptGameTransaction(
           this.publicKeyBase58
         );
-        this.stepDisplay = 'Creating proof...';
+        this.stepDisplay = 'Generating proof...';
         await this.zkappWorkerClient!.proveTransaction();
         this.stepDisplay = 'Getting transaction JSON...';
         const transactionJSON =
@@ -378,7 +382,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
         await this.zkappWorkerClient!.createClaimRewardTransaction(
           this.publicKeyBase58
         );
-        this.stepDisplay = 'Creating proof...';
+        this.stepDisplay = 'Generating proof...';
         await this.zkappWorkerClient!.proveTransaction();
         this.stepDisplay = 'Getting transaction JSON...';
         const transactionJSON =
