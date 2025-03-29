@@ -4,7 +4,7 @@ import { Queue, QueueEvents } from 'bullmq';
 import { setupContract } from './zkAppHandler.js';
 import dotenv from 'dotenv';
 import { handleJoinGame, handleProof } from './services.js';
-import cors from "cors";
+import cors from 'cors';
 import gamesRoute from './routes/gamesRoute.js';
 
 dotenv.config();
@@ -22,7 +22,7 @@ const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
 
-app.use("/games",gamesRoute);
+app.use('/games', gamesRoute);
 
 const wss = new WebSocketServer({ server });
 const activePlayers = new Map<string, Set<WebSocket>>();
@@ -50,10 +50,10 @@ wss.on('connection', (ws) => {
       }
 
       if (action === 'join') {
-        console.log("joined a game!")
+        console.log('joined a game!');
         handleJoinGame(gameId, activePlayers, ws);
       } else if (action === 'sendProof') {
-        console.log("received a proof!")
+        console.log('received a proof!');
         handleProof(gameId, zkProof, activePlayers, ws, proofQueue);
       } else {
         ws.send(JSON.stringify({ error: 'Unknown action!' }));

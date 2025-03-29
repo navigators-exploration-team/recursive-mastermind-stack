@@ -1,15 +1,36 @@
 <template>
   <div class="d-flex gap-4 align-items-center w-100 justify-content-center">
-    <el-form :model="game" :rules="rules" ref="ruleFormRef" class="w-100" style="max-width: 400px" @submit.prevent>
+    <el-form
+      :model="game"
+      :rules="rules"
+      ref="ruleFormRef"
+      class="w-100"
+      style="max-width: 400px"
+      @submit.prevent
+    >
       <el-form-item prop="gameAddress" class="w-100">
         <label>ZkApp Address</label>
-        <PasteFromClipBoard placeholder="Insert ZkApp Address" @change="handleZkAppAddress"
-          :inputValue="game.gameAddress" />
+        <PasteFromClipBoard
+          placeholder="Insert ZkApp Address"
+          @change="handleZkAppAddress"
+          :inputValue="game.gameAddress"
+        />
       </el-form-item>
 
-      <el-tooltip placement="bottom" :visible="!compiled" content="Please wait for compilation">
-        <el-button class="w-100 mt-2" color="#00ADB5" size="large" type="primary" @click="handleJoinGame"
-          :loading="!compiled" :disabled="!compiled">
+      <el-tooltip
+        placement="bottom"
+        :visible="!compiled"
+        content="Please wait for compilation"
+      >
+        <el-button
+          class="w-100 mt-2"
+          color="#00ADB5"
+          size="large"
+          type="primary"
+          @click="handleJoinGame"
+          :loading="!compiled"
+          :disabled="!compiled"
+        >
           Play
         </el-button>
       </el-tooltip>
@@ -52,8 +73,8 @@ const rules = ref({
 
 const game = ref({ gameAddress: '' });
 const handleZkAppAddress = (input: string) => {
-  game.value.gameAddress = input
-}
+  game.value.gameAddress = input;
+};
 const handleJoinGame = () => {
   if (!ruleFormRef.value) return;
   ruleFormRef.value.validate(async (valid) => {
@@ -62,5 +83,4 @@ const handleJoinGame = () => {
     }
   });
 };
-
 </script>

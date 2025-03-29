@@ -30,30 +30,31 @@
     </div>
     <div class="btn-container">
       <div v-if="isCurrentRound">
-      <el-button
-        :disabled="userRole !== 'CODE_MASTER'"
-        @click="handleVerifyGuess"
-        v-if="isCodeMasterTurn && userRole === 'CODE_MASTER'"
-        :loading="loading"
-        class="multi-line-button w-100"
-        size="small"
-        >{{stepDisplay ? stepDisplay : 'Verify' }}</el-button
-      >
-      <el-button
-        :disabled="
-          !combinationValidation.isValid || userRole !== 'CODE_BREAKER'
-        "
-        @click="handleSubmitGuess"
-        :title="combinationValidation.message"
-        :loading="loading"
-        class="multi-line-button w-100"
-        size="small"
-        v-if="!isCodeMasterTurn && userRole === 'CODE_BREAKER'"
-        > {{stepDisplay ? stepDisplay : 'Check' }} </el-button
-      >
+        <el-button
+          :disabled="userRole !== 'CODE_MASTER'"
+          @click="handleVerifyGuess"
+          v-if="isCodeMasterTurn && userRole === 'CODE_MASTER'"
+          :loading="loading"
+          class="multi-line-button w-100"
+          size="small"
+          >{{ stepDisplay ? stepDisplay : 'Verify' }}</el-button
+        >
+        <el-button
+          :disabled="
+            !combinationValidation.isValid || userRole !== 'CODE_BREAKER'
+          "
+          @click="handleSubmitGuess"
+          :title="combinationValidation.message"
+          :loading="loading"
+          class="multi-line-button w-100"
+          size="small"
+          v-if="!isCodeMasterTurn && userRole === 'CODE_BREAKER'"
+        >
+          {{ stepDisplay ? stepDisplay : 'Check' }}
+        </el-button>
+      </div>
     </div>
-    </div>
-    
+
     <el-dialog
       v-model="isVerifyGuessModalOpen"
       modal-class="dialog-class"
@@ -103,7 +104,10 @@ const focusPrevInput = (index: number) => {
 
 const handleGiveClue = async (formData: CodePicker) => {
   isVerifyGuessModalOpen.value = false;
-  await createGiveClueProof(formData.code.map((e: AvailableColor) => e.value), formData.randomSalt);
+  await createGiveClueProof(
+    formData.code.map((e: AvailableColor) => e.value),
+    formData.randomSalt
+  );
   if (error.value) {
     ElMessage.error({ message: error.value, duration: 6000 });
   }
@@ -187,7 +191,7 @@ const handleVerifyGuess = () => {
   white-space: normal;
   text-align: center;
   word-wrap: break-word;
-  padding:15px;
+  padding: 15px;
 }
 .btn-container {
   width: 120px;

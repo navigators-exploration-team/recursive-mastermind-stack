@@ -10,8 +10,17 @@
       Waiting for code breaker to accept the game
       <DotsLoader />
     </div>
-    <el-button v-else-if="!isLastAcceptedGame" size="large" color="#00ADB5" :disabled="loading" :loading="loading"
-      type="primary" class="w-100" @click="handleAcceptGame">Accept game</el-button>
+    <el-button
+      v-else-if="!isLastAcceptedGame"
+      size="large"
+      color="#00ADB5"
+      :disabled="loading"
+      :loading="loading"
+      type="primary"
+      class="w-100"
+      @click="handleAcceptGame"
+      >Accept game</el-button
+    >
     <div class="d-flex align-items-end gap-2" v-else>
       Waiting for the game to start
       <DotsLoader />
