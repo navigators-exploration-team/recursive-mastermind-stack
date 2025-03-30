@@ -2,22 +2,31 @@
   <div
     class="d-flex flex-column gap-4 align-items-center w-100 justify-content-center"
   >
-    <JoinGameForm />
-    <div class="mt-2" v-if="games.length > 0">Recently Played Games</div>
-    <div class="w-100 px-4 games-list">
-      <div
-        v-for="game in games"
-        :key="game"
-        class="d-flex gap-3 justify-content-around align-items-center mt-4"
-      >
-        <div>{{ formatAddress(game) }}</div>
-        <el-button
-          color="#00ADB5"
-          size="large"
-          type="primary"
-          @click="handleJoinGame(game)"
-          >JOIN</el-button
+    <div>
+      <JoinGameForm />
+      <div v-if="games.length > 0" class="mb-3 w-100">
+        <div class="my-4">Recently Played Games</div>
+        <div
+          class="d-flex justify-content-around"
         >
+          <div class="games-list w-100">
+            <div
+              v-for="game in games"
+              :key="game"
+              class="d-flex gap-9 align-items-center justify-content-between mb-4 w-100"
+            >
+              <div>{{ formatAddress(game) }}</div>
+              <el-button
+                color="#00ADB5"
+                size="large"
+                type="primary"
+                class="me-3"
+                @click="handleJoinGame(game)"
+                >JOIN</el-button
+              >
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

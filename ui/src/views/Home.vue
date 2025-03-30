@@ -15,15 +15,6 @@
         color="#00ADB5"
         size="large"
         style="width: 120px; text-align: center; white-space: normal"
-        :plain="step !== 'TUTORIAL'"
-        @click="setStep('TUTORIAL')"
-        >Tutorial</el-button
-      >
-      <el-button
-        type="primary"
-        color="#00ADB5"
-        size="large"
-        style="width: 120px; text-align: center; white-space: normal"
         :plain="step !== 'NEW_GAME'"
         @click="setStep('NEW_GAME')"
         >Create New Game</el-button

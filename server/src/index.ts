@@ -51,10 +51,10 @@ wss.on('connection', (ws) => {
 
       if (action === 'join') {
         console.log('joined a game!');
-        handleJoinGame(gameId, activePlayers, ws);
+        await handleJoinGame(gameId, activePlayers, ws);
       } else if (action === 'sendProof') {
         console.log('received a proof!');
-        handleProof(gameId, zkProof, activePlayers, ws, proofQueue);
+        await handleProof(gameId, zkProof, activePlayers, ws, proofQueue);
       } else {
         ws.send(JSON.stringify({ error: 'Unknown action!' }));
       }

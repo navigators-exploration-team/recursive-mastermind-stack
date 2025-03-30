@@ -28,7 +28,7 @@
         />
       </div>
     </div>
-    <div class="btn-container">
+    <div class="btn-container" v-if="showBtn">
       <div v-if="isCurrentRound">
         <el-button
           :disabled="userRole !== 'CODE_MASTER'"
@@ -143,6 +143,10 @@ const props = defineProps({
     type: Array<AvailableColor>,
     required: true,
   },
+  showBtn: {
+    type: Boolean,
+    default:true
+  }
 });
 const handleSubmitGuess = async () => {
   const code = props.guess.map((e: AvailableColor) => e.value);
@@ -181,7 +185,6 @@ const handleVerifyGuess = () => {
 
 .guess__container {
   border: 1px solid #eeeeee;
-  min-width: 440px;
 }
 
 .clue__container {
