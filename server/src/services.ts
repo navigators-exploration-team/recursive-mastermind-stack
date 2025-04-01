@@ -76,8 +76,9 @@ export const handleProof = async (
   }
 
   const timestamp = Date.now();
+  // if game id then save it else save with _gameId
   await saveGame(gameId, { lastProof: zkProof, timestamp });
-
+  
   const players = activePlayers.get(gameId) || new Set();
   players.forEach((player: WebSocket) => {
     if (player !== ws) {
