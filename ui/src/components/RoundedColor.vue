@@ -24,7 +24,6 @@ import { nextTick, ref } from 'vue';
 import { availableColors } from '../constants/colors';
 const props = defineProps({
   value: {
-    type: Number,
     required: true,
   },
   bgColor: {

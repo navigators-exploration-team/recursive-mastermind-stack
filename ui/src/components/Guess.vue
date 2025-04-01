@@ -28,27 +28,33 @@
         />
       </div>
     </div>
-    <div v-if="isCurrentRound">
-      <el-button
-        size="small"
-        :disabled="userRole !== 'CODE_MASTER'"
-        @click="handleVerifyGuess"
-        v-if="isCodeMasterTurn && userRole === 'CODE_MASTER'"
-        :loading="loading"
-        >Verify</el-button
-      >
-      <el-button
-        size="small"
-        :disabled="
-          !combinationValidation.isValid || userRole !== 'CODE_BREAKER'
-        "
-        @click="handleSubmitGuess"
-        :title="combinationValidation.message"
-        :loading="loading"
-        v-if="!isCodeMasterTurn && userRole === 'CODE_BREAKER'"
-        >Check</el-button
-      >
+    <div class="btn-container" v-if="showBtn">
+      <div v-if="isCurrentRound">
+        <el-button
+          :disabled="userRole !== 'CODE_MASTER'"
+          @click="handleVerifyGuess"
+          v-if="isCodeMasterTurn && userRole === 'CODE_MASTER'"
+          :loading="loading"
+          class="multi-line-button w-100"
+          size="small"
+          >{{ stepDisplay ? stepDisplay : 'Verify' }}</el-button
+        >
+        <el-button
+          :disabled="
+            !combinationValidation.isValid || userRole !== 'CODE_BREAKER'
+          "
+          @click="handleSubmitGuess"
+          :title="combinationValidation.message"
+          :loading="loading"
+          class="multi-line-button w-100"
+          size="small"
+          v-if="!isCodeMasterTurn && userRole === 'CODE_BREAKER'"
+        >
+          {{ stepDisplay ? stepDisplay : 'Check' }}
+        </el-button>
+      </div>
     </div>
+
     <el-dialog
       v-model="isVerifyGuessModalOpen"
       modal-class="dialog-class"
@@ -75,7 +81,7 @@ import CodePickerForm from './forms/CodePickerForm.vue';
 import { validateColorCombination } from '../utils';
 import { ElMessage } from 'element-plus';
 const { createGuessProof, createGiveClueProof, getRole } = useZkAppStore();
-const { error, zkProofStates, loading, userRole } =
+const { error, zkProofStates, loading, userRole, stepDisplay } =
   storeToRefs(useZkAppStore());
 
 const inputRefs = ref<(InstanceType<typeof RoundedColor> | null)[]>([]);
@@ -98,7 +104,10 @@ const focusPrevInput = (index: number) => {
 
 const handleGiveClue = async (formData: CodePicker) => {
   isVerifyGuessModalOpen.value = false;
-  await createGiveClueProof(formData.code, formData.randomSalt);
+  await createGiveClueProof(
+    formData.code.map((e: AvailableColor) => e.value),
+    formData.randomSalt
+  );
   if (error.value) {
     ElMessage.error({ message: error.value, duration: 6000 });
   }
@@ -134,6 +143,10 @@ const props = defineProps({
     type: Array<AvailableColor>,
     required: true,
   },
+  showBtn: {
+    type: Boolean,
+    default:true
+  }
 });
 const handleSubmitGuess = async () => {
   const code = props.guess.map((e: AvailableColor) => e.value);
@@ -172,10 +185,18 @@ const handleVerifyGuess = () => {
 
 .guess__container {
   border: 1px solid #eeeeee;
-  width: 440px;
 }
 
 .clue__container {
   width: 50px;
+}
+.multi-line-button {
+  white-space: normal;
+  text-align: center;
+  word-wrap: break-word;
+  padding: 15px;
+}
+.btn-container {
+  width: 120px;
 }
 </style>

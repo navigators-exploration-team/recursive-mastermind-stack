@@ -15,7 +15,7 @@ export interface ZkAppStates {
 }
 
 export interface CodePicker {
-  code: number[];
+  code: AvailableColor[];
   randomSalt: string;
 }
 

@@ -1,22 +1,46 @@
 <template>
   <div class="d-flex flex-column align-items-center w-100 h-100">
-    <el-form :model="game" :rules="rules" style="max-width: 400px; width: 100%" ref="ruleFormRef">
+    <el-form
+      :model="game"
+      :rules="rules"
+      style="max-width: 400px; width: 100%"
+      ref="ruleFormRef"
+    >
       <el-form-item prop="maxAttempts">
         <label>Number of Attempts</label>
-        <el-input type="number" v-model.number="game.maxAttempts" size="large"
-          placeholder="Insert a number between 5 and 15" :max="15" :min="5" @blur="setAttempts"></el-input>
+        <el-input
+          type="number"
+          v-model.number="game.maxAttempts"
+          size="large"
+          placeholder="Insert a number between 5 and 15"
+          :max="15"
+          :min="5"
+          @blur="setAttempts"
+        ></el-input>
       </el-form-item>
       <el-form-item prop="rewardAmount">
         <label>Reward Amount</label>
-        <el-input type="number" placeholder="Insert reward amount" v-model.number="game.rewardAmount"
-          size="large"></el-input>
+        <el-input
+          type="number"
+          placeholder="Insert reward amount"
+          v-model.number="game.rewardAmount"
+          size="large"
+        ></el-input>
       </el-form-item>
       <el-form-item prop="refereePubKeyBase58">
         <label>Refree Public Key</label>
-        <PasteFromClipBoard placeholder="Insert refree public key" @change="handleRefreeChange"
-          :inputValue="game.refereePubKeyBase58" />
+        <PasteFromClipBoard
+          placeholder="Insert refree public key"
+          @change="handleRefreeChange"
+          :inputValue="game.refereePubKeyBase58"
+        />
       </el-form-item>
-      <CodePickerForm @submit="handleInitGame" btnText="Submit Code" isRandomSalt />
+      <CodePickerForm
+        @submit="handleInitGame"
+        btnText="Submit Code"
+        isRandomSalt
+        :hideOnMount="false"
+      />
     </el-form>
   </div>
 </template>
@@ -27,7 +51,7 @@ import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import CodePickerForm from '@/components/forms/CodePickerForm.vue';
 import { ElForm, ElMessage } from 'element-plus';
-import { CodePicker } from '@/types';
+import { AvailableColor, CodePicker } from '@/types';
 import { GameParams } from '../../types';
 import { PublicKey } from 'o1js';
 import { ElNotification } from 'element-plus';
@@ -101,7 +125,7 @@ const handleInitGame = async (formData: CodePicker) => {
   ruleFormRef.value.validate(async (valid) => {
     if (valid) {
       await createInitGameTransaction(
-        formData.code,
+        formData.code.map((e: AvailableColor) => e.value),
         formData.randomSalt,
         game.value.maxAttempts as number,
         game.value.refereePubKeyBase58 as string,
@@ -116,6 +140,19 @@ const handleInitGame = async (formData: CodePicker) => {
           type: 'success',
           duration: 5000,
         });
+        let games = {};
+        const storedGames = localStorage.getItem('games');
+        if (storedGames) {
+          games = { ...JSON.parse(storedGames) };
+        }
+        games = {
+          ...games,
+          [zkAppAddress.value as string]: {
+            randomSalt: formData.randomSalt,
+            secretCode: formData.code,
+          },
+        };
+        localStorage.setItem('games', JSON.stringify(games));
         router.push({
           name: 'gameplay',
           params: {
@@ -127,9 +164,8 @@ const handleInitGame = async (formData: CodePicker) => {
   });
 };
 const handleRefreeChange = (input: string) => {
-  game.value.refereePubKeyBase58 = input
-
-}
+  game.value.refereePubKeyBase58 = input;
+};
 </script>
 
 <style scoped>
