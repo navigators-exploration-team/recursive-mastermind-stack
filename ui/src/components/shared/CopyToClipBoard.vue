@@ -1,5 +1,9 @@
 <template>
-  <el-tooltip :visible="copyTextTooltipVisible" content="Copied!" placement="top">
+  <el-tooltip
+    :visible="copyTextTooltipVisible"
+    content="Copied!"
+    placement="top"
+  >
     <el-icon :size="25" class="cursor-pointer" @click="copyToClipBoard">
       <CopyDocument />
     </el-icon>

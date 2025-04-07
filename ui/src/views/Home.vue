@@ -41,7 +41,7 @@
     <Rules v-if="step === 'RULES'" />
     <Lobby v-if="step === 'Lobby'" />
     <NewGameForm v-if="step === 'NEW_GAME'" />
-    <JoinGame v-if="step === 'JOIN'"/>
+    <JoinGame v-if="step === 'JOIN'" />
   </div>
 </template>
 <script setup lang="ts">

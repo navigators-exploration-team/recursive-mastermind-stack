@@ -30,9 +30,9 @@ export class WebSocketService {
             receivedProof.verify();
             if (this.onMessageCallback) this.onMessageCallback(data);
           }
-          if(data.hash) {
+          if (data.hash) {
             const { setLastTransactionHash } = useZkAppStore();
-            setLastTransactionHash(data.hash)
+            setLastTransactionHash(data.hash);
           }
         } catch (e) {
           console.log('Error handling message:', e);

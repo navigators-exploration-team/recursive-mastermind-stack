@@ -32,7 +32,7 @@ export const handleProof = async (
   receivedRewardAmount:number,
   activePlayers: Map<string, Set<WebSocket>>,
   ws: WebSocket,
-  proofQueue:Queue
+  proofQueue: Queue
 ) => {
   let game = await getGame(gameId);
   let gameData = JSON.parse(game?.value)

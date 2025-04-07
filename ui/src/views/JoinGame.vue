@@ -6,9 +6,7 @@
       <JoinGameForm />
       <div v-if="games.length > 0" class="mb-3 w-100">
         <div class="my-4">Recently Played Games</div>
-        <div
-          class="d-flex justify-content-around"
-        >
+        <div class="d-flex justify-content-around">
           <div class="games-list w-100">
             <div
               v-for="game in games"
