@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/cache.js",
-    "lint": "npx eslint src/* --fix"
+    "lint": "npx eslint src/* --fix",
+    "clean": "rimraf dist node_modules"
   },
   "dependencies": {
     "@navigators-exploration-team/mina-mastermind": "^0.4.4",
