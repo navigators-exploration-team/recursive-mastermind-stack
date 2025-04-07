@@ -32,7 +32,10 @@ export default class ZkappWorkerClient {
     publicKey: string,
     rewardAmount: number
   ): Promise<boolean> {
-    return await this._call('hasEnoughFunds', { publicKey, rewardAmount }) as Promise<boolean>;
+    return (await this._call('hasEnoughFunds', {
+      publicKey,
+      rewardAmount,
+    })) as Promise<boolean>;
   }
   async proveTransaction() {
     return this._call('proveTransaction', {});

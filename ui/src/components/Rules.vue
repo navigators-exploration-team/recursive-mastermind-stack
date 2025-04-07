@@ -24,7 +24,9 @@
         <div>
           <div class="my-2">Secret Code</div>
           <div class="d-flex flex-1 gap-5">
-            <div class="d-flex gap-3 secret-container py-2 px-5 w-100 justify-content-center">
+            <div
+              class="d-flex gap-3 secret-container py-2 px-5 w-100 justify-content-center"
+            >
               <RoundedColor
                 v-for="el in secret"
                 :bgColor="el.color"
@@ -36,7 +38,7 @@
           </div>
           <div class="my-2">Guess And Clue</div>
           <div>
-            <Guess :guess="guess" :clue="clue" :showBtn="false"/>
+            <Guess :guess="guess" :clue="clue" :showBtn="false" />
           </div>
         </div>
       </div>
@@ -74,18 +76,25 @@
     <li>
       <strong>How to get Mina tokens on Devnet:</strong>
       <ul>
-        <li>Go to the Mina Faucet: <a href="https://faucet.minaprotocol.com/" target="_blank">https://faucet.minaprotocol.com/</a></li>
+        <li>
+          Go to the Mina Faucet:
+          <a href="https://faucet.minaprotocol.com/" target="_blank"
+            >https://faucet.minaprotocol.com/</a
+          >
+        </li>
         <li>Enter your Mina Devnet wallet address.</li>
         <li>Click on "Request" and wait a few moments.</li>
         <li>Check your balance using your Auro wallet.</li>
       </ul>
     </li>
     <li>
-      <strong>Comprehensive Game Guide:</strong>  
-      For a complete, step-by-step walkthrough on how to play the game, including rules and examples, visit: 
-      <a href="https://app.guideflow.com/player/1pz4dqzsvr" target="_blank">https://app.guideflow.com/player/1pz4dqzsvr</a>
+      <strong>Comprehensive Game Guide:</strong>
+      For a complete, step-by-step walkthrough on how to play the game,
+      including rules and examples, visit:
+      <a href="https://app.guideflow.com/player/1pz4dqzsvr" target="_blank"
+        >https://app.guideflow.com/player/1pz4dqzsvr</a
+      >
     </li>
-
   </ul>
 </template>
 <script lang="ts" setup>

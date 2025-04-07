@@ -269,15 +269,12 @@ const functions = {
     });
     state.transaction = transaction;
   },
-  hasEnoughFunds: async (args: {
-    publicKey: string;
-    rewardAmount: number;
-  }) => {
-    const res = await functions.fetchAccount({publicKey58:args.publicKey})
-    if(res.account){
-      return Number(res.account.balance.toString()) > args.rewardAmount
+  hasEnoughFunds: async (args: { publicKey: string; rewardAmount: number }) => {
+    const res = await functions.fetchAccount({ publicKey58: args.publicKey });
+    if (res.account) {
+      return Number(res.account.balance.toString()) > args.rewardAmount;
     }
-    return false
+    return false;
   },
 };
 

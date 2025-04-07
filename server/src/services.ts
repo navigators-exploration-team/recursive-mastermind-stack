@@ -27,7 +27,7 @@ export const handleProof = async (
   zkProof: string,
   activePlayers: Map<string, Set<WebSocket>>,
   ws: WebSocket,
-  proofQueue:Queue
+  proofQueue: Queue
 ) => {
   let game = await getGame(gameId);
   let lastProof = game?.lastProof || null;

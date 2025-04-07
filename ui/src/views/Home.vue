@@ -32,7 +32,7 @@
     <Rules v-if="step === 'RULES'" />
     <GuideFlow v-if="step === 'TUTORIAL'" />
     <NewGameForm v-if="step === 'NEW_GAME'" />
-    <JoinGame v-if="step === 'JOIN'"/>
+    <JoinGame v-if="step === 'JOIN'" />
   </div>
 </template>
 <script setup lang="ts">

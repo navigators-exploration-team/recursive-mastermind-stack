@@ -145,8 +145,8 @@ const props = defineProps({
   },
   showBtn: {
     type: Boolean,
-    default:true
-  }
+    default: true,
+  },
 });
 const handleSubmitGuess = async () => {
   const code = props.guess.map((e: AvailableColor) => e.value);
