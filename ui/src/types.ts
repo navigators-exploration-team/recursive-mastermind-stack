@@ -22,5 +22,9 @@ export interface CodePicker {
 export interface GameParams {
   maxAttempts: number | null;
   rewardAmount: number | null;
-  refereePubKeyBase58: string ;
+  refereePubKeyBase58: string;
+}
+export interface Game {
+  name: string;
+  metadata: { gameMaxAttempts: string; gameRewardAmount: string };
 }

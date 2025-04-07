@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { handleJoinGame, handleProof } from './services.js';
 import cors from 'cors';
 import gamesRoute from './routes/gamesRoute.js';
+import cron from 'node-cron';
 
 dotenv.config();
 
@@ -37,12 +38,15 @@ const queueEvents = new QueueEvents('proofQueue', {
 queueEvents.on('completed', ({ jobId, returnvalue }: any) => {
   console.log(`Job ${jobId} completed, transaction hash: ${returnvalue}`);
 });
+cron.schedule('*/50 * * * *', async () => {
+  await proofQueue.add('checkGameCreation', {});
+});
 
 wss.on('connection', (ws) => {
   ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
-      const { gameId, action, zkProof } = data;
+      const { gameId, action, zkProof, maxAttempts, rewardAmount } = data;
 
       if (!gameId || !action) {
         ws.send(JSON.stringify({ error: 'Bad request!' }));
@@ -54,7 +58,15 @@ wss.on('connection', (ws) => {
         await handleJoinGame(gameId, activePlayers, ws);
       } else if (action === 'sendProof') {
         console.log('received a proof!');
-        await handleProof(gameId, zkProof, activePlayers, ws, proofQueue);
+        await handleProof(
+          gameId,
+          zkProof,
+          maxAttempts,
+          rewardAmount,
+          activePlayers,
+          ws,
+          proofQueue
+        );
       } else {
         ws.send(JSON.stringify({ error: 'Unknown action!' }));
       }

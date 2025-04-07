@@ -188,9 +188,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           },
         });
         this.currentTransactionLink = hash;
-
         await this.joinGame();
-
         const res = await this.zkappWorkerClient!.sendNewGameProof(
           signedData,
           combination,
@@ -200,6 +198,8 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           action: 'sendProof',
           gameId: this.zkAppAddress,
           zkProof: JSON.stringify(res),
+          maxAttempts,
+          rewardAmount
         });
         await axios.post(SERVER_URL + `/games/${this.publicKeyBase58}`, {
           gameId: this.zkAppAddress,
