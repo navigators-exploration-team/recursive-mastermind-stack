@@ -9,11 +9,11 @@ import {
   Cache,
   UInt64,
   Poseidon,
+  UInt8,
 } from 'o1js';
 import {
+  GameState,
   MastermindZkApp,
-  separateRewardAndFinalizeSlot,
-  separateTurnCountAndMaxAttemptSolved,
   StepProgram,
   StepProgramProof,
 } from '@navigators-exploration-team/mina-mastermind';
@@ -101,7 +101,7 @@ const functions = {
       await state.zkappInstance!.initGame(
         Field(args.unseparatedSecretCombination),
         Field(args.salt),
-        Field(args.maxAttempts),
+        UInt8.from(args.maxAttempts),
         refereePubKey,
         UInt64.from(args.rewardAmount)
       );
@@ -185,21 +185,13 @@ const functions = {
   getZkAppStates: async () => {
     const publicKey = PublicKey.fromBase58(state.zkAppAddress as string);
     await fetchAccount({ publicKey });
-    const [
-      codeMasterId,
-      codeBreakerId,
-      rewardFinalizeSlot,
-      turnCountMaxAttemptsIsSolved,
-    ] = await Promise.all([
+    const [codeMasterId, codeBreakerId, compressedState] = await Promise.all([
       state.zkappInstance!.codeMasterId.get(),
       state.zkappInstance!.codeBreakerId.get(),
-      state.zkappInstance!.rewardFinalizeSlot.get(),
-      state.zkappInstance!.turnCountMaxAttemptsIsSolved.get(),
+      state.zkappInstance!.compressedState.get(),
     ]);
-    const { rewardAmount, finalizeSlot } =
-      separateRewardAndFinalizeSlot(rewardFinalizeSlot);
-    let [turnCount, maxAttempts, isSolved] =
-      separateTurnCountAndMaxAttemptSolved(turnCountMaxAttemptsIsSolved);
+    let { rewardAmount, finalizeSlot, turnCount, maxAttempts, isSolved } =
+      GameState.unpack(compressedState);
 
     return {
       rewardAmount: rewardAmount.toString(),
@@ -257,7 +249,9 @@ const functions = {
   submitGameProof: async () => {
     const transaction = await Mina.transaction(async () => {
       await state.zkappInstance!.submitGameProof(
-        state.lastProof as StepProgramProof
+        state.lastProof as StepProgramProof,
+        //Todo: add corect pubkey
+        PublicKey.empty()
       );
     });
     state.transaction = transaction;
