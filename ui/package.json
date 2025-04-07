@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
-    "@navigators-exploration-team/mina-mastermind": "0.2.0",
+    "@navigators-exploration-team/mina-mastermind": "^0.4.4",
     "@vueuse/core": "^13.0.0",
     "add": "^2.0.6",
     "axios": "^1.8.4",

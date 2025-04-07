@@ -59,6 +59,7 @@ wss.on('connection', (ws) => {
         ws.send(JSON.stringify({ error: 'Unknown action!' }));
       }
     } catch (err) {
+      console.error('Error processing message:', err);
       ws.send(JSON.stringify({ error: 'Internal error!' }));
     }
   });

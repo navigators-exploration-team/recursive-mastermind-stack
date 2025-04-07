@@ -1,10 +1,10 @@
-import { Bool, fetchAccount, Mina, PrivateKey, PublicKey } from 'o1js';
+import { Bool, fetchAccount, Mina, PublicKey } from 'o1js';
 import dotenv from 'dotenv';
 import {
   checkIfSolved,
   deserializeClue,
   MastermindZkApp,
-  separateTurnCountAndMaxAttemptSolved,
+  GameState,
   StepProgram,
   StepProgramProof,
 } from '@navigators-exploration-team/mina-mastermind';
@@ -31,12 +31,8 @@ export async function checkGameStatus(
     let accountExists = response.account !== undefined;
     if (accountExists) {
       const zkApp = new MastermindZkApp(zkAppPublicKey);
-      const turnCountMaxAttemptsIsSolved =
-        await zkApp.turnCountMaxAttemptsIsSolved.get();
+      let { maxAttempts } = GameState.unpack(await zkApp.compressedState.get());
 
-      const [_, maxAttempts, isSolved] = separateTurnCountAndMaxAttemptSolved(
-        turnCountMaxAttemptsIsSolved
-      );
       const turnCount = zkProof.publicOutput.turnCount.toString();
       const deserializedClue = deserializeClue(
         zkProof.publicOutput.serializedClue

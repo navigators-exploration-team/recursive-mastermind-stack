@@ -1,20 +1,25 @@
 {
-  "name": "cache-files--generator",
+  "name": "cache-files-generator",
   "type": "module",
   "version": "1.0.0",
   "main": "src/cache.ts",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/cache.js"
+    "start": "node dist/cache.js",
+    "lint": "npx eslint src/* --fix"
   },
   "dependencies": {
-    "@navigators-exploration-team/mina-mastermind": "^0.1.0",
+    "@navigators-exploration-team/mina-mastermind": "^0.4.4",
     "o1js": "2.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@typescript-eslint/eslint-plugin": "^8.26.0",
+    "@typescript-eslint/parser": "^8.26.0",
+    "eslint": "^9.21.0",
+    "eslint-plugin-o1js": "^0.4.0"
   }
 }
