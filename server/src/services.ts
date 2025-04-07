@@ -10,10 +10,10 @@ export const handleJoinGame = async (
   ws: WebSocket
 ) => {
   let game = await getGame(gameId);
-  if(!game?.value){
-    game = await getGame(gameId,'PENDING_');
+  if (!game?.value) {
+    game = await getGame(gameId, 'PENDING_');
   }
-  let gameData = JSON.parse(game?.value)
+  let gameData = JSON.parse(game?.value);
   let lastProof = gameData?.lastProof || null;
   let timestamp = gameData?.timestamp || null;
   if (!activePlayers.has(gameId)) {
@@ -28,20 +28,22 @@ export const handleJoinGame = async (
 export const handleProof = async (
   gameId: string,
   zkProof: string,
-  receivedMaxAttempts:number,
-  receivedRewardAmount:number,
+  receivedMaxAttempts: number,
+  receivedRewardAmount: number,
   activePlayers: Map<string, Set<WebSocket>>,
   ws: WebSocket,
   proofQueue: Queue
 ) => {
   let game = await getGame(gameId);
-  let gameData = JSON.parse(game?.value)
+  let gameData = JSON.parse(game?.value);
 
   let lastProof = gameData?.lastProof || null;
 
   let lastTurnCount = null;
-  const gameMaxAttempts = game?.metadata?.gameMaxAttempts || receivedMaxAttempts
-  const gameRewardAmount = game?.metadata?.gameRewardAmount || receivedRewardAmount
+  const gameMaxAttempts =
+    game?.metadata?.gameMaxAttempts || receivedMaxAttempts;
+  const gameRewardAmount =
+    game?.metadata?.gameRewardAmount || receivedRewardAmount;
 
   if (lastProof) {
     const proof = await StepProgramProof.fromJSON(JSON.parse(lastProof));
@@ -86,9 +88,14 @@ export const handleProof = async (
   }
 
   const timestamp = Date.now();
-  let computedId = game?.value ? gameId : 'PENDING_'+gameId 
+  let computedId = game?.value ? gameId : 'PENDING_' + gameId;
 
-  await saveGame(computedId, { lastProof: zkProof, timestamp,gameMaxAttempts,gameRewardAmount  });
+  await saveGame(computedId, {
+    lastProof: zkProof,
+    timestamp,
+    gameMaxAttempts,
+    gameRewardAmount,
+  });
 
   const players = activePlayers.get(gameId) || new Set();
   players.forEach((player: WebSocket) => {

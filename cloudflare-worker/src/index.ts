@@ -38,7 +38,7 @@ export default {
 					cursor: games.list_complete ? null : games.cursor,
 					list_complete: games.list_complete,
 				}),
-				{ status: 200 }
+				{ status: 200 },
 			);
 		}
 		if (method === 'GET' && url.pathname.startsWith('/active-games')) {
@@ -57,7 +57,7 @@ export default {
 					cursor: games.list_complete ? null : games.cursor,
 					list_complete: games.list_complete,
 				}),
-				{ status: 200 }
+				{ status: 200 },
 			);
 		}
 		if (method === 'GET' && url.pathname.startsWith('/user/')) {
@@ -101,7 +101,7 @@ export default {
 		if (method === 'DELETE' && url.pathname.startsWith('/game/')) {
 			const gameId = url.pathname.split('/').pop();
 			if (!gameId) return new Response('Missing game ID', { status: 400 });
-		
+
 			try {
 				await env.GAME_KV.delete(gameId);
 				return new Response('Game deleted', { status: 200 });
@@ -109,7 +109,7 @@ export default {
 				return new Response(`Error deleting game: ${error.message}`, { status: 500 });
 			}
 		}
-		
+
 		return new Response('Not Found', { status: 404 });
 	},
 };

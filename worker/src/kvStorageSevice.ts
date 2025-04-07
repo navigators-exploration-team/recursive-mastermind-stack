@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
 const CLOUDFLARE_WORKER_URL = process.env.CLOUDFLARE_WORKER_URL;
@@ -50,9 +50,9 @@ export async function deleteGame(gameId: string, prefix?: string) {
   try {
     const computedGameId = prefix ? prefix + gameId : gameId;
     await fetch(`${CLOUDFLARE_WORKER_URL}/game/${computedGameId}`, {
-      method: "DELETE",
+      method: 'DELETE',
     });
   } catch (e) {
-    console.log("Error while deleting game:", e);
+    console.log('Error while deleting game:', e);
   }
 }

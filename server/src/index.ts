@@ -38,7 +38,7 @@ const queueEvents = new QueueEvents('proofQueue', {
 queueEvents.on('completed', ({ jobId, returnvalue }: any) => {
   console.log(`Job ${jobId} completed, transaction hash: ${returnvalue}`);
 });
-cron.schedule('*/50 * * * *', async () => {
+cron.schedule('* * * * *', async () => {
   await proofQueue.add('checkGameCreation', {});
 });
 
