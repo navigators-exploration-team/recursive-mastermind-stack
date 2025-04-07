@@ -21,6 +21,7 @@
 <script lang="ts" setup>
 import { FolderOpened } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
+// @ts-expect-error
 const props = defineProps({
   placeholder: {
     type: String,
