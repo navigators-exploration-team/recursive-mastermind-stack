@@ -7,8 +7,8 @@ COPY yarn.lock ./
 
 RUN yarn install --frozen-lockfile
 
-COPY tsconfig.json ./
-COPY src ./src
+COPY server/tsconfig.json ./
+COPY server/src ./src
 
 RUN yarn build
 
