@@ -55,12 +55,12 @@ jobs:
           REDIS_PORT=6379
           EOF
 
+      - name: Debug final Docker Compose config
+        run: docker compose -f docker-compose.yml -f docker-compose.override.ci.yml config
+
       - name: Build & start dev profile
         run: |
           docker compose -f docker-compose.yml -f docker-compose.override.ci.yml --profile dev up --build -d
-
-      - name: Debug final Docker Compose config
-        run: docker compose -f docker-compose.yml -f docker-compose.override.ci.yml config
 
       - name: Wait for services
         run: |
