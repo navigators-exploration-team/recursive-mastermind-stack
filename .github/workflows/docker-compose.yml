@@ -29,6 +29,28 @@ jobs:
         run: |
           docker compose --version
 
+      - name: 🔐 Create .env files
+        run: |
+          cat <<EOF > server/.env
+          MINA_NETWORK_URL=http://host.docker.internal:8080/graphql
+          CLOUDFLARE_WORKER_URL=https://cloudflare-worker.ghassen-loukil-it.workers.dev
+          SERVER_PORT=3000
+          REDIS_PORT=6379
+          REDIS_HOST=redis
+          EOF
+
+          cat <<EOF > ui/.env
+          VITE_MINA_NETWORK_URL=http://localhost:8080/graphql
+          VITE_WEB_SOCKET_URL=ws://localhost:3000
+          EOF
+
+          cat <<EOF > worker/.env
+          SERVER_PRIVATE_KEY=EKEJ467CaN7s6jsQCVYSAzBdwDgNwmDM1f8vCP9xtzWyszAENwDR
+          MINA_NETWORK_URL=http://host.docker.internal:8080/graphql
+          REDIS_HOST=redis
+          REDIS_PORT=6379
+          EOF
+
       - name: Build & start dev profile
         run: |
           docker compose --profile dev up --build -d
