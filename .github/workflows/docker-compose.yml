@@ -59,6 +59,9 @@ jobs:
         run: |
           docker compose -f docker-compose.yml -f docker-compose.override.ci.yml --profile dev up --build -d
 
+      - name: Debug final Docker Compose config
+        run: docker compose -f docker-compose.yml -f docker-compose.override.ci.yml config
+
       - name: Wait for services
         run: |
           sleep 10
