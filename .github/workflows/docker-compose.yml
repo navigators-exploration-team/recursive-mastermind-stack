@@ -57,7 +57,7 @@ jobs:
 
       - name: Build & start dev profile
         run: |
-          docker compose --profile dev up --build -d
+          docker compose -f docker-compose.yml -f docker-compose.override.ci.yml --profile dev up --build -d
 
       - name: Wait for services
         run: |
