@@ -1,4 +1,4 @@
-name: zkApp CI
+name: Mastermind Stack Validity Checks and Tests
 
 on:
   push:
