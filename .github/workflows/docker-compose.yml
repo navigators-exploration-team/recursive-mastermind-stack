@@ -63,6 +63,7 @@ jobs:
         run: |
           sleep 60
           docker compose ps
+          docker compose logs server-dev
 
       - name: Check server is running
         run: |
