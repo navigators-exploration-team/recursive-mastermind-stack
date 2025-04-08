@@ -1,3 +1,4 @@
 services:
   redis:
-    ports: []
+    ports: !override
+      - 6380:6379
