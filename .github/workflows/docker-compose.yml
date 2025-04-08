@@ -61,7 +61,7 @@ jobs:
 
       - name: Wait for services
         run: |
-          sleep 10
+          sleep 60
           docker compose ps
 
       - name: Check server is running
