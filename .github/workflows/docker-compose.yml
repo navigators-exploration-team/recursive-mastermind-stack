@@ -1,0 +1,57 @@
+name: Docker Compose Integration
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  docker-compose-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          docker compose --version
+
+      - name: Build & start dev profile
+        run: |
+          docker compose --profile dev up --build -d
+
+      - name: Wait for services
+        run: |
+          sleep 10
+          docker compose ps
+
+      - name: Check server is running
+        run: |
+          curl --fail http://localhost:3000 || exit 1
+
+      - name: Check frontend is running
+        run: |
+          curl --fail http://localhost:3001 || exit 1
+
+      - name: Run integration tests
+        run: |
+          # docker exec <container> npm run test
+          echo "No tests yet"
+
+      - name: Stop services
+        if: always()
+        run: |
+          docker compose down
