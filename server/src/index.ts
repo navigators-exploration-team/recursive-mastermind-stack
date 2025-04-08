@@ -17,7 +17,9 @@ app.use(express.json());
 const PORT = process.env.SERVER_PORT;
 const REDIS_PORT = parseInt(process.env.REDIS_PORT as string) || 6379;
 const REDIS_HOST = process.env.REDIS_HOST;
-setupContract();
+
+await setupContract();
+
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

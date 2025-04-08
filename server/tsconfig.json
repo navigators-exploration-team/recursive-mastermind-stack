@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "target": "es2020",
     "module": "NodeNext",
     "outDir": "./dist",
     "rootDir": "./src",
@@ -10,13 +10,9 @@
     "moduleResolution": "nodenext"
   },
   "ts-node": {
-        "esm": true,
-        "experimentalSpecifierResolution": "node"
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   },
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "src/**/*.ts"
-  ]
+  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts"]
 }

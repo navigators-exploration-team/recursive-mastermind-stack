@@ -15,10 +15,16 @@ export const setupContract = async () => {
     mina: process.env.MINA_NETWORK_URL as string,
   });
   Mina.setActiveInstance(network);
-  console.time('compiling');
+  console.log('Compiling StepProgram...');
+  console.time('StepProgram compilation');
   await StepProgram.compile();
+  console.log('StepProgram compiled');
+  console.timeEnd('StepProgram compilation');
+  console.log('Compiling MastermindZkApp...');
+  console.time('zkApp compilation');
   await MastermindZkApp.compile();
-  console.timeEnd('compiling');
+  console.log('MastermindZkApp compiled');
+  console.timeEnd('zkApp compilation');
 };
 
 export async function checkGameStatus(
