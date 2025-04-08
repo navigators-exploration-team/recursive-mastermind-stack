@@ -29,6 +29,10 @@ jobs:
         run: |
           docker compose --version
 
+      - name: Clean up previous containers
+        if: always()
+        run: docker compose down -v
+
       - name: Create .env files
         run: |
           cat <<EOF > server/.env
