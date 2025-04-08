@@ -20,7 +20,7 @@
     "bootstrap-vue": "^2.23.1",
     "element-plus": "^2.8.8",
     "install": "^0.13.0",
-    "o1js": "2.2.0",
+    "o1js": "2.4.0",
     "path": "^0.12.7",
     "pinia": "^2.2.6",
     "prettier": "^3.5.3",
