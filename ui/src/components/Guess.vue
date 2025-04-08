@@ -35,7 +35,7 @@
           @click="handleVerifyGuess"
           v-if="isCodeMasterTurn && userRole === 'CODE_MASTER'"
           :loading="loading"
-          class="multi-line-button w-100"
+          class="multi-line-button w-100 confirm-btn fs-7 fw-500 py-3"
           size="small"
           >{{ stepDisplay ? stepDisplay : 'Verify' }}</el-button
         >
@@ -46,7 +46,7 @@
           @click="handleSubmitGuess"
           :title="combinationValidation.message"
           :loading="loading"
-          class="multi-line-button w-100"
+          class="multi-line-button w-100 confirm-btn fs-7 fw-500 py-3"
           size="small"
           v-if="!isCodeMasterTurn && userRole === 'CODE_BREAKER'"
         >
@@ -182,10 +182,8 @@ const handleVerifyGuess = () => {
 .el-dialog__header {
   background: #121212 !important;
 }
-
-.guess__container {
-  border: 1px solid #eeeeee;
-}
+</style>
+<style scoped>
 
 .clue__container {
   width: 50px;
@@ -198,5 +196,10 @@ const handleVerifyGuess = () => {
 }
 .btn-container {
   width: 120px;
+}
+.confirm-btn {
+  border-radius: 10px;
+  background-color: #1b232e;
+  color: #c5c6c8;
 }
 </style>

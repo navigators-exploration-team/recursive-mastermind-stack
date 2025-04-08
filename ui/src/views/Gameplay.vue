@@ -55,12 +55,10 @@ onUnmounted(async () => {
   }
 });
 </script>
-<style lang="css">
+<style lang="css" scoped>
 .board__container {
   border: 1px solid #222;
+  box-shadow: 0 0 10px #00ffcc55;
 }
 
-.color-picker__container {
-  border: 1px solid #222;
-}
 </style>

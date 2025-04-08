@@ -1,6 +1,6 @@
 <template>
   <div class="h-100 w-100 d-flex flex-column align-items-center">
-    <p class="m-3 w-100" style="font-size: 40px">Mina Mastermind</p>
+    <p class="m-3 w-100 game-title fs-1">Mina Mastermind</p>
     <router-view />
   </div>
 </template>
@@ -42,5 +42,8 @@ watch(
   justify-content: center;
   color: white;
   padding-top: 20px;
+}
+.game-title {
+  color: #00ffcc;
 }
 </style>
