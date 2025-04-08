@@ -9,7 +9,7 @@
     "cache"
   ],
   "scripts": {
-    "clean": "turbo run clean && rimraf node_modules",
+    "clean": "turbo run clean && rimraf node_modules yarn.lock",
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "test": "turbo run test",
