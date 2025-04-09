@@ -1,18 +1,20 @@
-FROM node:20-slim as deps
+FROM node:20-slim AS deps
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+COPY server/package.json ./
+COPY yarn.lock ./
+
 RUN yarn install --frozen-lockfile
 
-FROM node:20-slim as dev
+FROM node:20-slim AS dev
 
 WORKDIR /app
 
 COPY --from=deps /app/node_modules /app/node_modules
 COPY --from=deps /app/package.json /app/yarn.lock /app/
 
-COPY . .
+COPY server/ .
 
 # Install `nodemon` globally for hot-reloading
 RUN yarn global add nodemon
