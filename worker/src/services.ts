@@ -28,7 +28,8 @@ export const sendFinalProof = async (job: Job) => {
       fee: TRANSACTION_FEE,
     },
     async () => {
-      await zkApp.submitGameProof(proof);
+      // Todo - pass correct pubkey
+      await zkApp.submitGameProof(proof, PublicKey.empty());
     }
   );
   console.log('proving transaction...');
