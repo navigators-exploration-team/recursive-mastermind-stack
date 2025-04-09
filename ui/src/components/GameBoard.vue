@@ -15,37 +15,12 @@
       class="gameplay__container d-flex flex-column align-items-center w-100 h-100 mt-2"
     >
       <div class="w-100 d-flex justify-content-start">
-        <template v-if="!isGameEnded">
-          <div class="d-flex align-items-center justify-content-between w-100">
-            <div
-              class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
-              v-if="isCodeMasterTurn"
-            >
-              Code Master Turn
-              <RoundedColor
-                bgColor="#222"
-                width="8px"
-                :value="0"
-                blinkColor="#0000ff"
-                height="8px"
-              />
-            </div>
-            <div
-              class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2"
-              v-else
-            >
-              Code Breaker Turn
-              <RoundedColor
-                bgColor="#222"
-                width="8px"
-                :value="0"
-                blinkColor="#ffde21"
-                height="8px"
-              />
-            </div>
-          </div>
-        </template>
-        <template v-else>
+        <div class="d-flex flex-start gap-2 p-3">
+          Game: {{ formatAddress(zkAppAddress as string) }}
+          <CopyToClipBoard :text="zkAppAddress || ''" />
+        </div>
+
+        <template v-if="isGameEnded">
           <div class="w-100 d-flex align-items-center justify-content-between">
             <div
               class="my-4 w-100 d-flex justify-content-between align-items-center"
@@ -83,23 +58,40 @@
         </template>
       </div>
 
-      <div class="d-flex mt-1">
+      <div class="d-flex mt-1 w-100">
         <div class="board__container d-flex">
-          <div class="color-picker__container d-flex flex-column gap-3 p-2">
-            <RoundedColor
-              height="40px"
-              width="40px"
-              v-for="el in availableColors"
-              :bg-color="el.color"
-              :value="el.value"
-            />
-          </div>
-
           <div>
-            <div class="d-flex flex-start gap-2 p-3">
-              Game: {{ formatAddress(zkAppAddress as string) }}
-              <CopyToClipBoard :text="zkAppAddress as string" />
+            <div
+              class="d-flex align-items-center justify-content-between w-100 ms-3"
+            >
+              <div
+                class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
+                v-if="isCodeMasterTurn"
+              >
+                Code Master Turn
+                <RoundedColor
+                  bgColor="#222"
+                  width="8px"
+                  :value="0"
+                  blinkColor="#0000ff"
+                  height="8px"
+                />
+              </div>
+              <div
+                class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2"
+                v-else
+              >
+                Code Breaker Turn
+                <RoundedColor
+                  bgColor="#222"
+                  width="8px"
+                  :value="0"
+                  blinkColor="#ffde21"
+                  height="8px"
+                />
+              </div>
             </div>
+
             <div
               v-for="(guess, row) in guesses?.slice(0, zkAppStates.maxAttempts)"
             >
@@ -112,6 +104,15 @@
             </div>
           </div>
         </div>
+      </div>
+      <div class="color-picker__container d-flex w-100 gap-2 p-2 mt-4">
+        <RoundedColor
+          height="40px"
+          width="40px"
+          v-for="el in availableColors"
+          :bg-color="el.color"
+          :value="el.value"
+        />
       </div>
     </div>
   </div>
@@ -221,29 +222,16 @@ onMounted(async () => {
 </script>
 <style scoped>
 .board__container {
-  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #00ffcc55;
 }
-
-.logs__container {
-  border: 1px solid #eeeeee;
-  border-left: none;
-}
-
 .color-picker__container {
-  border: 1px solid #eeeeee;
-}
-
-.logs-title {
-  border-bottom: 1px solid #eeeeee;
+  border-radius: 10px;
+  box-shadow: 0 0 10px #00ffcc55;
 }
 
 :deep(.el-popper) {
   width: 70% !important;
-}
-
-.separator {
-  border: 1px solid #eeeeee;
-  width: 2px;
 }
 
 .claim-btn {

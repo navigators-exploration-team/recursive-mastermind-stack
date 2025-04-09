@@ -24,3 +24,7 @@ export interface GameParams {
   rewardAmount: number | null;
   refereePubKeyBase58: string;
 }
+export interface Game {
+  name: string;
+  metadata: { gameMaxAttempts: string; gameRewardAmount: string };
+}

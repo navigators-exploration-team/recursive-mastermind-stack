@@ -1,8 +1,21 @@
 import { Router, Request, Response } from 'express';
-import { getUserGames, saveUserGame } from '../kvStorageService.js';
+import {
+  getActiveGames,
+  getUserGames,
+  saveUserGame,
+} from '../kvStorageService.js';
 
 const router = Router();
 
+router.get('/active-games', async (req: Request, res: Response) => {
+  try {
+    const games = await getActiveGames();
+    res.status(200).json(games);
+  } catch (error) {
+    console.error('Error fetching answer  list:', error);
+    res.status(500).json({ message: 'Failed to find answer list' });
+  }
+});
 router.get('/:id', async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;

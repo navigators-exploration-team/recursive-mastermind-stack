@@ -186,9 +186,9 @@ const combinationValidation = computed(() => {
 });
 const hiddenSecret = Array.from({ length: 4 }, () => ({
   color: '#fff',
-  value: 'x',
+  value: '*',
 }));
-const hiddenSalt = 'xxxxxxxxxxxxxxxxxxxx';
+const hiddenSalt = '********************';
 const handleSetSecretCode = (selectedColor: AvailableColor, index: number) => {
   secretCode.value[index] = { ...selectedColor };
 };
