@@ -2,11 +2,11 @@ FROM node:20-slim
 
 WORKDIR /app
 
-COPY package.json ./
-
+COPY ui/package.json ./
 COPY yarn.lock ./
+
 RUN yarn install
 
-COPY . .
+COPY ui/ .
 
 CMD ["yarn", "dev"]

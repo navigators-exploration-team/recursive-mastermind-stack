@@ -1,0 +1,24 @@
+{
+  "name": "mina-mastermind-stack",
+  "private": true,
+  "workspaces": [
+    "ui",
+    "server",
+    "worker",
+    "cloudflare-worker",
+    "cache"
+  ],
+  "scripts": {
+    "clean": "turbo run clean && rimraf node_modules yarn.lock",
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "format": "turbo run format",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "turbo": "latest"
+  },
+  "packageManager": "yarn@1.22.22"
+}

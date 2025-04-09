@@ -10,14 +10,16 @@ import gamesRoute from './routes/gamesRoute.js';
 dotenv.config();
 
 const app = express();
-app.use(cors());
 
+app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.SERVER_PORT;
+const PORT = process.env.SERVER_PORT || 3000;
 const REDIS_PORT = parseInt(process.env.REDIS_PORT as string) || 6379;
-const REDIS_HOST = process.env.REDIS_HOST;
-setupContract();
+const REDIS_HOST = process.env.REDIS_HOST || 'redis';
+
+await setupContract();
+
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
@@ -59,6 +61,7 @@ wss.on('connection', (ws) => {
         ws.send(JSON.stringify({ error: 'Unknown action!' }));
       }
     } catch (err) {
+      console.error('Error processing message:', err);
       ws.send(JSON.stringify({ error: 'Internal error!' }));
     }
   });
@@ -75,4 +78,8 @@ wss.on('connection', (ws) => {
   ws.on('error', (err) => {
     console.error('WebSocket error:', err);
   });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
 });

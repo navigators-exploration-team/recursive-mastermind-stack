@@ -71,6 +71,7 @@ export const handleProof = async (
       isSolved = isSolved_;
     }
   } catch (e) {
+    console.error('Error verifying proof:', e);
     ws.send(JSON.stringify({ error: 'Invalid zkProof!' }));
     return;
   }

@@ -1,38 +1,37 @@
 services:
   server-dev:
-    profiles: ["dev"]
-    build: 
-      context: ./server
-      dockerfile: docker/dockerfile.dev
+    profiles: ['dev']
+    build:
+      context: .
+      dockerfile: server/docker/dockerfile.dev
     volumes:
       - ./server/src:/app/src
       - ./server/package.json:/app/package.json
-      - ./server/yarn.lock:/app/yarn.lock
       - ./server/nodemon.json:/app/nodemon.json
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - server/.env
     depends_on:
-      - redis    
+      - redis
     restart: unless-stopped
   server-prod:
-    profiles: ["prod"]
-    build: 
-      context: ./server
-      dockerfile: docker/dockerfile.prod
+    profiles: ['prod']
+    build:
+      context: .
+      dockerfile: server/docker/dockerfile.prod
     volumes:
       - ./server/src:/app/src
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - server/.env
     restart: unless-stopped
   vue-app-dev-client:
-    profiles: ["dev"]
+    profiles: ['dev']
     build:
-      context: ./ui
-      dockerfile: docker/dockerfile.dev
+      context: .
+      dockerfile: ui/docker/dockerfile.dev
     volumes:
       - ./ui/src:/app/src
       - ./ui/index.ts:/app/index.ts
@@ -45,19 +44,19 @@ services:
     env_file:
       - ui/.env
   redis:
-    profiles: ["prod","dev"]
+    profiles: ['prod', 'dev']
     image: redis:latest
     ports:
       - '6379:6379'
     volumes:
       - redis_data:/data
-    command: ["redis-server", "--appendonly", "yes"]
+    command: ['redis-server', '--appendonly', 'yes']
     restart: always
   worker:
-    profiles: ["prod","dev"]
+    profiles: ['prod', 'dev']
     build:
-      context: ./worker
-      dockerfile: docker/dockerfile.dev
+      context: .
+      dockerfile: worker/docker/dockerfile.dev
     volumes:
       - ./worker/src:/app/src
     env_file:
