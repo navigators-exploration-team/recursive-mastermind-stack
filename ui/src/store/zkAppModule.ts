@@ -199,7 +199,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           gameId: this.zkAppAddress,
           zkProof: JSON.stringify(res),
           maxAttempts,
-          rewardAmount
+          rewardAmount,
         });
         await axios.post(SERVER_URL + `/games/${this.publicKeyBase58}`, {
           gameId: this.zkAppAddress,

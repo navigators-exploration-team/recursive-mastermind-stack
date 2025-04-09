@@ -60,5 +60,4 @@ onUnmounted(async () => {
   border: 1px solid #222;
   box-shadow: 0 0 10px #00ffcc55;
 }
-
 </style>
