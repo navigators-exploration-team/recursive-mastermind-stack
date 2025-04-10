@@ -4,8 +4,8 @@
       <el-table-column label="Game ID" width="180">
         <template #default="scope">
           <div class="d-flex align-items-center gap-2">
-            <span>{{ formatAddress(scope.row.name) }}</span>
-            <CopyToClipBoard :text="scope.row.name || ''" />
+            <span>{{ formatAddress(scope.row.id) }}</span>
+            <CopyToClipBoard :text="scope.row.id || ''" />
           </div>
         </template>
       </el-table-column>
@@ -25,7 +25,7 @@
             size="large"
             type="primary"
             class="me-3"
-            @click="handleJoinGame(scope.row.name)"
+            @click="handleJoinGame(scope.row.id)"
             >JOIN</el-button
           >
         </template>
@@ -49,10 +49,10 @@ const handleJoinGame = (game: string) => {
 };
 const getActiveGames = async () => {
   const res = await axios.get(SERVER_URL + '/games/active-games');
-  games.value = res?.data?.games?.map((game: Game) => ({
-    name:game?.name,
-    gameMaxAttempts: game?.metadata?.gameMaxAttempts,
-    gameRewardAmount: game?.metadata?.gameRewardAmount,
+  games.value = res?.data?.map((game: Game) => ({
+    id:game?._id,
+    gameMaxAttempts: game?.maxAttempts,
+    gameRewardAmount: game?.rewardAmount,
   }));
 };
 

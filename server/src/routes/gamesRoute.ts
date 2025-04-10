@@ -20,7 +20,10 @@ router.post('/accept/:id', async (req: Request, res: Response) => {
   try {
     const jsonGame = req.body;
     const userId = req.params.id;
-    const game = await createOrUpdateGame({_id:jsonGame.gameId,codeBreaker:userId});
+    const game = await createOrUpdateGame({
+      _id: jsonGame.gameId,
+      codeBreaker: userId,
+    });
     res.status(200).json({ game });
   } catch (error) {
     console.error('Error saving answer:', error);

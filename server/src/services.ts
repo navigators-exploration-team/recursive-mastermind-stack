@@ -36,10 +36,8 @@ export const handleProof = async (
   let lastProof = game?.lastProof || null;
 
   let lastTurnCount = null;
-  const gameMaxAttempts =
-    game?.maxAttempts || receivedMaxAttempts;
-  const gameRewardAmount =
-    game?.rewardAmount || receivedRewardAmount;
+  const gameMaxAttempts = game?.maxAttempts || receivedMaxAttempts;
+  const gameRewardAmount = game?.rewardAmount || receivedRewardAmount;
 
   if (lastProof) {
     const proof = await StepProgramProof.fromJSON(JSON.parse(lastProof));
@@ -85,14 +83,13 @@ export const handleProof = async (
   }
 
   const timestamp = Date.now();
-  console.log(lastTurnCount,"ssssssssssss")
   await createOrUpdateGame({
     _id: gameId,
     lastProof: zkProof,
     timestamp,
     maxAttempts: gameMaxAttempts,
     rewardAmount: gameRewardAmount,
-    codeMaster: lastTurnCount === null && playerId ? playerId : undefined
+    codeMaster: lastTurnCount === null && playerId ? playerId : undefined,
   });
 
   const players = activePlayers.get(gameId) || new Set();

@@ -44,15 +44,21 @@ services:
     stdin_open: true
     env_file:
       - ui/.env
+
   redis:
-    profiles: ['prod', 'dev']
-    image: redis:latest
-    ports:
-      - '6379:6379'
+    profiles: ['dev','prod']
+    image: redis:7.4.2
     volumes:
       - redis_data:/data
-    command: ['redis-server', '--appendonly', 'yes']
+    command: [
+      "redis-server",
+      "--requirepass", "${REDIS_PASSWORD}",
+      "--appendonly", "yes"
+    ]
     restart: always
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    
   worker:
     profiles: ['prod', 'dev']
     build:
@@ -68,18 +74,18 @@ services:
     restart: always
   db:
     profiles: ["prod","dev"]
-    image: mongo:latest
+    image: mongo:8.0.6
     container_name: db
     ports:
       - "27017:27017"
     environment:
-       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-       MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
     volumes:
       - mongodb_data:/data/db
-
   mongo-express:
+    profiles: ["dev"]
     image: mongo-express:latest
     container_name: mongo-express
     restart: always
@@ -92,8 +98,8 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: ${ME_CONFIG_BASICAUTH_USERNAME}
       ME_CONFIG_BASICAUTH_PASSWORD: ${ME_CONFIG_BASICAUTH_PASSWORD}
     depends_on:
+      - redis
       - db
-    profiles: ["prod", "dev"]
 
 volumes:
   redis_data:

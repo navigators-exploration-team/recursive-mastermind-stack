@@ -13,13 +13,13 @@
               :key="game"
               class="d-flex gap-9 align-items-center justify-content-between mb-4 w-100"
             >
-              <div>{{ formatAddress(game) }}</div>
+              <div>{{ formatAddress(game._id) }}</div>
               <el-button
                 color="#00ADB5"
                 size="large"
                 type="primary"
                 class="me-3"
-                @click="handleJoinGame(game)"
+                @click="handleJoinGame(game._id)"
                 >JOIN</el-button
               >
             </div>
@@ -38,9 +38,10 @@ import { useZkAppStore } from '@/store/zkAppModule';
 import { storeToRefs } from 'pinia';
 import { formatAddress } from '@/utils';
 import { useRouter } from 'vue-router';
+import { Game } from '@/types';
 
 const { publicKeyBase58 } = storeToRefs(useZkAppStore());
-const games = ref<string[]>([]);
+const games = ref<Game[]>([]);
 const router = useRouter();
 
 const getUserGames = async () => {

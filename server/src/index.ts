@@ -19,23 +19,23 @@ app.use(express.json());
 const PORT = process.env.SERVER_PORT || 3000;
 const REDIS_PORT = parseInt(process.env.REDIS_PORT as string) || 6379;
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
-
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD
 await setupContract();
 
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-connectDatabase()
+connectDatabase();
 app.use('/games', gamesRoute);
 
 const wss = new WebSocketServer({ server });
 const activePlayers = new Map<string, Set<WebSocket>>();
 
 const proofQueue = new Queue('proofQueue', {
-  connection: { host: REDIS_HOST, port: REDIS_PORT },
+  connection: { host: REDIS_HOST, port: REDIS_PORT, password: REDIS_PASSWORD },
 });
 const queueEvents = new QueueEvents('proofQueue', {
-  connection: { host: REDIS_HOST, port: REDIS_PORT },
+  connection: { host: REDIS_HOST, port: REDIS_PORT , password: REDIS_PASSWORD },
 });
 
 queueEvents.on('completed', ({ jobId, returnvalue }: any) => {
@@ -49,7 +49,8 @@ wss.on('connection', (ws) => {
   ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
-      const { gameId, action, zkProof, maxAttempts, rewardAmount , playerId } = data;
+      const { gameId, action, zkProof, maxAttempts, rewardAmount, playerId } =
+        data;
 
       if (!gameId || !action) {
         ws.send(JSON.stringify({ error: 'Bad request!' }));
