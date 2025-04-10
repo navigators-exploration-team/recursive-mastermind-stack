@@ -6,6 +6,7 @@ import {
 } from '@navigators-exploration-team/mina-mastermind';
 import dotenv from 'dotenv';
 import { checkGameCreation, sendFinalProof } from './services.js';
+import { connectDatabase } from './databaseConnection.js';
 dotenv.config();
 
 const REDIS_PORT = parseInt(process.env.REDIS_PORT as string) || 6379;
@@ -20,6 +21,7 @@ async function initialize() {
   await StepProgram.compile();
   await MastermindZkApp.compile();
   console.timeEnd('compiling');
+  connectDatabase();
 }
 
 initialize().catch((error) => {
@@ -30,11 +32,11 @@ const proofWorker = new Worker(
   'proofQueue',
   async (job: Job) => {
     try {
-      if (job.name === 'checkGameCreation') {
+       if (job.name === 'checkGameCreation') {
         await checkGameCreation();
       } else if (job.name === 'sendFinalProof') {
         return await sendFinalProof(job);
-      }
+      } 
     } catch (error) {
       console.error(`job failed with error: `, error);
       throw error;

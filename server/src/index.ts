@@ -7,6 +7,7 @@ import { handleJoinGame, handleProof } from './services.js';
 import cors from 'cors';
 import gamesRoute from './routes/gamesRoute.js';
 import cron from 'node-cron';
+import { connectDatabase } from './databaseConnection.js';
 
 dotenv.config();
 
@@ -22,7 +23,7 @@ setupContract();
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
+connectDatabase()
 app.use('/games', gamesRoute);
 
 const wss = new WebSocketServer({ server });
@@ -46,7 +47,7 @@ wss.on('connection', (ws) => {
   ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
-      const { gameId, action, zkProof, maxAttempts, rewardAmount } = data;
+      const { gameId, action, zkProof, maxAttempts, rewardAmount , playerId } = data;
 
       if (!gameId || !action) {
         ws.send(JSON.stringify({ error: 'Bad request!' }));
@@ -63,6 +64,7 @@ wss.on('connection', (ws) => {
           zkProof,
           maxAttempts,
           rewardAmount,
+          playerId,
           activePlayers,
           ws,
           proofQueue

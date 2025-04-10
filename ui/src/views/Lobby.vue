@@ -49,7 +49,7 @@ const handleJoinGame = (game: string) => {
 };
 const getActiveGames = async () => {
   const res = await axios.get(SERVER_URL + '/games/active-games');
-  games.value = res?.data?.games.map((game: Game) => ({
+  games.value = res?.data?.games?.map((game: Game) => ({
     name:game?.name,
     gameMaxAttempts: game?.metadata?.gameMaxAttempts,
     gameRewardAmount: game?.metadata?.gameRewardAmount,
