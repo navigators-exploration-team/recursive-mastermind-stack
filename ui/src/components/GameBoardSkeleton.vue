@@ -1,9 +1,7 @@
 <template>
   <el-skeleton animated>
     <template #template>
-      <div
-        class=" d-flex flex-column align-items-center w-100 h-100"
-      >
+      <div class="d-flex flex-column align-items-center w-100 h-100">
         <div>
           <div class="board__container d-flex">
             <div>
@@ -40,7 +38,6 @@ import GuessSkeleton from './GuessSkeleton.vue';
   border-radius: 10px;
   border: 1px solid #222;
   box-shadow: 0 0 10px #00ffcc55;
-
 }
 
 .el-skeleton.is-animated .el-skeleton__item {

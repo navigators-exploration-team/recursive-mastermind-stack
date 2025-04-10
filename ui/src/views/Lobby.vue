@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex gap-5 justify-content-center w-100 flex-wrap p-4">
-    <el-table :data="games" stripe class="w-100" >
+    <el-table :data="games" stripe class="w-100">
       <el-table-column label="Game ID" width="180">
         <template #default="scope">
           <div class="d-flex align-items-center gap-2">
@@ -9,12 +9,12 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="Max Attempts" prop="gameMaxAttempts" >
+      <el-table-column label="Max Attempts" prop="gameMaxAttempts">
       </el-table-column>
-      <el-table-column label="Game Reward" prop="gameRewardAmount" >
+      <el-table-column label="Game Reward" prop="gameRewardAmount">
         <template #default="scope">
           <div class="d-flex align-items-center gap-2">
-            <span>{{ (scope.row.gameRewardAmount)  / 1e9 }} MINA</span>
+            <span>{{ scope.row.gameRewardAmount / 1e9 }} MINA</span>
           </div>
         </template>
       </el-table-column>
@@ -62,13 +62,15 @@ onMounted(async () => {
 </script>
 <style lang="css" scoped>
 :deep(.el-table__row) {
-  background : #171d24 !important;
+  background: #171d24 !important;
   color: white;
 }
-:deep(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell){
-  background: #1f242b!important;
+:deep(
+  .el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell
+) {
+  background: #1f242b !important;
 }
-:deep(.el-table){
+:deep(.el-table) {
   --el-table-row-hover-bg-color: unset;
-  }
+}
 </style>

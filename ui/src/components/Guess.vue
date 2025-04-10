@@ -184,7 +184,6 @@ const handleVerifyGuess = () => {
 }
 </style>
 <style scoped>
-
 .clue__container {
   width: 50px;
 }

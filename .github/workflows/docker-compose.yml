@@ -1,0 +1,84 @@
+name: Docker Compose Integration Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  docker-compose-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          docker compose --version
+
+      - name: Clean up previous containers
+        if: always()
+        run: docker compose down -v
+
+      - name: Create .env files
+        run: |
+          cat <<EOF > server/.env
+          MINA_NETWORK_URL=http://host.docker.internal:8080/graphql
+          CLOUDFLARE_WORKER_URL=https://cloudflare-worker.ghassen-loukil-it.workers.dev
+          SERVER_PORT=3000
+          REDIS_PORT=6379
+          REDIS_HOST=redis
+          EOF
+
+          cat <<EOF > ui/.env
+          VITE_MINA_NETWORK_URL=http://localhost:8080/graphql
+          VITE_WEB_SOCKET_URL=ws://localhost:3000
+          EOF
+
+          cat <<EOF > worker/.env
+          SERVER_PRIVATE_KEY=EKEJ467CaN7s6jsQCVYSAzBdwDgNwmDM1f8vCP9xtzWyszAENwDR
+          MINA_NETWORK_URL=http://host.docker.internal:8080/graphql
+          REDIS_HOST=redis
+          REDIS_PORT=6379
+          EOF
+
+      - name: Build & start dev profile
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.override.ci.yml --profile dev up --build -d
+
+      - name: Wait for services
+        run: |
+          sleep 300
+          docker compose ps
+          docker compose logs server-dev
+
+      - name: Check server is running
+        run: |
+          curl --fail http://localhost:3000/health || exit 1
+
+      - name: Check frontend is running
+        run: |
+          curl --fail http://localhost:3001 || exit 1
+
+      - name: Run integration tests
+        run: |
+          # docker exec <container> npm run test
+          echo "No tests yet"
+
+      - name: Stop services
+        if: always()
+        run: |
+          docker compose down
