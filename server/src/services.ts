@@ -3,6 +3,7 @@ import { getGameById, createOrUpdateGame } from './repositories/game.js';
 import { StepProgramProof } from '@navigators-exploration-team/mina-mastermind';
 import { checkGameStatus } from './zkAppHandler.js';
 import { Queue } from 'bullmq';
+import { VerificationKey, verify } from 'o1js';
 
 export const handleJoinGame = async (
   gameId: string,
@@ -29,7 +30,8 @@ export const handleProof = async (
   playerId: string,
   activePlayers: Map<string, Set<WebSocket>>,
   ws: WebSocket,
-  proofQueue: Queue
+  proofQueue: Queue,
+  vk: VerificationKey
 ) => {
   let game = await getGameById(gameId);
 
@@ -54,8 +56,7 @@ export const handleProof = async (
 
   try {
     receivedProof = await StepProgramProof.fromJSON(JSON.parse(zkProof));
-    receivedProof.verify();
-
+    await verify(receivedProof, vk);
     const receivedTurnCount = Number(
       receivedProof.publicOutput.turnCount.toString()
     );

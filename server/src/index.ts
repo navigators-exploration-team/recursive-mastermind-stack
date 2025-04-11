@@ -20,7 +20,7 @@ const PORT = process.env.SERVER_PORT || 3000;
 const REDIS_PORT = parseInt(process.env.REDIS_PORT as string) || 6379;
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
 const REDIS_PASSWORD = process.env.REDIS_PASSWORD
-await setupContract();
+const vk = await setupContract();
 
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
@@ -70,7 +70,8 @@ wss.on('connection', (ws) => {
           playerId,
           activePlayers,
           ws,
-          proofQueue
+          proofQueue,
+          vk
         );
       } else {
         ws.send(JSON.stringify({ error: 'Unknown action!' }));
