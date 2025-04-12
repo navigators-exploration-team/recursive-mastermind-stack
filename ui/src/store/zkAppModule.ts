@@ -200,7 +200,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           zkProof: JSON.stringify(res),
           maxAttempts,
           rewardAmount,
-          playerId: this.publicKeyBase58
+          playerPubKeyBase58: this.publicKeyBase58
         });
         this.stepDisplay = '';
         this.error = null;

@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import Game, { IGame } from '../models/Game.js';
+import Game, { GameStatus, IGame } from '../models/Game.js';
 dotenv.config();
 
 export const createOrUpdateGame = async (gameData: Partial<IGame>) => {
@@ -25,7 +25,7 @@ export const getGameById = async (_id: string) => {
 
 export const getActiveGames = async () => {
   try {
-    const activeGames = await Game.find({ isActive: true });
+    const activeGames = await Game.find({ status: GameStatus.ACTIVE });
     return activeGames;
   } catch (err) {
     throw new Error('Error retrieving active games: ' + err);

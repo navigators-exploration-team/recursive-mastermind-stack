@@ -5,8 +5,7 @@ WORKDIR /app
 COPY server/package.json ./
 COPY yarn.lock ./
 
-RUN yarn install --frozen-lockfile
-
+RUN yarn install
 FROM node:23-slim AS dev
 
 WORKDIR /app

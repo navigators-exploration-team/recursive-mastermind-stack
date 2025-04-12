@@ -5,7 +5,11 @@ import {
   StepProgramProof,
 } from '@navigators-exploration-team/mina-mastermind';
 import dotenv from 'dotenv';
-import { getPendingGames, updateManyGames } from './repositories/game.js';
+import {
+  createOrUpdateGame,
+  getPendingGames,
+  updateManyGames,
+} from './repositories/game.js';
 
 dotenv.config();
 
@@ -14,9 +18,10 @@ const TRANSACTION_FEE = 1e8;
 dotenv.config();
 
 export const sendFinalProof = async (job: Job) => {
-  const { gameId, zkProof } = job.data;
+  const { gameId, zkProof, winnerPublicKeyBase58 } = job.data;
   const senderPrivateKey = PrivateKey.fromBase58(SERVER_PRIVATE_KEY);
   const senderPublicKey = senderPrivateKey.toPublicKey();
+  const winnerPublicKey = PublicKey.fromBase58(winnerPublicKeyBase58);
   const zkApp = new MastermindZkApp(PublicKey.fromBase58(gameId));
   console.log('creating transaction...');
   const proof = await StepProgramProof.fromJSON(JSON.parse(zkProof));
@@ -26,8 +31,7 @@ export const sendFinalProof = async (job: Job) => {
       fee: TRANSACTION_FEE,
     },
     async () => {
-      // Todo - pass correct pubkey
-      await zkApp.submitGameProof(proof, PublicKey.empty());
+      await zkApp.submitGameProof(proof, winnerPublicKey);
     }
   );
   console.log('proving transaction...');
@@ -37,6 +41,12 @@ export const sendFinalProof = async (job: Job) => {
   const pendingTx = await transaction.send();
   console.log('Transaction sent: ', pendingTx.hash);
   const txHash = pendingTx.hash;
+  await createOrUpdateGame({
+    _id:gameId,
+    winnerPublicKeyBase58,
+    settlementTransactionHash: txHash,
+    
+  });
   console.log(
     `Proof submitted for game ${gameId}, transaction hash: ${txHash}`
   );
@@ -59,7 +69,7 @@ export const checkGameCreation = async () => {
         activeGames.push(game._id);
       }
     } catch (err) {
-      console.error(`Error on game ${game}: `, err);
+      console.error(`Error on game ${game._id}: `, err);
     }
   });
   await Promise.all(promises);

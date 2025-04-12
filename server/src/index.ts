@@ -49,7 +49,7 @@ wss.on('connection', (ws) => {
   ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
-      const { gameId, action, zkProof, maxAttempts, rewardAmount, playerId } =
+      const { gameId, action, zkProof, maxAttempts, rewardAmount, playerPubKeyBase58 } =
         data;
 
       if (!gameId || !action) {
@@ -67,7 +67,7 @@ wss.on('connection', (ws) => {
           zkProof,
           maxAttempts,
           rewardAmount,
-          playerId,
+          playerPubKeyBase58,
           activePlayers,
           ws,
           proofQueue,

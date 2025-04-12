@@ -27,7 +27,7 @@ export const handleProof = async (
   zkProof: string,
   receivedMaxAttempts: number,
   receivedRewardAmount: number,
-  playerId: string,
+  playerPubKeyBase58: string,
   activePlayers: Map<string, Set<WebSocket>>,
   ws: WebSocket,
   proofQueue: Queue,
@@ -90,7 +90,7 @@ export const handleProof = async (
     timestamp,
     maxAttempts: gameMaxAttempts,
     rewardAmount: gameRewardAmount,
-    codeMaster: lastTurnCount === null && playerId ? playerId : undefined,
+    codeMaster: lastTurnCount === null && playerPubKeyBase58 ? playerPubKeyBase58 : undefined,
   });
 
   const players = activePlayers.get(gameId) || new Set();
@@ -100,7 +100,7 @@ export const handleProof = async (
     }
   });
   if (isSolved || (turnCount && maxAttempts && turnCount > maxAttempts * 2)) {
-    console.log('sending proof...');
-    await proofQueue.add('sendFinalProof', { gameId, zkProof });
+    const winnerPublicKeyBase58 = isSolved ? game?.codeBreaker : game?.codeMaster
+    await proofQueue.add('sendFinalProof', { gameId, zkProof, winnerPublicKeyBase58 });
   }
 };

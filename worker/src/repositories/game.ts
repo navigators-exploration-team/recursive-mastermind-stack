@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import Game, { IGame } from '../models/Game.js';
+import Game, { GameStatus, IGame } from '../models/Game.js';
 dotenv.config();
 
 export const createOrUpdateGame = async (gameData: Partial<IGame>) => {
@@ -25,7 +25,7 @@ export const getGameById = async (_id: string) => {
 
 export const getPendingGames = async () => {
   try {
-    const activeGames = await Game.find({ isActive: false }, '_id').lean();
+    const activeGames = await Game.find({ status: GameStatus.PENDING }, '_id').lean();
     return activeGames;
    } catch (err) {
     throw new Error('Error retrieving pending games: ' + err);
@@ -45,10 +45,9 @@ export const getUserGames = async (userId: string) => {
 
 export const updateManyGames = async (activeGames: string[]) => {
   try {
-    console.log(activeGames)
      await Game.updateMany(
       { _id: { $in: activeGames } },
-      { $set: { isActive: true } }
+      { $set: { status: GameStatus.ACTIVE } }
     );
    } catch (err) {
     throw new Error('Error updating games : ' + err);

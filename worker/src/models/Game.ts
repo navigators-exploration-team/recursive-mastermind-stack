@@ -1,15 +1,22 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export enum GameStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  ENDED = 'ENDED',
+}
+
 export interface IGame extends Document {
   _id: string;
   lastProof: any;
   maxAttempts: number;
   rewardAmount: number;
   timestamp: number;
-  codeBreaker: string;
+  codeBreaker?: string;
   codeMaster: string;
-  winnerId: string;
-  isActive: boolean;
+  winnerPublicKeyBase58?: string;
+  status: GameStatus;
+  settlementTransactionHash?:string;
 }
 
 const gameSchema: Schema = new Schema(
@@ -21,8 +28,14 @@ const gameSchema: Schema = new Schema(
     timestamp: { type: Number, default: Date.now },
     codeBreaker: { type: String, required: false },
     codeMaster: { type: String, required: true },
-    winnerId: { type: String, required: false },
-    isActive: { type: Boolean, default: false },
+    winnerPublicKeyBase58: { type: String, required: false },
+    status: {
+      type: String,
+      enum: Object.values(GameStatus),
+      default: GameStatus.PENDING,
+      required: true,
+    },
+    settlementTransactionHash: { type: String, required: false },
   },
   { timestamps: true }
 );
