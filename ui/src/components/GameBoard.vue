@@ -111,24 +111,12 @@ import { storeToRefs } from 'pinia';
 import { formatAddress } from '@/utils';
 import CopyToClipBoard from '@/components/shared/CopyToClipBoard.vue';
 import { cluesColors } from '@/constants/colors';
-import { ElNotification } from 'element-plus';
-import { ElMessage } from 'element-plus';
 import DotsLoader from '@/components/shared/DotsLoader.vue';
 import Timer from '@/components/shared/Timer.vue';
 
-const { claimRewardTransaction, getRole, getZkAppStates, penalizePlayer } =
-  useZkAppStore();
-const {
-  zkAppAddress,
-  zkProofStates,
-  zkAppStates,
-  publicKeyBase58,
-  error,
-  loading,
-  currentTransactionLink,
-  userRole,
-  game,
-} = storeToRefs(useZkAppStore());
+const { getRole, getZkAppStates, penalizePlayer } = useZkAppStore();
+const { zkAppAddress, zkProofStates, zkAppStates, publicKeyBase58, game } =
+  storeToRefs(useZkAppStore());
 const isCodeMasterTurn = computed(() => {
   return zkProofStates.value?.turnCount % 2 === 0;
 });
@@ -150,19 +138,6 @@ const handleSetColor = (
   row: number
 ) => {
   guesses.value[row][payload.index] = { ...payload.selectedColor };
-};
-const handleClaimReward = async () => {
-  await claimRewardTransaction();
-  if (error.value) {
-    ElMessage.error({ message: error.value, duration: 6000 });
-  } else {
-    ElNotification({
-      title: 'Success',
-      message: `Transaction Hash : ${currentTransactionLink.value}`,
-      type: 'success',
-      duration: 5000,
-    });
-  }
 };
 const isGameSolved = computed(() => {
   return clues.value?.some((clue: AvailableColor[]) =>
@@ -194,12 +169,7 @@ const lastTransactionLink = computed(() => {
     game.value?.settlementTransactionHash
   );
 });
-const isCurrentUserTurn = computed(() => {
-  return (
-    (isCodeMasterTurn.value && userRole.value === 'CODE_MASTER') ||
-    (!isCodeMasterTurn.value && userRole.value === 'CODE_BREAKER')
-  );
-});
+
 watch(
   () => zkProofStates.value?.turnCount,
   () => {
