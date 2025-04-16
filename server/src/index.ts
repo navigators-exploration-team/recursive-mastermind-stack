@@ -7,6 +7,7 @@ import { handleJoinGame, handleProof } from './services.js';
 import cors from 'cors';
 import gamesRoute from './routes/gamesRoute.js';
 import cron from 'node-cron';
+import { connectDatabase } from './databaseConnection.js';
 
 dotenv.config();
 
@@ -18,23 +19,23 @@ app.use(express.json());
 const PORT = process.env.SERVER_PORT || 3000;
 const REDIS_PORT = parseInt(process.env.REDIS_PORT as string) || 6379;
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
-
-await setupContract();
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD
+const vk = await setupContract();
 
 const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
+connectDatabase();
 app.use('/games', gamesRoute);
 
 const wss = new WebSocketServer({ server });
 const activePlayers = new Map<string, Set<WebSocket>>();
 
 const proofQueue = new Queue('proofQueue', {
-  connection: { host: REDIS_HOST, port: REDIS_PORT },
+  connection: { host: REDIS_HOST, port: REDIS_PORT, password: REDIS_PASSWORD },
 });
 const queueEvents = new QueueEvents('proofQueue', {
-  connection: { host: REDIS_HOST, port: REDIS_PORT },
+  connection: { host: REDIS_HOST, port: REDIS_PORT , password: REDIS_PASSWORD },
 });
 
 queueEvents.on('completed', ({ jobId, returnvalue }: any) => {
@@ -48,7 +49,8 @@ wss.on('connection', (ws) => {
   ws.on('message', async (message) => {
     try {
       const data = JSON.parse(message.toString());
-      const { gameId, action, zkProof, maxAttempts, rewardAmount } = data;
+      const { gameId, action, zkProof, maxAttempts, rewardAmount, playerPubKeyBase58 } =
+        data;
 
       if (!gameId || !action) {
         ws.send(JSON.stringify({ error: 'Bad request!' }));
@@ -65,9 +67,11 @@ wss.on('connection', (ws) => {
           zkProof,
           maxAttempts,
           rewardAmount,
+          playerPubKeyBase58,
           activePlayers,
           ws,
-          proofQueue
+          proofQueue,
+          vk
         );
       } else {
         ws.send(JSON.stringify({ error: 'Unknown action!' }));

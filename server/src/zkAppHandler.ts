@@ -22,9 +22,10 @@ export const setupContract = async () => {
   console.timeEnd('StepProgram compilation');
   console.log('Compiling MastermindZkApp...');
   console.time('zkApp compilation');
-  await MastermindZkApp.compile();
+  const {verificationKey} = await MastermindZkApp.compile();
   console.log('MastermindZkApp compiled');
   console.timeEnd('zkApp compilation');
+  return verificationKey
 };
 
 export async function checkGameStatus(

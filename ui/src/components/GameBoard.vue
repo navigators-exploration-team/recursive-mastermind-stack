@@ -15,11 +15,12 @@
       class="gameplay__container d-flex flex-column align-items-center w-100 h-100 mt-2"
     >
       <div class="w-100 d-flex justify-content-start">
-        <div class="d-flex flex-start gap-2 p-3">
+        <div class="d-flex flex-start gap-2 py-3">
           Game: {{ formatAddress(zkAppAddress as string) }}
           <CopyToClipBoard :text="zkAppAddress || ''" />
         </div>
-
+      </div>
+      <div class="w-100">
         <template v-if="isGameEnded">
           <div class="w-100 d-flex align-items-center justify-content-between">
             <div
@@ -57,7 +58,6 @@
           </div>
         </template>
       </div>
-
       <div class="d-flex mt-1 w-100">
         <div class="board__container d-flex">
           <div>

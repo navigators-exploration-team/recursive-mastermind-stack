@@ -200,9 +200,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           zkProof: JSON.stringify(res),
           maxAttempts,
           rewardAmount,
-        });
-        await axios.post(SERVER_URL + `/games/${this.publicKeyBase58}`, {
-          gameId: this.zkAppAddress,
+          playerPubKeyBase58: this.publicKeyBase58
         });
         this.stepDisplay = '';
         this.error = null;
@@ -365,7 +363,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
         await this.joinGame();
         this.stepDisplay = '';
         this.error = null;
-        await axios.post(SERVER_URL + `/games/${this.publicKeyBase58}`, {
+        await axios.post(SERVER_URL + `/games/accept/${this.publicKeyBase58}`, {
           gameId: this.zkAppAddress,
         });
       } catch (err: any) {

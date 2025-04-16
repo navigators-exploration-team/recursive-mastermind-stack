@@ -1,21 +1,18 @@
 import WebSocket from 'ws';
-import { getGame, saveGame } from './kvStorageService.js';
+import { getGameById, createOrUpdateGame } from './repositories/game.js';
 import { StepProgramProof } from '@navigators-exploration-team/mina-mastermind';
 import { checkGameStatus } from './zkAppHandler.js';
 import { Queue } from 'bullmq';
+import { VerificationKey, verify } from 'o1js';
 
 export const handleJoinGame = async (
   gameId: string,
   activePlayers: Map<string, Set<WebSocket>>,
   ws: WebSocket
 ) => {
-  let game = await getGame(gameId);
-  if (!game?.value) {
-    game = await getGame(gameId, 'PENDING_');
-  }
-  let gameData = JSON.parse(game?.value);
-  let lastProof = gameData?.lastProof || null;
-  let timestamp = gameData?.timestamp || null;
+  let game = await getGameById(gameId);
+  let lastProof = game?.lastProof || null;
+  let timestamp = game?.timestamp || null;
   if (!activePlayers.has(gameId)) {
     activePlayers.set(gameId, new Set());
   }
@@ -30,20 +27,19 @@ export const handleProof = async (
   zkProof: string,
   receivedMaxAttempts: number,
   receivedRewardAmount: number,
+  playerPubKeyBase58: string,
   activePlayers: Map<string, Set<WebSocket>>,
   ws: WebSocket,
-  proofQueue: Queue
+  proofQueue: Queue,
+  vk: VerificationKey
 ) => {
-  let game = await getGame(gameId);
-  let gameData = JSON.parse(game?.value);
+  let game = await getGameById(gameId);
 
-  let lastProof = gameData?.lastProof || null;
+  let lastProof = game?.lastProof || null;
 
   let lastTurnCount = null;
-  const gameMaxAttempts =
-    game?.metadata?.gameMaxAttempts || receivedMaxAttempts;
-  const gameRewardAmount =
-    game?.metadata?.gameRewardAmount || receivedRewardAmount;
+  const gameMaxAttempts = game?.maxAttempts || receivedMaxAttempts;
+  const gameRewardAmount = game?.rewardAmount || receivedRewardAmount;
 
   if (lastProof) {
     const proof = await StepProgramProof.fromJSON(JSON.parse(lastProof));
@@ -60,8 +56,7 @@ export const handleProof = async (
 
   try {
     receivedProof = await StepProgramProof.fromJSON(JSON.parse(zkProof));
-    receivedProof.verify();
-
+    await verify(receivedProof, vk);
     const receivedTurnCount = Number(
       receivedProof.publicOutput.turnCount.toString()
     );
@@ -89,13 +84,13 @@ export const handleProof = async (
   }
 
   const timestamp = Date.now();
-  let computedId = game?.value ? gameId : 'PENDING_' + gameId;
-
-  await saveGame(computedId, {
+  await createOrUpdateGame({
+    _id: gameId,
     lastProof: zkProof,
     timestamp,
-    gameMaxAttempts,
-    gameRewardAmount,
+    maxAttempts: gameMaxAttempts,
+    rewardAmount: gameRewardAmount,
+    codeMaster: lastTurnCount === null && playerPubKeyBase58 ? playerPubKeyBase58 : undefined,
   });
 
   const players = activePlayers.get(gameId) || new Set();
@@ -105,7 +100,7 @@ export const handleProof = async (
     }
   });
   if (isSolved || (turnCount && maxAttempts && turnCount > maxAttempts * 2)) {
-    console.log('sending proof...');
-    await proofQueue.add('sendFinalProof', { gameId, zkProof });
+    const winnerPublicKeyBase58 = isSolved ? game?.codeBreaker : game?.codeMaster
+    await proofQueue.add('sendFinalProof', { gameId, zkProof, winnerPublicKeyBase58 });
   }
 };
