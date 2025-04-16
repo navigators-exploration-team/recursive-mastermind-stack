@@ -172,3 +172,15 @@ export function serializeSecret(code: number[]) {
     return acc * 10 + curr;
   }, 0);
 }
+export function dateToDayHourMin(timestamp?: number): string {
+  if (!timestamp) return '-';
+  const date = new Date(timestamp);
+  const datePart = date.toLocaleDateString('en-CA');
+  const timePart = date.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  return `${datePart.replace(/-/g, '/')} ${timePart}`;
+}

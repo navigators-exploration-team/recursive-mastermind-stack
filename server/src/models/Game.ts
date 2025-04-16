@@ -1,9 +1,13 @@
+/* eslint-disable no-unused-vars */
 import mongoose, { Schema, Document } from 'mongoose';
 
 export enum GameStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
+  IN_PROGRESS = 'IN_PROGRESS',
   ENDED = 'ENDED',
+  PENALIZED = 'PENALIZED',
+  CANCELLED = 'CANCELLED',
 }
 
 export interface IGame extends Document {
@@ -16,7 +20,10 @@ export interface IGame extends Document {
   codeMaster: string;
   winnerPublicKeyBase58?: string;
   status: GameStatus;
-  settlementTransactionHash?:string;
+  settlementTransactionHash?: string;
+  lastAcceptTimestamp: number;
+  penalizationTransactionHash?: string;
+  turnCount: number;
 }
 
 const gameSchema: Schema = new Schema(
@@ -36,6 +43,9 @@ const gameSchema: Schema = new Schema(
       required: true,
     },
     settlementTransactionHash: { type: String, required: false },
+    lastAcceptTimestamp: { type: Number, required: false },
+    penalizationTransactionHash: { type: String, required: false },
+    turnCount: { type: Number, required: false },
   },
   { timestamps: true }
 );

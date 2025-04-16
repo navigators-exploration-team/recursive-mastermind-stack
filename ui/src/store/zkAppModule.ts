@@ -47,7 +47,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
     zkAppAddress: null as null | string,
     webSocketInstance: null as null | WebSocketService,
     userRole: null as null | string,
-    lastTransactionLink: null as null | string,
+    game: null as any,
   }),
   getters: {},
   actions: {
@@ -200,7 +200,7 @@ export const useZkAppStore = defineStore('useZkAppModule', {
           zkProof: JSON.stringify(res),
           maxAttempts,
           rewardAmount,
-          playerPubKeyBase58: this.publicKeyBase58
+          playerPubKeyBase58: this.publicKeyBase58,
         });
         this.stepDisplay = '';
         this.error = null;
@@ -407,8 +407,50 @@ export const useZkAppStore = defineStore('useZkAppModule', {
         this.publicKeyBase58
       );
     },
-    setLastTransactionHash(hash: string) {
-      this.lastTransactionLink = hash;
+    setGame(game: any) {
+      this.game = game;
+    },
+    startGame() {
+      this.webSocketInstance?.send({
+        action: 'startGame',
+        gameId: this.zkAppAddress,
+      });
+    },
+    penalizePlayer() {
+      this.webSocketInstance?.send({
+        action: 'penalize',
+        gameId: this.zkAppAddress,
+      });
+    },
+    async cancelGame(gameId: string) {
+      try {
+        this.loading = true;
+        this.stepDisplay = 'Creating a transaction...';
+        await this.zkappWorkerClient!.createCancelGameTransaction(
+          this.publicKeyBase58,
+          gameId
+        );
+        this.stepDisplay = 'Generating proof...';
+        await this.zkappWorkerClient!.proveTransaction();
+        this.stepDisplay = 'Getting transaction JSON...';
+        const transactionJSON =
+          await this.zkappWorkerClient!.getTransactionJSON();
+        this.stepDisplay = 'Requesting send transaction...';
+        const { hash } = await (window as any).mina.sendTransaction({
+          transaction: transactionJSON,
+          feePayer: {
+            memo: '',
+          },
+        });
+        this.currentTransactionLink = hash;
+        this.stepDisplay = '';
+        this.error = null;
+      } catch (err: any) {
+        this.error = err?.message || err;
+        console.log('error ', err);
+      } finally {
+        this.loading = false;
+      }
     },
   },
 });

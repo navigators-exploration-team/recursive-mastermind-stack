@@ -19,18 +19,17 @@ router.get('/active-games', async (req: Request, res: Response) => {
 router.post('/accept/:id', async (req: Request, res: Response) => {
   try {
     const jsonGame = req.body;
-    const userId = req.params.id;
     const game = await createOrUpdateGame({
       _id: jsonGame.gameId,
-      codeBreaker: userId,
+      lastAcceptTimestamp: Date.now(),
     });
     res.status(200).json({ game });
   } catch (error) {
-    console.error('Error saving answer:', error);
-    res.status(500).json({ message: 'Failed to save answer' });
+    console.error('Error :', error);
+    res.status(500).json({ message: 'Failed' });
   }
 });
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/user/:id', async (req: Request, res: Response) => {
   try {
     const userId = req.params.id;
     const games = await getUserGames(userId);
@@ -40,7 +39,5 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Failed to find answer list' });
   }
 });
-
-
 
 export default router;

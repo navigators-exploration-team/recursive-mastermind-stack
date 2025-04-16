@@ -5,7 +5,7 @@ import {
   StepProgram,
 } from '@navigators-exploration-team/mina-mastermind';
 import dotenv from 'dotenv';
-import { checkGameCreation, sendFinalProof } from './services.js';
+import { checkGameCreation, forfeitWin, sendFinalProof } from './services.js';
 import { connectDatabase } from './databaseConnection.js';
 dotenv.config();
 
@@ -35,6 +35,8 @@ initialize()
             await checkGameCreation();
           } else if (job.name === 'sendFinalProof') {
             return await sendFinalProof(job);
+          } else if (job.name === 'forfeitWin') {
+            return await forfeitWin(job);
           }
         } catch (error) {
           console.error(`job failed with error: `, error);

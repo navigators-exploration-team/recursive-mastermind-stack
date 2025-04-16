@@ -1,7 +1,12 @@
 <template>
   <div class="d-flex flex-column align-items-center">
     <div v-if="zkAppStates" class="w-100">
-      <GameDetail v-if="zkAppStates.codeBreakerId === '0'" />
+      <GameDetail
+        v-if="
+          zkAppStates.codeBreakerId === '0' ||
+          ['ACTIVE', 'PENDING'].includes(game.status)
+        "
+      />
       <GameBoard v-else />
     </div>
     <div v-else class="mt-5">
@@ -20,8 +25,9 @@ import GameDetail from '@/components/GameDetail.vue';
 import GameBoardSkeleton from '@/components/GameBoardSkeleton.vue';
 
 const route = useRoute();
-const { compiled, zkAppStates } = storeToRefs(useZkAppStore());
-const { initZkappInstance, joinGame, getZkAppStates } = useZkAppStore();
+const { compiled, zkAppStates, game } = storeToRefs(useZkAppStore());
+const { initZkappInstance, joinGame, getZkAppStates, startGame } =
+  useZkAppStore();
 const gameId = route?.params?.id as string;
 const initializeGame = async () => {
   if (compiled.value) {
@@ -44,6 +50,18 @@ watch(
   () => compiled.value,
   async () => {
     await initializeGame();
+  }
+);
+watch(
+  () => zkAppStates.value?.codeBreakerId,
+  () => {
+    if (
+      ['ACTIVE', 'PENDING'].includes(game.value.status) &&
+      zkAppStates.value?.codeBreakerId &&
+      zkAppStates.value?.codeBreakerId !== '0'
+    ) {
+      startGame();
+    }
   }
 );
 

@@ -122,6 +122,17 @@ export default class ZkappWorkerClient {
       feePayer,
     });
   }
+  async createCancelGameTransaction(
+    feePayer: string,
+    gamePublicKeyBase58: string
+  ) {
+    const result = this._call('createCancelGameTransaction', {
+      feePayer,
+      gamePublicKeyBase58,
+    });
+    return result as Promise<string>;
+  }
+
   // worker initialization
 
   worker: Worker;

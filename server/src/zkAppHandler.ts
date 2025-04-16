@@ -13,6 +13,7 @@ dotenv.config();
 export const setupContract = async () => {
   const network = Mina.Network({
     mina: process.env.MINA_NETWORK_URL as string,
+    archive: process.env.MINA_ARCHIVE_URL as string,
   });
   Mina.setActiveInstance(network);
   console.log('Compiling StepProgram...');
@@ -22,10 +23,10 @@ export const setupContract = async () => {
   console.timeEnd('StepProgram compilation');
   console.log('Compiling MastermindZkApp...');
   console.time('zkApp compilation');
-  const {verificationKey} = await MastermindZkApp.compile();
+  const { verificationKey } = await MastermindZkApp.compile();
   console.log('MastermindZkApp compiled');
   console.timeEnd('zkApp compilation');
-  return verificationKey
+  return verificationKey;
 };
 
 export async function checkGameStatus(

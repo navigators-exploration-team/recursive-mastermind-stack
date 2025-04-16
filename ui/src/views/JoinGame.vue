@@ -10,7 +10,7 @@
           <div class="games-list w-100">
             <div
               v-for="game in games"
-              :key="game"
+              :key="game._id"
               class="d-flex gap-9 align-items-center justify-content-between mb-4 w-100"
             >
               <div>{{ formatAddress(game._id) }}</div>
@@ -46,7 +46,9 @@ const router = useRouter();
 
 const getUserGames = async () => {
   if (publicKeyBase58.value) {
-    const res = await axios.get(SERVER_URL + '/games/' + publicKeyBase58.value);
+    const res = await axios.get(
+      SERVER_URL + '/games/user/' + publicKeyBase58.value
+    );
     if (res?.data?.games) {
       games.value = res.data.games;
     }
