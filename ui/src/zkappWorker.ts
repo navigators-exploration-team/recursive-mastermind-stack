@@ -270,6 +270,18 @@ const functions = {
     }
     return false;
   },
+  createCancelGameTransaction: async (args: {
+    feePayer: string;
+    gamePublicKeyBase58: string;
+  }) => {
+    const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
+    const gamePublicKey = PublicKey.fromBase58(args.gamePublicKeyBase58);
+    const zkApp = new state.MastermindContract!(gamePublicKey);
+    const transaction = await Mina.transaction(feePayerPublickKey, async () => {
+      await zkApp!.claimReward();
+    });
+    state.transaction = transaction;
+  },
 };
 
 // ---------------------------------------------------------------------------------------

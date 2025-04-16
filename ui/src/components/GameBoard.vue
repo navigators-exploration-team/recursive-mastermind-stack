@@ -65,30 +65,25 @@
               class="d-flex align-items-center justify-content-between w-100 ms-3"
             >
               <div
-                class="w-100 d-flex justify-content-start p-3 ps-0 gap-2 align-items-center"
-                v-if="isCodeMasterTurn"
+                class="w-100 d-flex justify-content-between p-3 ps-0 gap-2 align-items-center"
               >
-                Code Master Turn
-                <RoundedColor
-                  bgColor="#222"
-                  width="8px"
-                  :value="0"
-                  blinkColor="#0000ff"
-                  height="8px"
-                />
-              </div>
-              <div
-                class="w-100 d-flex justify-content-start align-items-center p-3 ps-0 gap-2"
-                v-else
-              >
-                Code Breaker Turn
-                <RoundedColor
-                  bgColor="#222"
-                  width="8px"
-                  :value="0"
-                  blinkColor="#ffde21"
-                  height="8px"
-                />
+                <span v-if="isCodeMasterTurn">Code Master Turn</span>
+                <span v-else>Code Breaker Turn</span>
+                <div class="pe-2" v-if="!turnEnded">
+                  <Timer
+                    :startTimestamp="game.timestamp"
+                    @turnEnded="handleTurnEnded"
+                  />
+                </div>
+                <div v-else class="pe-2">
+                  <el-button
+                    @click="handlePenalize"
+                    class="penalize-btn fs-7 fw-500"
+                    size="small"
+                  >
+                    Penalize
+                  </el-button>
+                </div>
               </div>
             </div>
 
@@ -132,8 +127,10 @@ import { cluesColors } from '@/constants/colors';
 import { ElNotification } from 'element-plus';
 import { ElMessage } from 'element-plus';
 import DotsLoader from '@/components/shared/DotsLoader.vue';
+import Timer from '@/components/shared/Timer.vue';
 
-const { claimRewardTransaction, getRole, getZkAppStates } = useZkAppStore();
+const { claimRewardTransaction, getRole, getZkAppStates, penalizePlayer } =
+  useZkAppStore();
 const {
   zkAppAddress,
   zkProofStates,
@@ -143,6 +140,7 @@ const {
   error,
   loading,
   currentTransactionLink,
+  game,
 } = storeToRefs(useZkAppStore());
 const isCodeMasterTurn = computed(() => {
   return zkProofStates.value?.turnCount % 2 === 0;
@@ -155,6 +153,13 @@ const clues = computed<Array<AvailableColor[]>>(
   () => zkProofStates.value?.cluesHistory
 );
 const isRewardClaimed = ref(false);
+const turnEnded = ref(false);
+const handleTurnEnded = () => {
+  turnEnded.value = true;
+};
+const handlePenalize = () => {
+  penalizePlayer();
+};
 const handleSetColor = (
   payload: { index: number; selectedColor: AvailableColor },
   row: number
@@ -237,5 +242,13 @@ onMounted(async () => {
 .claim-btn {
   background-color: #17b14d;
   color: white;
+}
+.timer-icon {
+  color: rgb(229, 107, 107);
+}
+.penalize-btn {
+  border-radius: 10px;
+  background-color: #9d2c2c;
+  color: #f7f9fc;
 }
 </style>

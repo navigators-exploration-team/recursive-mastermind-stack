@@ -28,4 +28,7 @@ export interface Game {
   _id: string;
   maxAttempts: string;
   rewardAmount: string;
+  codeMaster: string;
+  status: string;
+  lastAcceptTimestamp: number;
 }

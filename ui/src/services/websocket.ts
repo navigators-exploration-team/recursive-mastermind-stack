@@ -34,6 +34,10 @@ export class WebSocketService {
             const { setLastTransactionHash } = useZkAppStore();
             setLastTransactionHash(data.hash);
           }
+          if (data.game) {
+            const { setGame } = useZkAppStore();
+            setGame(data.game);
+          }
         } catch (e) {
           console.log('Error handling message:', e);
         }

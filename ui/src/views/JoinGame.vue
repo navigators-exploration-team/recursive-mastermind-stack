@@ -46,7 +46,9 @@ const router = useRouter();
 
 const getUserGames = async () => {
   if (publicKeyBase58.value) {
-    const res = await axios.get(SERVER_URL + '/games/' + publicKeyBase58.value);
+    const res = await axios.get(
+      SERVER_URL + '/games/user/' + publicKeyBase58.value
+    );
     if (res?.data?.games) {
       games.value = res.data.games;
     }
