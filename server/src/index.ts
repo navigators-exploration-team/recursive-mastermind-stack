@@ -43,8 +43,13 @@ const queueEvents = new QueueEvents('proofQueue', {
   connection: { host: REDIS_HOST, port: REDIS_PORT, password: REDIS_PASSWORD },
 });
 
-queueEvents.on('completed', ({ jobId, txHash }: any) => {
-  console.log(`Job ${jobId} completed, transaction hash: ${txHash}`);
+queueEvents.on('completed', ({ returnvalue }: any) => {
+  if (returnvalue) {
+    const players = activePlayers.get(returnvalue._id) || new Set();
+    players.forEach((player: WebSocket) => {
+      player.send(JSON.stringify({ game: returnvalue }));
+    });
+  }
 });
 cron.schedule('* * * * *', async () => {
   await proofQueue.add('checkGameCreation', {});

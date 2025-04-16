@@ -90,7 +90,15 @@ export const handleProof = async (
     ws.send(JSON.stringify({ error: 'Invalid zkProof!' }));
     return;
   }
-
+  let winnerPublicKeyBase58 = null;
+  if (isSolved || (turnCount && maxAttempts && turnCount > maxAttempts * 2)) {
+    winnerPublicKeyBase58 = isSolved ? game?.codeBreaker : game?.codeMaster;
+    await proofQueue.add('sendFinalProof', {
+      gameId,
+      zkProof,
+      winnerPublicKeyBase58,
+    });
+  }
   const timestamp = Date.now();
   const updatedGame = await createOrUpdateGame({
     _id: gameId,
@@ -103,6 +111,10 @@ export const handleProof = async (
         ? playerPubKeyBase58
         : undefined,
     turnCount: receivedTurnCount,
+    winnerPublicKeyBase58: winnerPublicKeyBase58
+      ? winnerPublicKeyBase58
+      : undefined,
+    status: winnerPublicKeyBase58 ? GameStatus.ENDED : undefined,
   });
 
   const players = activePlayers.get(gameId) || new Set();
@@ -111,16 +123,6 @@ export const handleProof = async (
       player.send(JSON.stringify({ zkProof, timestamp, game: updatedGame }));
     }
   });
-  if (isSolved || (turnCount && maxAttempts && turnCount > maxAttempts * 2)) {
-    const winnerPublicKeyBase58 = isSolved
-      ? game?.codeBreaker
-      : game?.codeMaster;
-    await proofQueue.add('sendFinalProof', {
-      gameId,
-      zkProof,
-      winnerPublicKeyBase58,
-    });
-  }
 };
 
 export async function handleGameStart(

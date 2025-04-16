@@ -14,7 +14,7 @@
     <div
       class="gameplay__container d-flex flex-column align-items-center w-100 h-100 mt-2"
     >
-      <div class="w-100 d-flex justify-content-start">
+      <div class="w-100 d-flex justify-content-start w-100">
         <div class="d-flex flex-start gap-2 py-3">
           Game: {{ formatAddress(zkAppAddress as string) }}
           <CopyToClipBoard :text="zkAppAddress || ''" />
@@ -24,34 +24,28 @@
         <template v-if="isGameEnded">
           <div class="w-100 d-flex align-items-center justify-content-between">
             <div
-              class="my-4 w-100 d-flex justify-content-between align-items-center"
+              class="mb-4 w-100 d-flex justify-content-between align-items-center"
             >
-              <span v-if="isGameSolved"> The code breaker has won!</span>
-              <span v-else> The code master has won!</span>
-              <div v-if="isWinner && !isRewardClaimed">
-                <el-button
-                  class="claim-btn"
-                  @click="handleClaimReward"
-                  v-if="showRewardButton"
-                  :disabled="loading"
-                  :loading="loading"
+              <div>
+                <span v-if="isGameSolved">Code breaker has won!</span>
+                <span v-else>Code master has won!</span>
+              </div>
+              <div v-if="isWinner">
+                <div
+                  class="ms-1 d-flex align-items-end gap-2"
+                  v-if="!lastTransactionLink"
                 >
-                  Claim Reward
-                </el-button>
+                  Generating transaction
+                  <DotsLoader />
+                </div>
                 <div v-else>
-                  <div class="ms-1 d-flex align-items-end gap-2">
-                    Submitting proof
-                    <DotsLoader />
-                  </div>
-                  <div v-if="lastTransactionLink">
-                    <a
-                      :href="`https://minascan.io/devnet/tx/${lastTransactionLink}?type=zk-tx`"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Transaction Hash
-                    </a>
-                  </div>
+                  <a
+                    :href="`https://minascan.io/devnet/tx/${lastTransactionLink}?type=zk-tx`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Transaction Hash
+                  </a>
                 </div>
               </div>
             </div>
@@ -59,30 +53,22 @@
         </template>
       </div>
       <div class="d-flex mt-1 w-100">
-        <div class="board__container d-flex">
+        <div class="board__container d-flex w-100">
           <div>
             <div
               class="d-flex align-items-center justify-content-between w-100 ms-3"
             >
               <div
                 class="w-100 d-flex justify-content-between p-3 ps-0 gap-2 align-items-center"
+                v-if="!isGameEnded"
               >
                 <span v-if="isCodeMasterTurn">Code Master Turn</span>
                 <span v-else>Code Breaker Turn</span>
-                <div class="pe-2" v-if="!turnEnded">
+                <div class="pe-2">
                   <Timer
                     :startTimestamp="game.timestamp"
                     @turnEnded="handleTurnEnded"
                   />
-                </div>
-                <div v-else class="pe-2">
-                  <el-button
-                    @click="handlePenalize"
-                    class="penalize-btn fs-7 fw-500"
-                    size="small"
-                  >
-                    Penalize
-                  </el-button>
                 </div>
               </div>
             </div>
@@ -95,6 +81,7 @@
                 @setColor="handleSetColor($event, row)"
                 :guess="guess"
                 :clue="clues[row]"
+                :show-btn="!isGameEnded"
               />
             </div>
           </div>
@@ -135,11 +122,11 @@ const {
   zkAppAddress,
   zkProofStates,
   zkAppStates,
-  userRole,
-  lastTransactionLink,
+  publicKeyBase58,
   error,
   loading,
   currentTransactionLink,
+  userRole,
   game,
 } = storeToRefs(useZkAppStore());
 const isCodeMasterTurn = computed(() => {
@@ -152,14 +139,12 @@ const guesses = ref<Array<AvailableColor[]>>(
 const clues = computed<Array<AvailableColor[]>>(
   () => zkProofStates.value?.cluesHistory
 );
-const isRewardClaimed = ref(false);
-const turnEnded = ref(false);
 const handleTurnEnded = () => {
-  turnEnded.value = true;
+  if (game.value?.status !== 'PENALIZED') {
+    penalizePlayer();
+  }
 };
-const handlePenalize = () => {
-  penalizePlayer();
-};
+
 const handleSetColor = (
   payload: { index: number; selectedColor: AvailableColor },
   row: number
@@ -171,7 +156,6 @@ const handleClaimReward = async () => {
   if (error.value) {
     ElMessage.error({ message: error.value, duration: 6000 });
   } else {
-    isRewardClaimed.value = true;
     ElNotification({
       title: 'Success',
       message: `Transaction Hash : ${currentTransactionLink.value}`,
@@ -187,21 +171,33 @@ const isGameSolved = computed(() => {
 });
 const isWinner = computed(() => {
   return (
-    (isGameSolved.value && userRole.value === 'CODE_BREAKER') ||
-    (zkProofStates.value?.turnCount > zkAppStates.value?.maxAttempts * 2 &&
-      userRole.value === 'CODE_MASTER')
+    isGameEnded.value &&
+    publicKeyBase58.value === game.value?.winnerPublicKeyBase58
   );
 });
 const isGameEnded = computed(() => {
   return (
     isGameSolved.value ||
-    zkProofStates?.value?.turnCount > zkAppStates?.value?.maxAttempts * 2
+    zkProofStates?.value?.turnCount > zkAppStates?.value?.maxAttempts * 2 ||
+    game.value?.status === 'PENALIZED'
   );
 });
 const showRewardButton = computed(() => {
   return (
     zkAppStates.value?.turnCount > zkAppStates.value?.maxAttempts * 2 ||
     zkAppStates.value?.isSolved === '1'
+  );
+});
+const lastTransactionLink = computed(() => {
+  return (
+    game.value?.penalizationTransactionHash ||
+    game.value?.settlementTransactionHash
+  );
+});
+const isCurrentUserTurn = computed(() => {
+  return (
+    (isCodeMasterTurn.value && userRole.value === 'CODE_MASTER') ||
+    (!isCodeMasterTurn.value && userRole.value === 'CODE_BREAKER')
   );
 });
 watch(

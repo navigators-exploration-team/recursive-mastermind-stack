@@ -10,7 +10,7 @@
           <div class="games-list w-100">
             <div
               v-for="game in games"
-              :key="game"
+              :key="game._id"
               class="d-flex gap-9 align-items-center justify-content-between mb-4 w-100"
             >
               <div>{{ formatAddress(game._id) }}</div>

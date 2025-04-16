@@ -41,15 +41,14 @@ export const sendFinalProof = async (job: Job) => {
   const pendingTx = await transaction.send();
   console.log('Transaction sent: ', pendingTx.hash);
   const txHash = pendingTx.hash;
-  await createOrUpdateGame({
+  const game = await createOrUpdateGame({
     _id: gameId,
-    winnerPublicKeyBase58,
     settlementTransactionHash: txHash,
   });
   console.log(
     `Proof submitted for game ${gameId}, transaction hash: ${txHash}`
   );
-  return txHash;
+  return game;
 };
 
 export const checkGameCreation = async () => {
@@ -100,9 +99,9 @@ export const forfeitWin = async (job: Job) => {
   const pendingTx = await transaction.send();
   console.log('Transaction sent: ', pendingTx.hash);
   const txHash = pendingTx.hash;
-  await createOrUpdateGame({
+  const game = await createOrUpdateGame({
     _id: gameId,
     penalizationTransactionHash: txHash,
   });
-  return txHash;
+  return game;
 };

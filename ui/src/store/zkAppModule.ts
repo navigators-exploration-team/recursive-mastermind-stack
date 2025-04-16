@@ -47,7 +47,6 @@ export const useZkAppStore = defineStore('useZkAppModule', {
     zkAppAddress: null as null | string,
     webSocketInstance: null as null | WebSocketService,
     userRole: null as null | string,
-    lastTransactionLink: null as null | string,
     game: null as any,
   }),
   getters: {},
@@ -407,9 +406,6 @@ export const useZkAppStore = defineStore('useZkAppModule', {
       this.userRole = await this.zkappWorkerClient!.getUserRole(
         this.publicKeyBase58
       );
-    },
-    setLastTransactionHash(hash: string) {
-      this.lastTransactionLink = hash;
     },
     setGame(game: any) {
       this.game = game;

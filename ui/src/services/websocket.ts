@@ -30,10 +30,6 @@ export class WebSocketService {
             receivedProof.verify();
             if (this.onMessageCallback) this.onMessageCallback(data);
           }
-          if (data.hash) {
-            const { setLastTransactionHash } = useZkAppStore();
-            setLastTransactionHash(data.hash);
-          }
           if (data.game) {
             const { setGame } = useZkAppStore();
             setGame(data.game);
