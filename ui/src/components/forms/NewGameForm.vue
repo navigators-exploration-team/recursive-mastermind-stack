@@ -6,25 +6,15 @@
       style="max-width: 400px; width: 100%"
       ref="ruleFormRef"
     >
-      <el-form-item prop="maxAttempts">
-        <label>Number of Attempts</label>
-        <el-input
-          type="number"
-          v-model.number="game.maxAttempts"
-          size="large"
-          placeholder="Insert a number between 5 and 15"
-          :max="15"
-          :min="5"
-          @blur="setAttempts"
-        ></el-input>
-      </el-form-item>
       <el-form-item prop="rewardAmount">
         <label>Reward Amount</label>
         <el-input
           type="number"
-          placeholder="Insert reward amount"
+          placeholder="Reward amount greater than 9 MINA"
           v-model.number="game.rewardAmount"
           size="large"
+          :min="10"
+          @blur="setRewardAmount"
         ></el-input>
       </el-form-item>
       <el-form-item prop="refereePubKeyBase58">
@@ -63,35 +53,27 @@ const router = useRouter();
 const { createInitGameTransaction } = useZkAppStore();
 
 const game = ref<GameParams>({
-  maxAttempts: null,
   rewardAmount: null,
   refereePubKeyBase58: '',
 });
 const ruleFormRef = ref<InstanceType<typeof ElForm>>();
 const rules = ref({
-  maxAttempts: [
-    {
-      required: true,
-      message: `The number of attempts is required !`,
-      trigger: 'change',
-    },
-    {
-      validator: (_rule: any, value: any, callback: any) => {
-        if (value >= 5 && value <= 15) {
-          callback();
-        } else {
-          callback(
-            new Error(`The number of attempts should be between 5 and 15`)
-          );
-        }
-      },
-    },
-  ],
   rewardAmount: [
     {
       required: true,
       message: `The reward amount is required !`,
       trigger: 'change',
+    },
+    {
+      validator: (_rule: any, value: any, callback: any) => {
+        if (value >= 10) {
+          callback();
+        } else {
+          callback(
+            new Error(`The reward amount should be greater than 10 MINA`)
+          );
+        }
+      },
     },
   ],
   refereePubKeyBase58: [
@@ -112,12 +94,10 @@ const rules = ref({
     },
   ],
 });
-const setAttempts = () => {
-  if (!game.value.maxAttempts) return;
-  if (game.value.maxAttempts > 15) {
-    game.value.maxAttempts = 15;
-  } else if (game.value.maxAttempts < 5) {
-    game.value.maxAttempts = 5;
+const setRewardAmount = () => {
+  if (!game.value.rewardAmount) return;
+  if (game.value.rewardAmount < 10) {
+    game.value.rewardAmount = 10;
   }
 };
 const handleInitGame = async (formData: CodePicker) => {
@@ -127,7 +107,6 @@ const handleInitGame = async (formData: CodePicker) => {
       await createInitGameTransaction(
         formData.code.map((e: AvailableColor) => e.value),
         formData.randomSalt,
-        game.value.maxAttempts as number,
         game.value.refereePubKeyBase58 as string,
         game.value.rewardAmount! * 1e9
       );

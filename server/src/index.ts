@@ -63,7 +63,6 @@ wss.on('connection', (ws) => {
         gameId,
         action,
         zkProof,
-        maxAttempts,
         rewardAmount,
         playerPubKeyBase58,
       } = data;
@@ -81,7 +80,6 @@ wss.on('connection', (ws) => {
         await handleProof(
           gameId,
           zkProof,
-          maxAttempts,
           rewardAmount,
           playerPubKeyBase58,
           activePlayers,

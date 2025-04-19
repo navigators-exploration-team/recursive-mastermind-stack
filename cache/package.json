@@ -11,7 +11,7 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
-    "@navigators-exploration-team/mina-mastermind": "^0.4.4",
+    "@navigators-exploration-team/mina-mastermind": "1.2.0",
     "o1js": "2.4.0"
   },
   "devDependencies": {

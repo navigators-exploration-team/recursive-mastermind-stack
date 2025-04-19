@@ -74,7 +74,7 @@
             </div>
 
             <div
-              v-for="(guess, row) in guesses?.slice(0, zkAppStates.maxAttempts)"
+              v-for="(guess, row) in guesses"
             >
               <Guess
                 :attemptNo="row"
@@ -113,6 +113,7 @@ import CopyToClipBoard from '@/components/shared/CopyToClipBoard.vue';
 import { cluesColors } from '@/constants/colors';
 import DotsLoader from '@/components/shared/DotsLoader.vue';
 import Timer from '@/components/shared/Timer.vue';
+import { MAX_ATTEMPTS } from '@/constants/config';
 
 const { getRole, getZkAppStates, penalizePlayer } = useZkAppStore();
 const { zkAppAddress, zkProofStates, zkAppStates, publicKeyBase58, game } =
@@ -153,13 +154,13 @@ const isWinner = computed(() => {
 const isGameEnded = computed(() => {
   return (
     isGameSolved.value ||
-    zkProofStates?.value?.turnCount > zkAppStates?.value?.maxAttempts * 2 ||
+    zkProofStates?.value?.turnCount > MAX_ATTEMPTS * 2 ||
     game.value?.status === 'PENALIZED'
   );
 });
 const showRewardButton = computed(() => {
   return (
-    zkAppStates.value?.turnCount > zkAppStates.value?.maxAttempts * 2 ||
+    zkAppStates.value?.turnCount > MAX_ATTEMPTS * 2 ||
     zkAppStates.value?.isSolved === '1'
   );
 });
@@ -175,7 +176,7 @@ watch(
   () => {
     guesses.value = zkProofStates.value.guessesHistory;
     if (
-      zkProofStates.value?.turnCount > zkAppStates.value?.maxAttempts * 2 ||
+      zkProofStates.value?.turnCount > MAX_ATTEMPTS * 2 ||
       isGameSolved.value
     ) {
       intervalId.value = setInterval(async () => {

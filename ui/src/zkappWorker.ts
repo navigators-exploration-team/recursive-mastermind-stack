@@ -9,9 +9,9 @@ import {
   Cache,
   UInt64,
   Poseidon,
-  UInt8,
 } from 'o1js';
 import {
+  Combination,
   GameState,
   MastermindZkApp,
   StepProgram,
@@ -84,9 +84,8 @@ const functions = {
   },
   createInitGameTransaction: async (args: {
     feePayer: string;
-    unseparatedSecretCombination: number;
+    separatedSecretCombination: number[];
     salt: string;
-    maxAttempts: number;
     refereePubKeyBase58: string;
     rewardAmount: number;
   }) => {
@@ -95,13 +94,13 @@ const functions = {
     state.zkappInstance = new state.MastermindContract!(zkAppAddress);
     const feePayerPublickKey = PublicKey.fromBase58(args.feePayer);
     const refereePubKey = PublicKey.fromBase58(args.refereePubKeyBase58);
+    const combination = Combination.from(args.separatedSecretCombination)
     const transaction = await Mina.transaction(feePayerPublickKey, async () => {
       AccountUpdate.fundNewAccount(feePayerPublickKey);
       state.zkappInstance!.deploy();
       await state.zkappInstance!.initGame(
-        Field(args.unseparatedSecretCombination),
+        combination,
         Field(args.salt),
-        UInt8.from(args.maxAttempts),
         refereePubKey,
         UInt64.from(args.rewardAmount)
       );
@@ -113,18 +112,19 @@ const functions = {
   },
   sendNewGameProof: async (args: {
     signedData: SignedData;
-    unseparatedSecretCombination: number;
+    separatedSecretCombination: number[];
     salt: string;
   }) => {
     try {
       const signature = Signature.fromBase58(args.signedData.signature);
       const codeMasterPubKey = PublicKey.fromBase58(args.signedData.publicKey);
+      const combination = Combination.from(args.separatedSecretCombination)
       const stepProof = await StepProgram.createGame(
         {
           authPubKey: codeMasterPubKey,
           authSignature: signature,
         },
-        Field(args.unseparatedSecretCombination),
+        combination,
         Field(args.salt)
       );
       state.lastProof = stepProof.proof;
@@ -135,7 +135,7 @@ const functions = {
   },
   createGuessProof: async (args: {
     signedData: SignedData;
-    unseparatedGuess: number;
+    separatedGuess: number[];
   }) => {
     const signature = Signature.fromBase58(args.signedData.signature);
     const codeBreakerPubKey = PublicKey.fromBase58(args.signedData.publicKey);
@@ -145,7 +145,7 @@ const functions = {
         authSignature: signature,
       },
       state.lastProof as StepProgramProof,
-      Field(args.unseparatedGuess)
+      Combination.from(args.separatedGuess)
     );
     state.lastProof = stepProof.proof;
     return stepProof.proof.toJSON();
@@ -158,7 +158,7 @@ const functions = {
   },
   createGiveClueProof: async (args: {
     signedData: SignedData;
-    secretCombination: number;
+    secretCombination: number[];
     randomSalt: string;
   }) => {
     const signature = Signature.fromBase58(args.signedData.signature);
@@ -169,7 +169,7 @@ const functions = {
         authSignature: signature,
       },
       state.lastProof as StepProgramProof,
-      Field(args.secretCombination),
+      Combination.from(args.secretCombination),
       Field(args.randomSalt)
     );
     state.lastProof = stepProof.proof;
@@ -190,7 +190,7 @@ const functions = {
       state.zkappInstance!.codeBreakerId.get(),
       state.zkappInstance!.compressedState.get(),
     ]);
-    let { rewardAmount, finalizeSlot, turnCount, maxAttempts, isSolved } =
+    let { rewardAmount, finalizeSlot, turnCount, isSolved } =
       GameState.unpack(compressedState);
 
     return {
@@ -199,7 +199,6 @@ const functions = {
       codeBreakerId: codeBreakerId.toString(),
       codeMasterId: codeMasterId.toString(),
       turnCount: turnCount.toString(),
-      maxAttempts: maxAttempts.toString(),
       isSolved: isSolved.toString(),
     };
   },
@@ -213,7 +212,6 @@ const functions = {
         packedGuessHistory,
         packedClueHistory,
       } = state.lastProof.publicOutput;
-
       return {
         guessesHistory: generateColoredGuessHistory(packedGuessHistory),
         solutionHash: solutionHash.toString(),

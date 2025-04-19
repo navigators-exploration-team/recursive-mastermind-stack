@@ -11,8 +11,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="Max Attempts" prop="gameMaxAttempts" width="150">
-      </el-table-column>
+
       <el-table-column label="Game Reward" prop="gameRewardAmount" width="150">
         <template #default="scope">
           <div class="d-flex align-items-center gap-2">
@@ -78,7 +77,6 @@ const getActiveGames = async () => {
   games.value = res?.data?.map((game: Game) => {
     return {
       id: game?._id,
-      gameMaxAttempts: game?.maxAttempts,
       gameRewardAmount: game?.rewardAmount,
       codeMaster: game?.codeMaster,
       status: game.status,

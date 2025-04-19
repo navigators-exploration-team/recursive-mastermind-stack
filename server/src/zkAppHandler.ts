@@ -38,9 +38,6 @@ export async function checkGameStatus(
     let response = await fetchAccount({ publicKey: zkAppPublicKey });
     let accountExists = response.account !== undefined;
     if (accountExists) {
-      const zkApp = new MastermindZkApp(zkAppPublicKey);
-      let { maxAttempts } = GameState.unpack(await zkApp.compressedState.get());
-
       const turnCount = zkProof.publicOutput.turnCount.toString();
       const deserializedClue = deserializeClue(
         zkProof.publicOutput.serializedClue
@@ -48,7 +45,6 @@ export async function checkGameStatus(
       const isGameSolved = checkIfSolved(deserializedClue) as Bool;
 
       return {
-        maxAttempts: Number(maxAttempts.toString()),
         turnCount: Number(turnCount),
         isSolved: isGameSolved.toBoolean(),
       };
@@ -58,7 +54,6 @@ export async function checkGameStatus(
   }
 
   return {
-    maxAttempts: null,
     turnCount: null,
     isSolved: null,
   };

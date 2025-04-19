@@ -4,7 +4,6 @@
       Game ID : {{ formatAddress(zkAppAddress as string) }}
       <CopyToClipBoard :text="zkAppAddress as string" />
     </div>
-    <div>Number of Attempts : {{ zkAppStates.maxAttempts }}</div>
     <div>Reward Amount : {{ zkAppStates.rewardAmount / 1e9 }} MINA</div>
     <div class="d-flex align-items-end gap-2" v-if="userRole === 'CODE_MASTER'">
       Waiting for code breaker to accept the game

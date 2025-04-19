@@ -1,10 +1,10 @@
 export interface AvailableColor {
   color: string;
   value: number;
+  title?: string;
 }
 
 export interface ZkAppStates {
-  maxAttempts: number;
   turnCount: number;
   isSolved: boolean;
   codemasterId: string;
@@ -20,13 +20,11 @@ export interface CodePicker {
 }
 
 export interface GameParams {
-  maxAttempts: number | null;
   rewardAmount: number | null;
   refereePubKeyBase58: string;
 }
 export interface Game {
   _id: string;
-  maxAttempts: string;
   rewardAmount: string;
   codeMaster: string;
   status: string;

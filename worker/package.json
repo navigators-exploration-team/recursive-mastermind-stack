@@ -13,7 +13,7 @@
     "clean": "rimraf dist node_modules"
   },
   "dependencies": {
-    "@navigators-exploration-team/mina-mastermind": "^0.4.4",
+    "@navigators-exploration-team/mina-mastermind": "1.2.0",
     "bullmq": "^5.44.4",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",

@@ -8,6 +8,7 @@ import { checkGameStatus } from './zkAppHandler.js';
 import { Queue } from 'bullmq';
 import { PublicKey, UInt32, VerificationKey, verify } from 'o1js';
 import { GameStatus } from './models/Game.js';
+import { MAX_ATTEMPTS } from './constants.js';
 
 export const handleJoinGame = async (
   gameId: string,
@@ -29,7 +30,6 @@ export const handleJoinGame = async (
 export const handleProof = async (
   gameId: string,
   zkProof: string,
-  receivedMaxAttempts: number,
   receivedRewardAmount: number,
   playerPubKeyBase58: string,
   activePlayers: Map<string, Set<WebSocket>>,
@@ -48,7 +48,6 @@ export const handleProof = async (
   let lastProof = game?.lastProof || null;
 
   let lastTurnCount = null;
-  const gameMaxAttempts = game?.maxAttempts || receivedMaxAttempts;
   const gameRewardAmount = game?.rewardAmount || receivedRewardAmount;
 
   if (lastProof) {
@@ -62,7 +61,7 @@ export const handleProof = async (
   }
 
   let receivedProof;
-  let maxAttempts, turnCount, isSolved;
+  let turnCount, isSolved;
   let receivedTurnCount;
   try {
     receivedProof = await StepProgramProof.fromJSON(JSON.parse(zkProof));
@@ -75,13 +74,9 @@ export const handleProof = async (
     }
 
     if (receivedTurnCount % 2 !== 0) {
-      const {
-        maxAttempts: maxAttempts_,
-        turnCount: turnCount_,
-        isSolved: isSolved_,
-      } = await checkGameStatus(gameId, receivedProof);
+      const { turnCount: turnCount_, isSolved: isSolved_ } =
+        await checkGameStatus(gameId, receivedProof);
 
-      maxAttempts = maxAttempts_;
       turnCount = turnCount_;
       isSolved = isSolved_;
     }
@@ -91,7 +86,7 @@ export const handleProof = async (
     return;
   }
   let winnerPublicKeyBase58 = null;
-  if (isSolved || (turnCount && maxAttempts && turnCount > maxAttempts * 2)) {
+  if (isSolved || (turnCount && turnCount > MAX_ATTEMPTS * 2)) {
     winnerPublicKeyBase58 = isSolved ? game?.codeBreaker : game?.codeMaster;
     await proofQueue.add('sendFinalProof', {
       gameId,
@@ -104,7 +99,6 @@ export const handleProof = async (
     _id: gameId,
     lastProof: zkProof,
     timestamp,
-    maxAttempts: gameMaxAttempts,
     rewardAmount: gameRewardAmount,
     codeMaster:
       lastTurnCount === null && playerPubKeyBase58
@@ -162,7 +156,7 @@ export async function handleGameStart(
       data.data?.bestChain?.[0]?.protocolState?.consensusState
         ?.slotSinceGenesis;
     const finalizeSlot = Number(acceptedGame.finalizeSlot);
-    const startGameSlot = finalizeSlot - 2 * (game?.maxAttempts || 0);
+    const startGameSlot = finalizeSlot - 2 * (MAX_ATTEMPTS || 0);
     let status = GameStatus.IN_PROGRESS;
     let winnerPublicKeyBase58 = null;
 

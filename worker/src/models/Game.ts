@@ -13,7 +13,6 @@ export enum GameStatus {
 export interface IGame extends Document {
   _id: string;
   lastProof: any;
-  maxAttempts: number;
   rewardAmount: number;
   timestamp: number;
   codeBreaker?: string;
@@ -30,7 +29,6 @@ const gameSchema: Schema = new Schema(
   {
     _id: { type: String, required: true },
     lastProof: { type: Schema.Types.Mixed, required: true },
-    maxAttempts: { type: Number, required: true },
     rewardAmount: { type: Number, required: true },
     timestamp: { type: Number, default: Date.now },
     codeBreaker: { type: String, required: false },

@@ -44,10 +44,10 @@
       </div>
     </div>
     <ul>
-      <li>Code Master's secret combination: 5 9 3 4</li>
+      <li>Code Master's secret combination: 5 6 2 4</li>
     </ul>
     <ul>
-      <li>Code Breaker's guess: 5 7 8 9</li>
+      <li>Code Breaker's guess: 5 7 3 6</li>
     </ul>
     <ul>
       <li>Clue: 2 0 0 1</li>
@@ -64,7 +64,7 @@
     </ul>
     <ul>
       <ul>
-        <li>The blow is 9 in the fourth position.</li>
+        <li>The blow is 6 in the fourth position.</li>
       </ul>
     </ul>
     <li>

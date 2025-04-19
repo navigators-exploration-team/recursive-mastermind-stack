@@ -50,17 +50,15 @@ export default class ZkappWorkerClient {
   }
   async createInitGameTransaction(
     feePayer: string,
-    unseparatedSecretCombination: number,
+    separatedSecretCombination: number[],
     salt: string,
-    maxAttempts: number,
     refereePubKeyBase58: string,
     rewardAmount: number
   ): Promise<string> {
     const result = this._call('createInitGameTransaction', {
       feePayer,
-      unseparatedSecretCombination,
+      separatedSecretCombination,
       salt,
-      maxAttempts,
       refereePubKeyBase58,
       rewardAmount,
     });
@@ -74,24 +72,24 @@ export default class ZkappWorkerClient {
   }
   async sendNewGameProof(
     signedData: SignedData,
-    unseparatedSecretCombination: number,
+    separatedSecretCombination: number[],
     salt: string
   ) {
     return this._call('sendNewGameProof', {
       signedData,
-      unseparatedSecretCombination,
+      separatedSecretCombination,
       salt,
     });
   }
-  async createGuessProof(signedData: SignedData, unseparatedGuess: number) {
+  async createGuessProof(signedData: SignedData, separatedGuess: number[]) {
     return this._call('createGuessProof', {
       signedData,
-      unseparatedGuess,
+      separatedGuess,
     });
   }
   async createGiveClueProof(
     signedData: SignedData,
-    secretCombination: number,
+    secretCombination: number[],
     randomSalt: string
   ) {
     return this._call('createGiveClueProof', {
